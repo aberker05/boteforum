@@ -1,8 +1,22 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Edit2, X, Check, Lock, User } from 'lucide-react';
+import {
+  Edit2,
+  X,
+  Check,
+  Lock,
+  User,
+  Camera,
+  Trash2,
+} from 'lucide-react';
+import {
+  UserAvatar,
+  parseAvatarValue,
+  formatAvatarValue,
+  compressAvatarFile,
+} from './UserAvatar';
 
 const COLORS = [
   '#6366f1',
@@ -29,13 +43,18 @@ export function ProfileEditModal({
   initialColor,
 }: ProfileEditModalProps) {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const parsedInitial = parseAvatarValue(initialColor);
+
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<'profile' | 'security'>('profile');
 
   const [displayName, setDisplayName] = useState(initialDisplayName);
   const [email, setEmail] = useState(initialEmail);
   const [bio, setBio] = useState(initialBio);
-  const [avatarColor, setAvatarColor] = useState(initialColor);
+  const [baseColor, setBaseColor] = useState(parsedInitial.color);
+  const [avatarImageUrl, setAvatarImageUrl] = useState(parsedInitial.imageUrl);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -44,6 +63,26 @@ export function ProfileEditModal({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+
+  const combinedAvatarValue = formatAvatarValue(baseColor, avatarImageUrl);
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setError('');
+    setUploadingPhoto(true);
+    try {
+      const compressed = await compressAvatarFile(file);
+      setAvatarImageUrl(compressed);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Fotoğraf yüklenirken bir hata oluştu.'
+      );
+    } finally {
+      setUploadingPhoto(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,7 +108,12 @@ export function ProfileEditModal({
     try {
       const payload =
         tab === 'profile'
-          ? { displayName, email, bio, avatarColor }
+          ? {
+              displayName,
+              email,
+              bio,
+              avatarColor: combinedAvatarValue,
+            }
           : { currentPassword, newPassword };
 
       const res = await fetch('/api/profile', {
@@ -104,22 +148,28 @@ export function ProfileEditModal({
       <button
         type="button"
         onClick={() => {
+          const fresh = parseAvatarValue(initialColor);
+          setDisplayName(initialDisplayName);
+          setEmail(initialEmail);
+          setBio(initialBio);
+          setBaseColor(fresh.color);
+          setAvatarImageUrl(fresh.imageUrl);
           setError('');
           setSuccessMsg('');
           setOpen(true);
         }}
-        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
       >
         <Edit2 className="w-3.5 h-3.5" />
-        Profili & Şifreyi Düzenle
+        Profili & Fotoğrafı Düzenle
       </button>
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="w-full max-w-md rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-2xl">
+          <div className="w-full max-w-md max-h-[92vh] overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                Hesap Ayarları
+                Hesap & Profil Ayarları
               </h3>
               <button
                 type="button"
@@ -139,14 +189,14 @@ export function ProfileEditModal({
                   setError('');
                   setSuccessMsg('');
                 }}
-                className={`flex-1 inline-flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold transition-all ${
+                className={`flex-1 inline-flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                   tab === 'profile'
                     ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs'
                     : 'text-slate-600 dark:text-slate-400'
                 }`}
               >
                 <User className="w-3.5 h-3.5" />
-                Profil Bilgileri
+                Profil & Fotoğraf
               </button>
               <button
                 type="button"
@@ -155,7 +205,7 @@ export function ProfileEditModal({
                   setError('');
                   setSuccessMsg('');
                 }}
-                className={`flex-1 inline-flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold transition-all ${
+                className={`flex-1 inline-flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                   tab === 'security'
                     ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs'
                     : 'text-slate-600 dark:text-slate-400'
@@ -181,6 +231,51 @@ export function ProfileEditModal({
             <form onSubmit={handleSave} className="space-y-4">
               {tab === 'profile' ? (
                 <>
+                  {/* Profil Fotoğrafı Yükleme Bölümü */}
+                  <div className="p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 flex items-center gap-4">
+                    <UserAvatar
+                      name={displayName || initialDisplayName}
+                      avatar={combinedAvatarValue}
+                      className="w-16 h-16 rounded-2xl text-2xl shadow-md"
+                    />
+                    <div className="flex-1 min-w-0 space-y-2">
+                      <p className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                        Profil Fotoğrafı
+                      </p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/png,image/jpeg,image/webp,image/gif"
+                          onChange={handlePhotoUpload}
+                          className="hidden"
+                        />
+                        <button
+                          type="button"
+                          disabled={uploadingPhoto}
+                          onClick={() => fileInputRef.current?.click()}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-xs transition-all cursor-pointer"
+                        >
+                          <Camera className="w-3.5 h-3.5" />
+                          {uploadingPhoto ? 'İşleniyor...' : 'Fotoğraf Seç'}
+                        </button>
+                        {avatarImageUrl && (
+                          <button
+                            type="button"
+                            onClick={() => setAvatarImageUrl('')}
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 transition-all cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            Kaldır
+                          </button>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-slate-400">
+                        Otomatik kare (1:1) kırpılır ve sıkıştırılır.
+                      </p>
+                    </div>
+                  </div>
+
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                       Görünen Ad Soyad
@@ -231,18 +326,18 @@ export function ProfileEditModal({
 
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                      Profil Rengi
+                      Varsayılan Avatar Rengi (Fotoğraf yoksa görünür)
                     </label>
                     <div className="flex items-center gap-2.5">
                       {COLORS.map((color) => (
                         <button
                           key={color}
                           type="button"
-                          onClick={() => setAvatarColor(color)}
-                          className="w-8 h-8 rounded-xl flex items-center justify-center text-white transition-transform hover:scale-110"
+                          onClick={() => setBaseColor(color)}
+                          className="w-8 h-8 rounded-xl flex items-center justify-center text-white transition-transform hover:scale-110 cursor-pointer"
                           style={{ backgroundColor: color }}
                         >
-                          {avatarColor === color && <Check className="w-4 h-4" />}
+                          {baseColor === color && <Check className="w-4 h-4" />}
                         </button>
                       ))}
                     </div>
@@ -305,7 +400,7 @@ export function ProfileEditModal({
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-50"
+                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-50 cursor-pointer"
                 >
                   {saving
                     ? 'Kaydediliyor...'

@@ -20,6 +20,7 @@ import { VoteButtons } from './VoteButtons';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import { MarkdownEditor } from './MarkdownEditor';
 import { ReportModalButton } from './ReportModalButton';
+import { UserAvatar } from './UserAvatar';
 import { formatRelativeTime } from '@/lib/utils';
 import { checkContentModeration } from '@/lib/moderation';
 import { getUserLevelInfo } from '@/lib/badges';
@@ -460,12 +461,11 @@ export function CommentSection({
                 href={`/kullanici/${comment.author.username}`}
                 className="flex items-center gap-2.5 group"
               >
-                <div
-                  className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-2xs"
-                  style={{ backgroundColor: comment.author.avatarColor }}
-                >
-                  {comment.author.displayName.charAt(0).toUpperCase()}
-                </div>
+                <UserAvatar
+                  name={comment.author.displayName}
+                  avatar={comment.author.avatarColor}
+                  className="w-8 h-8 rounded-xl text-xs shadow-2xs"
+                />
                 <div>
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <span className="text-sm font-bold text-slate-900 dark:text-slate-100 group-hover:text-indigo-500 transition-colors">

@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { CategoryIcon } from './CategoryIcon';
 import { BrandLogo, BRAND_LOGO_ICONS, renderBrandIcon } from './BrandLogo';
+import { UserAvatar } from './UserAvatar';
 import {
   AdminContentManager,
   type AdminThreadRecord,
@@ -1102,14 +1103,13 @@ export function AdminDashboard({
                           href={`/kullanici/${u.username}`}
                           className="flex items-center gap-2.5 group"
                         >
-                          <div
-                            className={`w-8 h-8 rounded-xl flex items-center justify-center text-white text-xs font-bold shrink-0 ${
+                          <UserAvatar
+                            name={u.displayName}
+                            avatar={u.avatarColor}
+                            className={`w-8 h-8 rounded-xl text-xs ${
                               isBanned ? 'opacity-60 grayscale' : ''
                             }`}
-                            style={{ backgroundColor: u.avatarColor }}
-                          >
-                            {u.displayName.charAt(0).toUpperCase()}
-                          </div>
+                          />
                           <div>
                             <p className="font-semibold text-slate-900 dark:text-white group-hover:text-indigo-500 transition-colors flex items-center gap-1.5 flex-wrap">
                               <span className={isBanned ? 'line-through text-slate-400' : ''}>

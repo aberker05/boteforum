@@ -27,6 +27,7 @@ import { ThreadActions } from '@/components/ThreadActions';
 import { CommentSection } from '@/components/CommentSection';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { ThreadPollCard } from '@/components/ThreadPollCard';
+import { UserAvatar } from '@/components/UserAvatar';
 import { getPollByThreadId } from '@/lib/polls';
 import { getSiteSettings } from '@/lib/siteSettings';
 import { formatRelativeTime } from '@/lib/utils';
@@ -322,12 +323,11 @@ export default async function ThreadDetailPage({ params }: ThreadDetailProps) {
                 href={`/kullanici/${thread.author.username}`}
                 className="flex items-center gap-3 group"
               >
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-xs"
-                  style={{ backgroundColor: thread.author.avatarColor }}
-                >
-                  {thread.author.displayName.charAt(0).toUpperCase()}
-                </div>
+                <UserAvatar
+                  name={thread.author.displayName}
+                  avatar={thread.author.avatarColor}
+                  className="w-10 h-10 rounded-xl text-sm shadow-xs"
+                />
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-indigo-500 transition-colors">
@@ -539,10 +539,13 @@ export default async function ThreadDetailPage({ params }: ThreadDetailProps) {
                     key={p.username}
                     href={`/kullanici/${p.username}`}
                     title={`${p.displayName} (@${p.username})`}
-                    className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold hover:scale-105 transition-transform shadow-2xs"
-                    style={{ backgroundColor: p.avatarColor }}
+                    className="hover:scale-105 transition-transform"
                   >
-                    {p.displayName.charAt(0).toUpperCase()}
+                    <UserAvatar
+                      name={p.displayName}
+                      avatar={p.avatarColor}
+                      className="w-7 h-7 rounded-lg text-xs shadow-2xs"
+                    />
                   </Link>
                 ))}
               </div>
@@ -569,12 +572,11 @@ export default async function ThreadDetailPage({ params }: ThreadDetailProps) {
               href={`/kullanici/${thread.author.username}`}
               className="flex items-center gap-3 group"
             >
-              <div
-                className="w-11 h-11 rounded-2xl flex items-center justify-center text-white font-bold text-base shrink-0"
-                style={{ backgroundColor: thread.author.avatarColor }}
-              >
-                {thread.author.displayName.charAt(0).toUpperCase()}
-              </div>
+              <UserAvatar
+                name={thread.author.displayName}
+                avatar={thread.author.avatarColor}
+                className="w-11 h-11 rounded-2xl text-base"
+              />
               <div className="min-w-0">
                 <p className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-indigo-500 truncate">
                   {thread.author.displayName}

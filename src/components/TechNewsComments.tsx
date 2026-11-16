@@ -16,6 +16,7 @@ import {
 import { TechNewsCommentItem } from '@/lib/techNews';
 import { MarkdownEditor } from './MarkdownEditor';
 import { MarkdownRenderer } from './MarkdownRenderer';
+import { UserAvatar } from './UserAvatar';
 import { formatRelativeTime } from '@/lib/utils';
 import { checkContentModeration } from '@/lib/moderation';
 
@@ -240,12 +241,11 @@ export function TechNewsComments({
                 href={`/kullanici/${comment.author.username}`}
                 className="flex items-center gap-2 group"
               >
-                <div
-                  className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold"
-                  style={{ backgroundColor: comment.author.avatarColor }}
-                >
-                  {comment.author.displayName.charAt(0).toUpperCase()}
-                </div>
+                <UserAvatar
+                  name={comment.author.displayName}
+                  avatar={comment.author.avatarColor}
+                  className="w-7 h-7 rounded-lg text-xs"
+                />
                 <div>
                   <span className="text-sm font-semibold text-slate-900 dark:text-slate-100 group-hover:text-indigo-500 transition-colors">
                     {comment.author.displayName}

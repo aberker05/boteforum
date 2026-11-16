@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { VoteButtons } from './VoteButtons';
 import { CategoryIcon } from './CategoryIcon';
+import { UserAvatar } from './UserAvatar';
 import { formatRelativeTime } from '@/lib/utils';
 
 export interface ThreadCardData {
@@ -126,12 +127,11 @@ export function ThreadCard({
             title={`${thread.author.displayName} (@${thread.author.username})`}
             className="shrink-0 relative"
           >
-            <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-xs font-bold shadow-2xs"
-              style={{ backgroundColor: thread.author.avatarColor }}
-            >
-              {thread.author.displayName.charAt(0).toUpperCase()}
-            </div>
+            <UserAvatar
+              name={thread.author.displayName}
+              avatar={thread.author.avatarColor}
+              className="w-9 h-9 rounded-xl text-xs shadow-2xs"
+            />
             {thread.isSolved && (
               <span
                 title="Çözüldü"
@@ -296,12 +296,11 @@ export function ThreadCard({
         title={`${thread.author.displayName} (@${thread.author.username})`}
         className="shrink-0 relative self-start mt-0.5 hidden sm:block group/avatar"
       >
-        <div
-          className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-sm font-bold shadow-xs group-hover/avatar:scale-105 transition-transform"
-          style={{ backgroundColor: thread.author.avatarColor }}
-        >
-          {thread.author.displayName.charAt(0).toUpperCase()}
-        </div>
+        <UserAvatar
+          name={thread.author.displayName}
+          avatar={thread.author.avatarColor}
+          className="w-10 h-10 rounded-xl text-sm shadow-xs group-hover/avatar:scale-105 transition-transform"
+        />
         {thread.isSolved ? (
           <span
             title="Çözüldü"
@@ -436,12 +435,11 @@ export function ThreadCard({
               href={`/kullanici/${thread.author.username}`}
               className="flex items-center gap-2 group/author"
             >
-              <div
-                className="w-6 h-6 rounded-lg flex items-center justify-center text-white text-[11px] font-bold"
-                style={{ backgroundColor: thread.author.avatarColor }}
-              >
-                {thread.author.displayName.charAt(0).toUpperCase()}
-              </div>
+              <UserAvatar
+                name={thread.author.displayName}
+                avatar={thread.author.avatarColor}
+                className="w-6 h-6 rounded-lg text-[11px]"
+              />
               <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 group-hover/author:text-indigo-500 transition-colors">
                 {thread.author.displayName}
               </span>

@@ -27,6 +27,7 @@ import {
 import { ThreadCard, type ThreadCardData } from './ThreadCard';
 import { CategoryIcon } from './CategoryIcon';
 import TechNewsCover from './TechNewsCover';
+import { UserAvatar } from './UserAvatar';
 import { matchesSearch, normalizeSearchText } from '@/lib/utils';
 import type { TechNewsItem } from '@/lib/techNews';
 
@@ -978,12 +979,11 @@ export function HomeFeedClient({
                   >
                     {idx + 1}.
                   </span>
-                  <div
-                    className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-xs font-bold shrink-0"
-                    style={{ backgroundColor: u.avatarColor }}
-                  >
-                    {u.displayName.charAt(0).toUpperCase()}
-                  </div>
+                  <UserAvatar
+                    name={u.displayName}
+                    avatar={u.avatarColor}
+                    className="w-8 h-8 rounded-xl text-xs"
+                  />
                   <div className="min-w-0">
                     <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate group-hover:text-indigo-500 transition-colors">
                       {u.displayName}

@@ -4,6 +4,19 @@ import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
 import { checkContentModeration } from '@/lib/moderation';
 import { validateContentLength, verifyRequestOrigin } from '@/lib/security';
+import { isSafeLogoUrl } from '@/lib/siteSettings';
+
+function isValidAvatarPayload(raw: string): boolean {
+  const trimmed = raw.trim();
+  if (!trimmed || trimmed.length > 150000) return false;
+  if (/^#[0-9a-fA-F]{6}$/.test(trimmed)) return true;
+  if (trimmed.includes('|')) {
+    const [color, ...rest] = trimmed.split('|');
+    const imgUrl = rest.join('|').trim();
+    return /^#[0-9a-fA-F]{6}$/.test(color) && isSafeLogoUrl(imgUrl);
+  }
+  return isSafeLogoUrl(trimmed);
+}
 
 export async function PATCH(request: Request) {
   try {
@@ -48,9 +61,9 @@ export async function PATCH(request: Request) {
       }
     }
 
-    if (avatarColor && !/^#[0-9a-fA-F]{6}$/.test(String(avatarColor))) {
+    if (avatarColor && !isValidAvatarPayload(String(avatarColor))) {
       return NextResponse.json(
-        { error: 'Geçersiz profil renk formatı.' },
+        { error: 'Geçersiz profil fotoğrafı veya renk formatı.' },
         { status: 400 }
       );
     }

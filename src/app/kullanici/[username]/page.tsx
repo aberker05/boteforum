@@ -19,6 +19,7 @@ import { getSiteSettings } from '@/lib/siteSettings';
 import { getUserBadges, getUserLevelInfo } from '@/lib/badges';
 import { ThreadCard } from '@/components/ThreadCard';
 import { ProfileEditModal } from '@/components/ProfileEditModal';
+import { UserAvatar } from '@/components/UserAvatar';
 import { formatRelativeTime } from '@/lib/utils';
 
 interface ProfilePageProps {
@@ -169,12 +170,11 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
       <div className="rounded-3xl border border-slate-200/90 dark:border-slate-800/90 bg-white dark:bg-slate-900/95 p-6 sm:p-8 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div className="flex items-start sm:items-center gap-4">
-            <div
-              className="w-20 h-20 rounded-3xl flex items-center justify-center text-white text-3xl font-extrabold shadow-lg shrink-0"
-              style={{ backgroundColor: profileUser.avatarColor }}
-            >
-              {profileUser.displayName.charAt(0).toUpperCase()}
-            </div>
+            <UserAvatar
+              name={profileUser.displayName}
+              avatar={profileUser.avatarColor}
+              className="w-20 h-20 rounded-3xl text-3xl font-extrabold shadow-lg"
+            />
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white">

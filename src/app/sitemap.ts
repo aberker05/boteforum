@@ -2,15 +2,19 @@ import type { MetadataRoute } from 'next';
 import { prisma } from '@/lib/prisma';
 import { getAllTechNews } from '@/lib/techNews';
 
+export const dynamic = 'force-dynamic';
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
   const [threads, news] = await Promise.all([
-    prisma.thread.findMany({
-      select: { slug: true, updatedAt: true },
-      orderBy: { updatedAt: 'desc' },
-      take: 200,
-    }),
+    prisma.thread
+      .findMany({
+        select: { slug: true, updatedAt: true },
+        orderBy: { updatedAt: 'desc' },
+        take: 200,
+      })
+      .catch(() => []),
     getAllTechNews().catch(() => []),
   ]);
 

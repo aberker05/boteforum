@@ -13,6 +13,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import type { NotificationItem, NotificationType } from '@/lib/notifications';
+import { UserAvatar } from './UserAvatar';
 import { formatRelativeTime } from '@/lib/utils';
 
 export function NotificationBell() {
@@ -204,12 +205,11 @@ export function NotificationBell() {
                   >
                     {/* Gönderen Avatarı + Tip İkonu */}
                     <div className="relative shrink-0 mt-0.5">
-                      <div
-                        className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-xs font-bold"
-                        style={{ backgroundColor: n.actorAvatarColor || '#6366f1' }}
-                      >
-                        {n.actorDisplayName.charAt(0).toUpperCase()}
-                      </div>
+                      <UserAvatar
+                        name={n.actorDisplayName}
+                        avatar={n.actorAvatarColor}
+                        className="w-8 h-8 rounded-xl text-xs"
+                      />
                       <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-center">
                         {renderTypeIcon(n.type)}
                       </span>

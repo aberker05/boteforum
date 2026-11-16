@@ -28,6 +28,7 @@ import {
 import { useTheme } from './ThemeProvider';
 import { NotificationBell } from './NotificationBell';
 import { BrandLogo } from './BrandLogo';
+import { UserAvatar } from './UserAvatar';
 import { DEFAULT_SITE_SETTINGS, type SiteSettings } from '@/lib/siteSettings';
 import { matchesSearch, normalizeSearchText } from '@/lib/utils';
 
@@ -668,14 +669,13 @@ export function Navbar({
               <div className="relative">
                 <button
                   onClick={() => setMenuOpen(!menuOpen)}
-                  className="flex items-center gap-2 p-1 pr-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800/70 transition-colors"
+                  className="flex items-center gap-2 p-1 pr-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800/70 transition-colors cursor-pointer"
                 >
-                  <div
-                    className="w-7 h-7 rounded-lg flex items-center justify-center text-white font-semibold text-xs"
-                    style={{ backgroundColor: user.avatarColor }}
-                  >
-                    {user.displayName.charAt(0).toUpperCase()}
-                  </div>
+                  <UserAvatar
+                    name={user.displayName}
+                    avatar={user.avatarColor}
+                    className="w-7 h-7 rounded-lg text-xs font-semibold"
+                  />
                   <div className="hidden lg:flex flex-col items-start text-left">
                     <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 leading-none">
                       {user.displayName}
