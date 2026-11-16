@@ -1,0 +1,798 @@
+'use client';
+
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import Link from 'next/link';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import {
+  Search,
+  Sun,
+  Moon,
+  PlusCircle,
+  LogOut,
+  User as UserIcon,
+  Bookmark,
+  Sparkles,
+  Award,
+  X,
+  Shield,
+  Newspaper,
+  MessageSquare,
+  CheckCircle2,
+  HelpCircle,
+  BookOpen,
+  Tag,
+  Layers,
+  ArrowRight,
+  CornerDownLeft,
+} from 'lucide-react';
+import { useTheme } from './ThemeProvider';
+import { NotificationBell } from './NotificationBell';
+import { BrandLogo } from './BrandLogo';
+import { DEFAULT_SITE_SETTINGS, type SiteSettings } from '@/lib/siteSettings';
+import { matchesSearch, normalizeSearchText } from '@/lib/utils';
+
+interface NavbarUser {
+  id: string;
+  username: string;
+  displayName: string;
+  avatarColor: string;
+  role: string;
+  reputation: number;
+}
+
+interface SearchIndexData {
+  threads: {
+    id: string;
+    title: string;
+    slug: string;
+    excerpt: string;
+    tags: string;
+    isSolved: boolean;
+    views: number;
+    commentCount: number;
+    author: {
+      username: string;
+      displayName: string;
+      avatarColor: string;
+    };
+    category: {
+      name: string;
+      slug: string;
+      color: string;
+    };
+  }[];
+  categories: {
+    id: string;
+    name: string;
+    slug: string;
+    description: string;
+    color: string;
+    icon: string;
+    _count: { threads: number };
+  }[];
+  tags: { tag: string; count: number }[];
+  users: {
+    id: string;
+    username: string;
+    displayName: string;
+    avatarColor: string;
+    reputation: number;
+    role: string;
+  }[];
+  news: {
+    id: string;
+    title: string;
+    slug: string;
+    category: string;
+    badgeColor: string;
+    readTime: string;
+  }[];
+}
+
+interface SuggestionItem {
+  id: string;
+  type: 'thread' | 'category' | 'tag' | 'news' | 'user';
+  title: string;
+  subtitle?: string;
+  badge?: string;
+  badgeColor?: string;
+  isSolved?: boolean;
+  href: string;
+  fillText: string;
+  filterAction?: { q?: string; kategori?: string; etiket?: string };
+}
+
+export function Navbar({
+  user,
+  siteSettings = DEFAULT_SITE_SETTINGS,
+}: {
+  user: NavbarUser | null;
+  siteSettings?: SiteSettings;
+}) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const { theme, toggleTheme } = useTheme();
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+
+  // Canlı arama önerileri (Autocomplete) durumları
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
+  const [searchIndex, setSearchIndex] = useState<SearchIndexData | null>(null);
+  const [loadingIndex, setLoadingIndex] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
+
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+  const mobileSearchContainerRef = useRef<HTMLDivElement>(null);
+
+  const currentFilter = searchParams.get('filtre') || '';
+
+  useEffect(() => {
+    setSearchQuery(searchParams.get('q') || '');
+  }, [searchParams]);
+
+  // HomeFeedClient üzerinden filtre temizlendiğinde arama kutusunu da sıfırla
+  useEffect(() => {
+    const handleClear = () => setSearchQuery('');
+    window.addEventListener('novaforum:clear-search', handleClear);
+    return () => window.removeEventListener('novaforum:clear-search', handleClear);
+  }, []);
+
+  // Dışarı tıklandığında öneri penceresini kapat
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node;
+      const inDesktop =
+        searchContainerRef.current &&
+        searchContainerRef.current.contains(target);
+      const inMobile =
+        mobileSearchContainerRef.current &&
+        mobileSearchContainerRef.current.contains(target);
+
+      if (!inDesktop && !inMobile) {
+        setSuggestionsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Ctrl+K veya "/" ile arama kutusuna odaklanma
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+        setSuggestionsOpen(true);
+      } else if (
+        e.key === '/' &&
+        document.activeElement?.tagName !== 'INPUT' &&
+        document.activeElement?.tagName !== 'TEXTAREA'
+      ) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+        setSuggestionsOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const ensureSearchIndex = async () => {
+    if (searchIndex || loadingIndex) return;
+    setLoadingIndex(true);
+    try {
+      const res = await fetch('/api/search');
+      if (res.ok) {
+        const data = await res.json();
+        setSearchIndex(data);
+      }
+    } catch {
+      // ignore
+    } finally {
+      setLoadingIndex(false);
+    }
+  };
+
+  // Kullanıcı yazdıkça eşleşen önerileri 0ms gecikmeyle hesapla
+  const filteredResults = useMemo(() => {
+    if (!searchIndex) {
+      return {
+        threads: [],
+        categories: [],
+        tags: [],
+        news: [],
+        users: [],
+        flatList: [] as SuggestionItem[],
+      };
+    }
+
+    const q = searchQuery.trim();
+    const normQ = normalizeSearchText(q);
+
+    const threads = !normQ
+      ? searchIndex.threads.slice(0, 4)
+      : searchIndex.threads
+          .filter(
+            (t) =>
+              matchesSearch(t.title, normQ) ||
+              matchesSearch(t.tags, normQ) ||
+              matchesSearch(t.category.name, normQ) ||
+              matchesSearch(t.excerpt, normQ) ||
+              matchesSearch(t.author.displayName, normQ)
+          )
+          .slice(0, 5);
+
+    const categories = !normQ
+      ? []
+      : searchIndex.categories
+          .filter(
+            (c) =>
+              matchesSearch(c.name, normQ) ||
+              matchesSearch(c.description, normQ)
+          )
+          .slice(0, 3);
+
+    const tags = !normQ
+      ? searchIndex.tags.slice(0, 6)
+      : searchIndex.tags
+          .filter((t) => matchesSearch(t.tag, normQ))
+          .slice(0, 5);
+
+    const news = !normQ
+      ? []
+      : searchIndex.news
+          .filter(
+            (n) =>
+              matchesSearch(n.title, normQ) || matchesSearch(n.category, normQ)
+          )
+          .slice(0, 2);
+
+    const users = !normQ
+      ? []
+      : searchIndex.users
+          .filter(
+            (u) =>
+              matchesSearch(u.displayName, normQ) ||
+              matchesSearch(u.username, normQ)
+          )
+          .slice(0, 3);
+
+    const flatList: SuggestionItem[] = [
+      ...threads.map((t) => ({
+        id: `thread-${t.id}`,
+        type: 'thread' as const,
+        title: t.title,
+        subtitle: `${t.category.name} • @${t.author.username} • ${t.commentCount} yanıt`,
+        badge: t.category.name,
+        badgeColor: t.category.color,
+        isSolved: t.isSolved,
+        href: `/konu/${t.slug}`,
+        fillText: t.title,
+      })),
+      ...categories.map((c) => ({
+        id: `cat-${c.id}`,
+        type: 'category' as const,
+        title: c.name,
+        subtitle: `${c._count.threads} konu • Kategoriye filtrele`,
+        badge: 'Kategori',
+        badgeColor: c.color,
+        href: `/?kategori=${c.slug}`,
+        fillText: c.name,
+        filterAction: { kategori: c.slug, q: '', etiket: '' },
+      })),
+      ...tags.map((t) => ({
+        id: `tag-${t.tag}`,
+        type: 'tag' as const,
+        title: `#${t.tag}`,
+        subtitle: `${t.count} konuda kullanıldı`,
+        href: `/?etiket=${encodeURIComponent(t.tag)}`,
+        fillText: t.tag,
+        filterAction: { etiket: t.tag, q: '', kategori: '' },
+      })),
+      ...news.map((n) => ({
+        id: `news-${n.id}`,
+        type: 'news' as const,
+        title: n.title,
+        subtitle: `${n.category} • ${n.readTime}`,
+        badge: n.category,
+        badgeColor: n.badgeColor,
+        href: `/haberler/${n.slug}`,
+        fillText: n.title,
+      })),
+      ...users.map((u) => ({
+        id: `user-${u.id}`,
+        type: 'user' as const,
+        title: u.displayName,
+        subtitle: `@${u.username} • ${u.reputation}p itibar`,
+        badgeColor: u.avatarColor,
+        href: `/kullanici/${u.username}`,
+        fillText: u.username,
+      })),
+    ];
+
+    return { threads, categories, tags, news, users, flatList };
+  }, [searchIndex, searchQuery]);
+
+  // Satır içi otomatik tamamlama ipucu (inline ghost text / hızlı tamamlama kelimesi)
+  const autoCompleteHint = useMemo(() => {
+    const q = searchQuery.trim();
+    if (!q || !searchIndex) return '';
+    const normQ = normalizeSearchText(q);
+    // Önce etiketlerde önekle başlayan var mı bak
+    const tagMatch = searchIndex.tags.find((t) =>
+      normalizeSearchText(t.tag).startsWith(normQ)
+    );
+    if (tagMatch && tagMatch.tag.toLowerCase() !== q.toLowerCase()) {
+      return tagMatch.tag;
+    }
+    // Kategori adlarında başlayan var mı bak
+    const catMatch = searchIndex.categories.find((c) =>
+      normalizeSearchText(c.name).startsWith(normQ)
+    );
+    if (catMatch && catMatch.name.toLowerCase() !== q.toLowerCase()) {
+      return catMatch.name;
+    }
+    return '';
+  }, [searchQuery, searchIndex]);
+
+  const handleInputChange = (val: string) => {
+    setSearchQuery(val);
+    setActiveIndex(-1);
+    setSuggestionsOpen(true);
+    ensureSearchIndex();
+
+    // Ana sayfadaysak yazdıkça konuları anında filtrele
+    if (pathname === '/') {
+      window.dispatchEvent(
+        new CustomEvent('novaforum:search', { detail: { q: val.trim() } })
+      );
+    }
+  };
+
+  const handleSelectSuggestion = (item: SuggestionItem) => {
+    setSuggestionsOpen(false);
+    setMobileSearchOpen(false);
+
+    if (item.filterAction && pathname === '/') {
+      if (item.filterAction.q !== undefined) {
+        setSearchQuery(item.filterAction.q);
+      }
+      window.dispatchEvent(
+        new CustomEvent('novaforum:search', { detail: item.filterAction })
+      );
+      router.push(item.href);
+      return;
+    }
+
+    router.push(item.href);
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (
+      activeIndex >= 0 &&
+      activeIndex < filteredResults.flatList.length
+    ) {
+      handleSelectSuggestion(filteredResults.flatList[activeIndex]);
+      return;
+    }
+
+    const trimmed = searchQuery.trim();
+    setSuggestionsOpen(false);
+    setMobileSearchOpen(false);
+
+    if (pathname === '/') {
+      window.dispatchEvent(
+        new CustomEvent('novaforum:search', { detail: { q: trimmed } })
+      );
+    }
+
+    const params = new URLSearchParams(searchParams.toString());
+    if (trimmed) {
+      params.set('q', trimmed);
+    } else {
+      params.delete('q');
+    }
+    const qs = params.toString();
+    router.push(qs ? `/?${qs}` : '/');
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const total = filteredResults.flatList.length;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setSuggestionsOpen(true);
+      if (total > 0) {
+        setActiveIndex((prev) => (prev + 1) % total);
+      }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (total > 0) {
+        setActiveIndex((prev) => (prev <= 0 ? total - 1 : prev - 1));
+      }
+    } else if (e.key === 'Tab') {
+      if (activeIndex >= 0 && activeIndex < total) {
+        e.preventDefault();
+        const fill = filteredResults.flatList[activeIndex].fillText;
+        handleInputChange(fill);
+      } else if (autoCompleteHint) {
+        e.preventDefault();
+        handleInputChange(autoCompleteHint);
+      }
+    } else if (e.key === 'Escape') {
+      setSuggestionsOpen(false);
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchQuery('');
+    setActiveIndex(-1);
+    if (pathname === '/') {
+      window.dispatchEvent(
+        new CustomEvent('novaforum:search', { detail: { q: '' } })
+      );
+    }
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('q');
+    const qs = params.toString();
+    router.push(qs ? `/?${qs}` : '/');
+    searchInputRef.current?.focus();
+  };
+
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    setMenuOpen(false);
+    window.location.href = '/';
+  };
+
+  const renderSuggestionsDropdown = () => {
+    const trimmed = searchQuery.trim();
+    if (!suggestionsOpen || !trimmed) return null;
+
+    const { flatList } = filteredResults;
+
+    return (
+      <div className="absolute left-0 right-0 sm:min-w-[440px] top-full mt-2 rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-[#111827] shadow-2xl shadow-black/40 overflow-hidden z-50">
+        {/* Varsa Kelime Tamamlama Önerisi */}
+        {autoCompleteHint && (
+          <div className="px-4 py-2 bg-indigo-500/10 border-b border-indigo-500/20 flex items-center justify-between gap-2 text-xs">
+            <span className="text-slate-600 dark:text-slate-300">
+              Bunu mu demek istediniz?
+            </span>
+            <button
+              type="button"
+              onClick={() => handleInputChange(autoCompleteHint)}
+              className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-indigo-600 text-white font-semibold hover:bg-indigo-500 transition-colors"
+            >
+              {autoCompleteHint}
+              <span className="text-[10px] opacity-80 font-normal">(Tab)</span>
+            </button>
+          </div>
+        )}
+
+        {/* Öneri Listesi */}
+        {loadingIndex && !searchIndex ? (
+          <div className="p-5 text-center text-xs text-slate-400">
+            Aranıyor...
+          </div>
+        ) : flatList.length === 0 ? (
+          <div className="p-5 text-center space-y-1">
+            <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+              &ldquo;{trimmed}&rdquo; için eşleşen sonuç bulunamadı
+            </p>
+            <p className="text-[11px] text-slate-400">
+              Farklı bir kelime deneyebilir veya Enter tuşuna basabilirsiniz.
+            </p>
+          </div>
+        ) : (
+          <div className="divide-y divide-slate-100 dark:divide-slate-800/70 max-h-[360px] overflow-y-auto custom-scrollbar">
+            {flatList.slice(0, 7).map((item, idx) => {
+              const isSelected = idx === activeIndex;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onMouseEnter={() => setActiveIndex(idx)}
+                  onClick={() => handleSelectSuggestion(item)}
+                  className={`w-full px-4 py-2.5 text-left flex items-center justify-between gap-3 transition-colors ${
+                    isSelected
+                      ? 'bg-indigo-50/90 dark:bg-indigo-950/60'
+                      : 'hover:bg-slate-50 dark:hover:bg-slate-800/60'
+                  }`}
+                >
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
+                      {item.type === 'thread' && (
+                        <MessageSquare className="w-3.5 h-3.5 text-indigo-500" />
+                      )}
+                      {item.type === 'category' && (
+                        <Layers
+                          className="w-3.5 h-3.5"
+                          style={{ color: item.badgeColor || '#6366f1' }}
+                        />
+                      )}
+                      {item.type === 'tag' && (
+                        <Tag className="w-3.5 h-3.5 text-emerald-500" />
+                      )}
+                      {item.type === 'news' && (
+                        <Newspaper className="w-3.5 h-3.5 text-amber-500" />
+                      )}
+                      {item.type === 'user' && (
+                        <div
+                          className="w-5 h-5 rounded-md flex items-center justify-center text-white text-[10px] font-bold"
+                          style={{
+                            backgroundColor: item.badgeColor || '#6366f1',
+                          }}
+                        >
+                          {item.title.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
+                          {item.title}
+                        </span>
+                        {item.isSolved && (
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                        )}
+                      </div>
+                      {item.subtitle && (
+                        <p className="text-[11px] text-slate-400 truncate">
+                          {item.subtitle}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <ArrowRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Alt Bar: Tüm Sonuçları Forumda Filtrele */}
+        <button
+          type="button"
+          onClick={handleSearch}
+          className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/70 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 border-t border-slate-200/80 dark:border-slate-800 flex items-center justify-between text-xs font-semibold text-indigo-600 dark:text-indigo-400 transition-colors"
+        >
+          <span className="flex items-center gap-1.5 truncate">
+            <Search className="w-3.5 h-3.5 shrink-0" />
+            &ldquo;{trimmed}&rdquo; için tüm sonuçları listele
+          </span>
+          <CornerDownLeft className="w-3.5 h-3.5 shrink-0 opacity-70" />
+        </button>
+      </div>
+    );
+  };
+
+  return (
+    <header className="sticky top-0 z-40 w-full border-b border-slate-200/90 dark:border-slate-800/90 bg-white/95 dark:bg-[#0b0f19]/95 backdrop-blur-md">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+        {/* Sol: Dinamik Site Logosu & Başlığı */}
+        <Link href="/" className="shrink-0">
+          <BrandLogo settings={siteSettings} size="md" showTagline={true} />
+        </Link>
+
+        {/* Orta: Geniş ve Ferah Arama Çubuğu */}
+        <div
+          ref={searchContainerRef}
+          className="flex-1 max-w-lg hidden sm:block relative"
+        >
+          <form onSubmit={handleSearch}>
+            <div className="relative">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                ref={searchInputRef}
+                type="text"
+                autoComplete="off"
+                value={searchQuery}
+                onFocus={() => {
+                  setSuggestionsOpen(true);
+                  ensureSearchIndex();
+                }}
+                onChange={(e) => handleInputChange(e.target.value)}
+                onKeyDown={handleSearchKeyDown}
+                placeholder="Konu, etiket veya içerik ara..."
+                className="w-full pl-10 pr-9 py-2 rounded-xl text-sm bg-slate-100/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={clearSearch}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          </form>
+
+          {/* Canlı Öneri Açılır Menüsü */}
+          {renderSuggestionsDropdown()}
+        </div>
+
+        {/* Sağ Aksiyonlar */}
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={() => {
+              const next = !mobileSearchOpen;
+              setMobileSearchOpen(next);
+              if (next) {
+                setSuggestionsOpen(true);
+                ensureSearchIndex();
+              }
+            }}
+            title="Ara"
+            className="sm:hidden p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors"
+          >
+            <Search className="w-4 h-4" />
+          </button>
+
+          <Link
+            href="/haberler"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20 transition-colors"
+          >
+            <Newspaper className="w-3.5 h-3.5" />
+            <span className="hidden md:inline">Teknoloji Gündemi</span>
+          </Link>
+
+          <button
+            onClick={toggleTheme}
+            title={theme === 'dark' ? 'Aydınlık Moda Geç' : 'Karanlık Moda Geç'}
+            className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors"
+          >
+            {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
+          </button>
+
+          {user ? (
+            <>
+              <NotificationBell />
+
+              <Link
+                href="/yeni-konu"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm shadow-indigo-500/20 transition-all"
+              >
+                <PlusCircle className="w-4 h-4" />
+                <span className="hidden md:inline">Yeni Konu</span>
+              </Link>
+
+              <div className="relative">
+                <button
+                  onClick={() => setMenuOpen(!menuOpen)}
+                  className="flex items-center gap-2 p-1 pr-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800/70 transition-colors"
+                >
+                  <div
+                    className="w-7 h-7 rounded-lg flex items-center justify-center text-white font-semibold text-xs"
+                    style={{ backgroundColor: user.avatarColor }}
+                  >
+                    {user.displayName.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="hidden lg:flex flex-col items-start text-left">
+                    <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 leading-none">
+                      {user.displayName}
+                    </span>
+                    <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-medium flex items-center gap-0.5 mt-0.5">
+                      <Award className="w-2.5 h-2.5" /> {user.reputation}p
+                    </span>
+                  </div>
+                </button>
+
+                {menuOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-10"
+                      onClick={() => setMenuOpen(false)}
+                    />
+                    <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl py-2 z-20">
+                      <div className="px-4 py-2.5 border-b border-slate-100 dark:border-slate-800">
+                        <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">
+                          {user.displayName}
+                        </p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                          @{user.username}
+                        </p>
+                      </div>
+                      <Link
+                        href={`/kullanici/${user.username}`}
+                        onClick={() => setMenuOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                      >
+                        <UserIcon className="w-4 h-4 text-slate-400" />
+                        Profilim & Rozetler
+                      </Link>
+                      {user.role === 'ADMIN' && (
+                        <Link
+                          href="/admin"
+                          onClick={() => setMenuOpen(false)}
+                          className="flex items-center gap-2.5 px-4 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-colors"
+                        >
+                          <Shield className="w-4 h-4" />
+                          Yönetim Paneli
+                        </Link>
+                      )}
+                      <Link
+                        href="/?filtre=kaydedilenler"
+                        onClick={() => setMenuOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                      >
+                        <Bookmark className="w-4 h-4 text-slate-400" />
+                        Kaydedilen Konular
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Çıkış Yap
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Link
+                href="/giris"
+                className="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              >
+                Giriş Yap
+              </Link>
+              <Link
+                href="/kayit"
+                className="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm shadow-indigo-500/20 transition-all"
+              >
+                Kayıt Ol
+              </Link>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Mobil Arama Çekmecesi */}
+      {mobileSearchOpen && (
+        <div
+          ref={mobileSearchContainerRef}
+          className="sm:hidden px-4 pb-3 pt-1 border-t border-slate-100 dark:border-slate-800/80 bg-white dark:bg-[#0b0f19] relative"
+        >
+          <form onSubmit={handleSearch} className="relative">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input
+              type="text"
+              autoFocus
+              autoComplete="off"
+              value={searchQuery}
+              onFocus={() => {
+                setSuggestionsOpen(true);
+                ensureSearchIndex();
+              }}
+              onChange={(e) => handleInputChange(e.target.value)}
+              onKeyDown={handleSearchKeyDown}
+              placeholder="Konu, etiket veya içerik ara..."
+              className="w-full pl-10 pr-8 py-2 rounded-xl text-sm bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={clearSearch}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </form>
+          {renderSuggestionsDropdown()}
+        </div>
+      )}
+    </header>
+  );
+}

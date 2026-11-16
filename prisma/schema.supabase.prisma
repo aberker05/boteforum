@@ -1,0 +1,213 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id          String    @id @default(cuid())
+  username    String    @unique
+  email       String    @unique
+  password    String
+  displayName String
+  bio         String?
+  avatarColor String    @default("#6366f1")
+  role        String    @default("MEMBER") // ADMIN, MODERATOR, MEMBER
+  reputation  Int       @default(1)
+  createdAt   DateTime  @default(now())
+
+  threads     Thread[]
+  comments    Comment[]
+  votes       Vote[]
+  bookmarks   Bookmark[]
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String
+  icon        String   @default("MessageSquare")
+  color       String   @default("#6366f1")
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  threads     Thread[]
+}
+
+model Thread {
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  content     String
+  views       Int       @default(0)
+  isPinned    Boolean   @default(false)
+  isLocked    Boolean   @default(false)
+  isSolved    Boolean   @default(false)
+  tags        String    @default("")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  authorId    String
+  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  categoryId  String
+  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  comments    Comment[]
+  votes       Vote[]
+  bookmarks   Bookmark[]
+}
+
+model Comment {
+  id          String    @id @default(cuid())
+  content     String
+  isAccepted  Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  authorId    String
+  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  threadId    String
+  thread      Thread    @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  parentId    String?
+  parent      Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies     Comment[] @relation("CommentReplies")
+
+  votes       Vote[]
+}
+
+model Vote {
+  id        String   @id @default(cuid())
+  value     Int      // 1 for helpful/like
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  threadId  String?
+  thread    Thread?  @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  commentId String?
+  comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, threadId])
+  @@unique([userId, commentId])
+}
+
+model Bookmark {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  threadId  String
+  thread    Thread   @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, threadId])
+}
+
+model TechNews {
+  id         String @id @default(cuid())
+  title      String
+  slug       String @unique
+  summary    String
+  content    String
+  category   String
+  badgeColor String @default("#6366f1")
+  source     String @default("NovaTech Radar")
+  readTime   String @default("3 dk okuma")
+  isFeatured Int    @default(0)
+  views      Int    @default(0)
+  createdAt  String
+  imageUrl   String @default("")
+}
+
+model TechNewsComment {
+  id        String  @id
+  newsId    String
+  authorId  String
+  content   String
+  parentId  String?
+  createdAt String
+}
+
+model ThreadPoll {
+  id        String @id
+  threadId  String @unique
+  question  String
+  createdAt String
+}
+
+model ThreadPollOption {
+  id         String @id
+  pollId     String
+  text       String
+  orderIndex Int    @default(0)
+}
+
+model ThreadPollVote {
+  id        String @id
+  pollId    String
+  optionId  String
+  userId    String
+  createdAt String
+
+  @@unique([pollId, userId])
+}
+
+model Notification {
+  id               String @id
+  userId           String
+  type             String
+  actorUsername    String
+  actorDisplayName String
+  actorAvatarColor String
+  message          String
+  link             String
+  isRead           Int    @default(0)
+  createdAt        String
+}
+
+model ContentReport {
+  id            String @id
+  reporterId    String
+  targetType    String
+  targetId      String
+  threadSlug    String
+  targetSummary String
+  reason        String
+  details       String @default("")
+  status        String @default("PENDING")
+  createdAt     String
+}
+
+model PasswordReset {
+  id        String @id
+  userId    String
+  email     String
+  code      String
+  expiresAt String
+  createdAt String
+}
+
+model SiteSettings {
+  id                String @id
+  siteNamePrimary   String
+  siteNameAccent    String
+  siteTagline       String
+  logoType          String @default("icon")
+  logoIcon          String @default("Sparkles")
+  logoText          String @default("NF")
+  logoImageUrl      String @default("")
+  brandColor        String @default("#6366f1")
+  footerDescription String
+  copyrightText     String
+  updatedAt         String
+}
+
