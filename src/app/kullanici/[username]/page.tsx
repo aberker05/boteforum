@@ -265,8 +265,8 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
         {/* Seviye Çubuğu ve Rozetler */}
         <div className="mt-5 pt-5 border-t border-slate-100 dark:border-slate-800 grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
-          <div className="md:col-span-5 p-4 rounded-2xl bg-slate-50/80 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800">
-            <div className="flex items-center justify-between mb-2">
+          <div className="md:col-span-5 p-4 rounded-2xl bg-slate-50/80 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 space-y-2">
+            <div className="flex items-center justify-between">
               <span
                 className="px-2.5 py-0.5 rounded-full text-xs font-extrabold"
                 style={{
@@ -276,8 +276,10 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
               >
                 Seviye {levelInfo.level} • {levelInfo.title}
               </span>
-              <span className="text-xs font-semibold text-slate-500">
-                {profileUser.reputation} / {levelInfo.nextLevelPoints}p
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-200 tabular-nums">
+                {levelInfo.level === 5
+                  ? `${profileUser.reputation}p (Maks.)`
+                  : `${profileUser.reputation} / ${levelInfo.nextLevelPoints}p`}
               </span>
             </div>
             <div className="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
@@ -288,6 +290,19 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                   backgroundColor: levelInfo.color,
                 }}
               />
+            </div>
+            <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+              <span>
+                {levelInfo.level === 5
+                  ? 'En yüksek topluluk rütbesine ulaşıldı! 🏆'
+                  : `Sonraki seviyeye ${levelInfo.remainingPoints} puan kaldı`}
+              </span>
+              <Link
+                href="/kurallar"
+                className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline"
+              >
+                Puan Tablosu →
+              </Link>
             </div>
           </div>
 

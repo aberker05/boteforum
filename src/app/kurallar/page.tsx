@@ -10,6 +10,7 @@ import {
   AlertOctagon,
 } from 'lucide-react';
 import { getSiteSettings } from '@/lib/siteSettings';
+import { LEVEL_TIERS } from '@/lib/badges';
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
@@ -93,48 +94,109 @@ export default async function RulesPage() {
       </section>
 
       {/* 2. İtibar Puanı ve Seviye Sistemi */}
-      <section className="rounded-3xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900/90 p-6 sm:p-8 space-y-4">
-        <h2 className="text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-          <Award className="w-5 h-5 text-amber-500" />
-          2. İtibar Puanı, Seviyeler ve Rozetler Nasıl Kazanılır?
-        </h2>
+      <section className="rounded-3xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900/90 p-6 sm:p-8 space-y-6">
+        <div className="space-y-1">
+          <h2 className="text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+            <Award className="w-5 h-5 text-amber-500" />
+            2. İtibar Puanı, Seviyeler ve Rozet Sistemi Nasıl Çalışır?
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+            Her yeni üye <strong>0 Puan (Seviye 1)</strong> ile başlar. Tüm puanlamalar kolay takip edilebilmesi için <strong>5 ve 10&apos;un katları</strong> şeklinde hesaplanır.
+          </p>
+        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs sm:text-sm">
-          <div className="p-4 rounded-2xl border border-indigo-500/20 bg-indigo-500/5">
-            <span className="text-lg font-extrabold text-indigo-600 dark:text-indigo-400">
-              +5 Puan
+        {/* 4 Ana Puan Kazanım Kuralı */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs sm:text-sm">
+          <div className="p-4 rounded-2xl border border-indigo-500/25 bg-indigo-500/5">
+            <span className="text-xl font-extrabold text-indigo-600 dark:text-indigo-400">
+              +10 Puan
             </span>
             <p className="font-bold text-slate-900 dark:text-white mt-1">
               Yeni Konu Açmak
             </p>
             <p className="text-xs text-slate-500 mt-0.5">
-              Toplulukta yeni bir tartışma veya soru başlattığınızda kazanılır.
+              Toplulukta yeni bir tartışma veya teknik soru başlattığınızda kazanılır.
             </p>
           </div>
 
-          <div className="p-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/5">
-            <span className="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">
-              +15 Puan
+          <div className="p-4 rounded-2xl border border-blue-500/25 bg-blue-500/5">
+            <span className="text-xl font-extrabold text-blue-600 dark:text-blue-400">
+              +5 Puan
+            </span>
+            <p className="font-bold text-slate-900 dark:text-white mt-1">
+              Yorum / Yanıt Yazmak
+            </p>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Forum konularına veya teknoloji haberlerine yaptığınız her katkı için verilir.
+            </p>
+          </div>
+
+          <div className="p-4 rounded-2xl border border-amber-500/25 bg-amber-500/5">
+            <span className="text-xl font-extrabold text-amber-600 dark:text-amber-400">
+              +5 Puan
+            </span>
+            <p className="font-bold text-slate-900 dark:text-white mt-1">
+              Beğeni (Faydalı Oy) Almak
+            </p>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Konunuz veya yorumunuz başka bir üye tarafından beğenildiğinde kazanılır.
+            </p>
+          </div>
+
+          <div className="p-4 rounded-2xl border border-emerald-500/25 bg-emerald-500/5">
+            <span className="text-xl font-extrabold text-emerald-600 dark:text-emerald-400">
+              +25 Puan
             </span>
             <p className="font-bold text-slate-900 dark:text-white mt-1">
               Kabul Edilen Çözüm
             </p>
             <p className="text-xs text-slate-500 mt-0.5">
-              Yanıtınız konu sahibi tarafından doğru çözüm olarak seçildiğinde kazanılır.
+              Yanıtınız konu sahibi tarafından doğru çözüm olarak onaylandığında kazanılır.
             </p>
           </div>
+        </div>
 
-          <div className="p-4 rounded-2xl border border-amber-500/20 bg-amber-500/5">
-            <span className="text-lg font-extrabold text-amber-600 dark:text-amber-400">
-              +2 / +3 Puan
-            </span>
-            <p className="font-bold text-slate-900 dark:text-white mt-1">
-              Yorum ve Artı Oy
-            </p>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Yaptığınız her yorum için +2, konunuzun aldığı her beğeni için +3 puan verilir.
-            </p>
+        {/* 5 Kademeli Seviye (Rütbe) Tablosu */}
+        <div className="space-y-2.5 pt-2">
+          <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+            Topluluk Seviye (Rütbe) Basamakları
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-5 gap-2.5">
+            {LEVEL_TIERS.map((tier) => (
+              <div
+                key={tier.level}
+                className="p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-1 mb-1">
+                    <span
+                      className="px-2 py-0.5 rounded-md text-[11px] font-extrabold"
+                      style={{
+                        backgroundColor: `${tier.color}20`,
+                        color: tier.color,
+                      }}
+                    >
+                      Seviye {tier.level}
+                    </span>
+                    <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                      {tier.level === 5
+                        ? `${tier.minPoints}+ p`
+                        : `${tier.minPoints}–${tier.nextLevelPoints - 1} p`}
+                    </span>
+                  </div>
+                  <p className="text-xs font-extrabold text-slate-900 dark:text-white mt-1">
+                    {tier.title}
+                  </p>
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5 leading-snug">
+                  {tier.description}
+                </p>
+              </div>
+            ))}
           </div>
+          <p className="text-[11px] text-slate-400 pt-1">
+            * Adil sıralama ilkesi gereği; bir beğeni geri çekildiğinde (-5p) veya çözüm işareti kaldırıldığında (-25p) ilgili puan otomatik olarak dengelenir.
+          </p>
         </div>
       </section>
 

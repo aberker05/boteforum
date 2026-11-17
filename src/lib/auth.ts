@@ -91,7 +91,7 @@ export async function findOrCreateGoogleUser(email: string, displayName: string)
         bio: 'Google hesabı ile katıldı.',
         avatarColor: randomColor,
         role: isFirstUser ? 'ADMIN' : 'MEMBER',
-        reputation: isFirstUser ? 500 : 10,
+        reputation: isFirstUser ? 600 : 0,
       },
     });
   }

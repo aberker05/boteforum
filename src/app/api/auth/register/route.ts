@@ -104,7 +104,7 @@ export async function POST(request: Request) {
         displayName: (displayName || cleanUsername).trim(),
         avatarColor: randomColor,
         role: isFirstUser ? 'ADMIN' : 'MEMBER',
-        reputation: isFirstUser ? 500 : 10,
+        reputation: isFirstUser ? 600 : 0,
       },
     });
 

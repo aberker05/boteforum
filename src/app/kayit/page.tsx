@@ -22,7 +22,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [acceptedPolicy, setAcceptedPolicy] = useState(true);
+  const [acceptedPolicy, setAcceptedPolicy] = useState(false);
   const [showDataInfo, setShowDataInfo] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);

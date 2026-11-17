@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getCurrentUser } from '@/lib/auth';
+import { getCurrentUser, invalidateUserCache } from '@/lib/auth';
 import { slugify } from '@/lib/utils';
 import { checkContentModeration } from '@/lib/moderation';
 import { createPollForThread } from '@/lib/polls';
@@ -161,8 +161,9 @@ export async function POST(request: Request) {
       try {
         await prisma.user.update({
           where: { id: user.id },
-          data: { reputation: { increment: 5 } },
+          data: { reputation: { increment: 10 } },
         });
+        invalidateUserCache(user.id);
 
         const mentionedUsernames = extractMentions(content);
         if (mentionedUsernames.length > 0) {

@@ -698,7 +698,7 @@ export async function createTechNewsComment(input: {
   prisma.user
     .update({
       where: { id: input.authorId },
-      data: { reputation: { increment: 2 } },
+      data: { reputation: { increment: 5 } },
     })
     .catch(() => {});
 

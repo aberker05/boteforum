@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getCurrentUser } from '@/lib/auth';
+import { getCurrentUser, invalidateUserCache } from '@/lib/auth';
 import { createNotification } from '@/lib/notifications';
 import { checkActionCooldown, verifyRequestOrigin } from '@/lib/security';
 
@@ -57,8 +57,9 @@ export async function POST(request: Request) {
         prisma.user
           .update({
             where: { id: thread.authorId },
-            data: { reputation: { increment: -3 } },
+            data: { reputation: { increment: -5 } },
           })
+          .then(() => invalidateUserCache(thread.authorId))
           .catch(() => {});
       } else if (existing) {
         await prisma.vote.update({
@@ -68,8 +69,9 @@ export async function POST(request: Request) {
         prisma.user
           .update({
             where: { id: thread.authorId },
-            data: { reputation: { increment: 3 } },
+            data: { reputation: { increment: 5 } },
           })
+          .then(() => invalidateUserCache(thread.authorId))
           .catch(() => {});
       } else {
         await prisma.vote.create({
@@ -82,13 +84,13 @@ export async function POST(request: Request) {
 
         const shortTitle =
           thread.title.length > 48
-            ? `${thread.title.slice(0, 48)}...`
+            ? `${thread.title.length > 48 ? `${thread.title.slice(0, 48)}...` : thread.title}`
             : thread.title;
 
         Promise.all([
           prisma.user.update({
             where: { id: thread.authorId },
-            data: { reputation: { increment: 3 } },
+            data: { reputation: { increment: 5 } },
           }),
           createNotification({
             userId: thread.authorId,
@@ -96,10 +98,12 @@ export async function POST(request: Request) {
             actorUsername: user.username,
             actorDisplayName: user.displayName,
             actorAvatarColor: user.avatarColor,
-            message: `"${shortTitle}" başlıklı konunuzu faydalı buldu (+3 puan).`,
+            message: `"${shortTitle}" başlıklı konunuzu faydalı buldu (+5 puan).`,
             link: `/konu/${thread.slug}`,
           }),
-        ]).catch(() => {});
+        ])
+          .then(() => invalidateUserCache(thread.authorId))
+          .catch(() => {});
       }
 
       const votes = await prisma.vote.findMany({
@@ -141,8 +145,9 @@ export async function POST(request: Request) {
         prisma.user
           .update({
             where: { id: comment.authorId },
-            data: { reputation: { increment: -2 } },
+            data: { reputation: { increment: -5 } },
           })
+          .then(() => invalidateUserCache(comment.authorId))
           .catch(() => {});
       } else if (existing) {
         await prisma.vote.update({
@@ -152,8 +157,9 @@ export async function POST(request: Request) {
         prisma.user
           .update({
             where: { id: comment.authorId },
-            data: { reputation: { increment: 2 } },
+            data: { reputation: { increment: 5 } },
           })
+          .then(() => invalidateUserCache(comment.authorId))
           .catch(() => {});
       } else {
         await prisma.vote.create({
@@ -172,7 +178,7 @@ export async function POST(request: Request) {
         Promise.all([
           prisma.user.update({
             where: { id: comment.authorId },
-            data: { reputation: { increment: 2 } },
+            data: { reputation: { increment: 5 } },
           }),
           createNotification({
             userId: comment.authorId,
@@ -180,10 +186,12 @@ export async function POST(request: Request) {
             actorUsername: user.username,
             actorDisplayName: user.displayName,
             actorAvatarColor: user.avatarColor,
-            message: `"${shortTitle}" konusundaki yanıtınızı faydalı buldu (+2 puan).`,
+            message: `"${shortTitle}" konusundaki yanıtınızı faydalı buldu (+5 puan).`,
             link: `/konu/${comment.thread.slug}#yorum-${comment.id}`,
           }),
-        ]).catch(() => {});
+        ])
+          .then(() => invalidateUserCache(comment.authorId))
+          .catch(() => {});
       }
 
       const votes = await prisma.vote.findMany({

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getCurrentUser } from '@/lib/auth';
+import { getCurrentUser, invalidateUserCache } from '@/lib/auth';
 import { checkContentModeration } from '@/lib/moderation';
 import {
   checkActionCooldown,
@@ -106,13 +106,14 @@ export async function POST(request: Request) {
         await Promise.all([
           prisma.user.update({
             where: { id: user.id },
-            data: { reputation: { increment: 2 } },
+            data: { reputation: { increment: 5 } },
           }),
           prisma.thread.update({
             where: { id: threadId },
             data: { updatedAt: new Date() },
           }),
         ]);
+        invalidateUserCache(user.id);
 
         const notifiedUserIds = new Set<string>([user.id]);
         const shortTitle =
@@ -246,6 +247,23 @@ export async function PATCH(request: Request) {
     if (action === 'toggleAccept' && (isThreadAuthor || isModerator)) {
       const newStatus = !comment.isAccepted;
 
+      // Daha önce kabul edilmiş başka bir çözüm varsa onun puanını (-25) geri düş
+      const previouslyAccepted = await prisma.comment.findMany({
+        where: { threadId: comment.threadId, isAccepted: true },
+      });
+
+      for (const prev of previouslyAccepted) {
+        if (prev.authorId !== comment.thread.authorId) {
+          await prisma.user
+            .update({
+              where: { id: prev.authorId },
+              data: { reputation: { increment: -25 } },
+            })
+            .catch(() => {});
+          invalidateUserCache(prev.authorId);
+        }
+      }
+
       if (newStatus) {
         // Aynı konudaki diğer çözümleri kaldır
         await prisma.comment.updateMany({
@@ -264,11 +282,12 @@ export async function PATCH(request: Request) {
         data: { isSolved: newStatus },
       });
 
-      if (newStatus && comment.authorId !== user.id) {
+      if (newStatus && comment.authorId !== comment.thread.authorId) {
         await prisma.user.update({
           where: { id: comment.authorId },
-          data: { reputation: { increment: 15 } },
+          data: { reputation: { increment: 25 } },
         });
+        invalidateUserCache(comment.authorId);
 
         const shortTitle =
           comment.thread.title.length > 48
@@ -281,7 +300,7 @@ export async function PATCH(request: Request) {
           actorUsername: user.username,
           actorDisplayName: user.displayName,
           actorAvatarColor: user.avatarColor,
-          message: `"${shortTitle}" konusundaki yanıtınızı çözüm olarak kabul etti! (+15 puan)`,
+          message: `"${shortTitle}" konusundaki yanıtınızı çözüm olarak kabul etti! (+25 puan)`,
           link: `/konu/${comment.thread.slug}#yorumlar`,
         });
       }
