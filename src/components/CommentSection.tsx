@@ -430,10 +430,10 @@ export function CommentSection({
       <div
         key={comment.id}
         id={`yorum-${comment.id}`}
-        className={isReply ? 'mt-3 ml-5 sm:ml-9 border-l-2 border-slate-200 dark:border-slate-800 pl-3 sm:pl-4' : 'scroll-mt-24'}
+        className={isReply ? 'mt-3 ml-2.5 sm:ml-9 border-l-2 border-slate-200 dark:border-slate-800 pl-2.5 sm:pl-4' : 'scroll-mt-24'}
       >
         <div
-          className={`rounded-2xl border p-4 sm:p-5 transition-all ${
+          className={`rounded-2xl border p-3.5 sm:p-5 transition-all ${
             comment.isAccepted
               ? 'bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-500/60 dark:border-emerald-600/60 shadow-sm'
               : 'bg-white dark:bg-slate-900/90 border-slate-200/80 dark:border-slate-800/80'
@@ -602,7 +602,7 @@ export function CommentSection({
                   title="Bu mesajı alıntılayarak yanıt yaz"
                 >
                   <Quote className="w-3.5 h-3.5" />
-                  Alıntıla
+                  <span className="hidden sm:inline">Alıntıla</span>
                 </button>
               )}
             </div>

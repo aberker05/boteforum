@@ -575,24 +575,201 @@ export function Navbar({
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-slate-200/90 dark:border-slate-800/90 bg-white/95 dark:bg-[#0b0f19]/95 backdrop-blur-md">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-        {/* Sol: Dinamik Site Logosu & Başlığı */}
-        <Link href="/" className="shrink-0">
-          <BrandLogo settings={siteSettings} size="md" showTagline={true} />
-        </Link>
+    <>
+      <header className="sticky top-0 z-40 w-full border-b border-slate-200/90 dark:border-slate-800/90 bg-white/95 dark:bg-[#0b0f19]/95 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-2 sm:gap-4">
+          {/* Sol: Dinamik Site Logosu & Başlığı */}
+          <Link href="/" className="shrink-0">
+            <BrandLogo settings={siteSettings} size="md" showTagline={true} />
+          </Link>
 
-        {/* Orta: Geniş ve Ferah Arama Çubuğu */}
-        <div
-          ref={searchContainerRef}
-          className="flex-1 max-w-lg hidden sm:block relative"
-        >
-          <form onSubmit={handleSearch}>
-            <div className="relative">
+          {/* Orta: Geniş ve Ferah Arama Çubuğu */}
+          <div
+            ref={searchContainerRef}
+            className="flex-1 max-w-lg hidden sm:block relative"
+          >
+            <form onSubmit={handleSearch}>
+              <div className="relative">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  autoComplete="off"
+                  value={searchQuery}
+                  onFocus={() => {
+                    setSuggestionsOpen(true);
+                    ensureSearchIndex();
+                  }}
+                  onChange={(e) => handleInputChange(e.target.value)}
+                  onKeyDown={handleSearchKeyDown}
+                  placeholder="Konu, etiket veya içerik ara..."
+                  className="w-full pl-10 pr-9 py-2 rounded-xl text-sm bg-slate-100/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={clearSearch}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            </form>
+
+            {/* Canlı Öneri Açılır Menüsü */}
+            {renderSuggestionsDropdown()}
+          </div>
+
+          {/* Sağ Aksiyonlar */}
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                const next = !mobileSearchOpen;
+                setMobileSearchOpen(next);
+                if (next) {
+                  setSuggestionsOpen(true);
+                  ensureSearchIndex();
+                }
+              }}
+              title="Ara"
+              className="sm:hidden p-2 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors cursor-pointer"
+            >
+              <Search className="w-4 h-4" />
+            </button>
+
+            <Link
+              href="/haberler"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20 transition-colors"
+            >
+              <Newspaper className="w-3.5 h-3.5" />
+              <span className="hidden md:inline">Teknoloji Gündemi</span>
+            </Link>
+
+            <button
+              onClick={toggleTheme}
+              title={theme === 'dark' ? 'Aydınlık Moda Geç' : 'Karanlık Moda Geç'}
+              className="p-2 sm:p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors cursor-pointer"
+            >
+              {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
+            </button>
+
+            {user ? (
+              <>
+                <NotificationBell />
+
+                <Link
+                  href="/yeni-konu"
+                  className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm shadow-indigo-500/20 transition-all"
+                >
+                  <PlusCircle className="w-4 h-4" />
+                  <span className="hidden md:inline">Yeni Konu</span>
+                </Link>
+
+                <div className="relative">
+                  <button
+                    onClick={() => setMenuOpen(!menuOpen)}
+                    className="flex items-center gap-2 p-1 sm:pr-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800/70 transition-colors cursor-pointer"
+                  >
+                    <UserAvatar
+                      name={user.displayName}
+                      avatar={user.avatarColor}
+                      className="w-7 h-7 rounded-lg text-xs font-semibold"
+                    />
+                    <div className="hidden lg:flex flex-col items-start text-left">
+                      <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 leading-none">
+                        {user.displayName}
+                      </span>
+                      <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-medium flex items-center gap-0.5 mt-0.5">
+                        <Award className="w-2.5 h-2.5" /> {user.reputation}p
+                      </span>
+                    </div>
+                  </button>
+
+                  {menuOpen && (
+                    <>
+                      <div
+                        className="fixed inset-0 z-10"
+                        onClick={() => setMenuOpen(false)}
+                      />
+                      <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl py-2 z-20">
+                        <div className="px-4 py-2.5 border-b border-slate-100 dark:border-slate-800">
+                          <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">
+                            {user.displayName}
+                          </p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                            @{user.username}
+                          </p>
+                        </div>
+                        <Link
+                          href={`/kullanici/${user.username}`}
+                          onClick={() => setMenuOpen(false)}
+                          className="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        >
+                          <UserIcon className="w-4 h-4 text-slate-400" />
+                          Profilim & Rozetler
+                        </Link>
+                        {user.role === 'ADMIN' && (
+                          <Link
+                            href="/admin"
+                            onClick={() => setMenuOpen(false)}
+                            className="flex items-center gap-2.5 px-4 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-colors"
+                          >
+                            <Shield className="w-4 h-4" />
+                            Yönetim Paneli
+                          </Link>
+                        )}
+                        <Link
+                          href="/?filtre=kaydedilenler"
+                          onClick={() => setMenuOpen(false)}
+                          className="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        >
+                          <Bookmark className="w-4 h-4 text-slate-400" />
+                          Kaydedilen Konular
+                        </Link>
+                        <button
+                          onClick={handleLogout}
+                          className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          Çıkış Yap
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <Link
+                  href="/giris"
+                  className="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                >
+                  Giriş
+                </Link>
+                <Link
+                  href="/kayit"
+                  className="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm shadow-indigo-500/20 transition-all"
+                >
+                  Kayıt Ol
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Mobil Arama Çekmecesi */}
+        {mobileSearchOpen && (
+          <div
+            ref={mobileSearchContainerRef}
+            className="sm:hidden px-3 pb-3 pt-1.5 border-t border-slate-100 dark:border-slate-800/80 bg-white dark:bg-[#0b0f19] relative"
+          >
+            <form onSubmit={handleSearch} className="relative">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
-                ref={searchInputRef}
                 type="text"
+                autoFocus
                 autoComplete="off"
                 value={searchQuery}
                 onFocus={() => {
@@ -602,7 +779,7 @@ export function Navbar({
                 onChange={(e) => handleInputChange(e.target.value)}
                 onKeyDown={handleSearchKeyDown}
                 placeholder="Konu, etiket veya içerik ara..."
-                className="w-full pl-10 pr-9 py-2 rounded-xl text-sm bg-slate-100/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all"
+                className="w-full pl-10 pr-8 py-2 rounded-xl text-sm bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
               />
               {searchQuery && (
                 <button
@@ -613,186 +790,100 @@ export function Navbar({
                   <X className="w-4 h-4" />
                 </button>
               )}
-            </div>
-          </form>
+            </form>
+            {renderSuggestionsDropdown()}
+          </div>
+        )}
+      </header>
 
-          {/* Canlı Öneri Açılır Menüsü */}
-          {renderSuggestionsDropdown()}
-        </div>
-
-        {/* Sağ Aksiyonlar */}
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            type="button"
-            onClick={() => {
-              const next = !mobileSearchOpen;
-              setMobileSearchOpen(next);
-              if (next) {
-                setSuggestionsOpen(true);
-                ensureSearchIndex();
-              }
-            }}
-            title="Ara"
-            className="sm:hidden p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors"
-          >
-            <Search className="w-4 h-4" />
-          </button>
-
-          <Link
-            href="/haberler"
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20 transition-colors"
-          >
-            <Newspaper className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">Teknoloji Gündemi</span>
-          </Link>
-
-          <button
-            onClick={toggleTheme}
-            title={theme === 'dark' ? 'Aydınlık Moda Geç' : 'Karanlık Moda Geç'}
-            className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors"
-          >
-            {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
-          </button>
-
-          {user ? (
-            <>
-              <NotificationBell />
-
-              <Link
-                href="/yeni-konu"
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm shadow-indigo-500/20 transition-all"
-              >
-                <PlusCircle className="w-4 h-4" />
-                <span className="hidden md:inline">Yeni Konu</span>
-              </Link>
-
-              <div className="relative">
-                <button
-                  onClick={() => setMenuOpen(!menuOpen)}
-                  className="flex items-center gap-2 p-1 pr-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800/70 transition-colors cursor-pointer"
-                >
-                  <UserAvatar
-                    name={user.displayName}
-                    avatar={user.avatarColor}
-                    className="w-7 h-7 rounded-lg text-xs font-semibold"
-                  />
-                  <div className="hidden lg:flex flex-col items-start text-left">
-                    <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 leading-none">
-                      {user.displayName}
-                    </span>
-                    <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-medium flex items-center gap-0.5 mt-0.5">
-                      <Award className="w-2.5 h-2.5" /> {user.reputation}p
-                    </span>
-                  </div>
-                </button>
-
-                {menuOpen && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-10"
-                      onClick={() => setMenuOpen(false)}
-                    />
-                    <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl py-2 z-20">
-                      <div className="px-4 py-2.5 border-b border-slate-100 dark:border-slate-800">
-                        <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">
-                          {user.displayName}
-                        </p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                          @{user.username}
-                        </p>
-                      </div>
-                      <Link
-                        href={`/kullanici/${user.username}`}
-                        onClick={() => setMenuOpen(false)}
-                        className="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                      >
-                        <UserIcon className="w-4 h-4 text-slate-400" />
-                        Profilim & Rozetler
-                      </Link>
-                      {user.role === 'ADMIN' && (
-                        <Link
-                          href="/admin"
-                          onClick={() => setMenuOpen(false)}
-                          className="flex items-center gap-2.5 px-4 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-colors"
-                        >
-                          <Shield className="w-4 h-4" />
-                          Yönetim Paneli
-                        </Link>
-                      )}
-                      <Link
-                        href="/?filtre=kaydedilenler"
-                        onClick={() => setMenuOpen(false)}
-                        className="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                      >
-                        <Bookmark className="w-4 h-4 text-slate-400" />
-                        Kaydedilen Konular
-                      </Link>
-                      <button
-                        onClick={handleLogout}
-                        className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        Çıkış Yap
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            </>
-          ) : (
-            <div className="flex items-center gap-2">
-              <Link
-                href="/giris"
-                className="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              >
-                Giriş Yap
-              </Link>
-              <Link
-                href="/kayit"
-                className="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm shadow-indigo-500/20 transition-all"
-              >
-                Kayıt Ol
-              </Link>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Mobil Arama Çekmecesi */}
-      {mobileSearchOpen && (
-        <div
-          ref={mobileSearchContainerRef}
-          className="sm:hidden px-4 pb-3 pt-1 border-t border-slate-100 dark:border-slate-800/80 bg-white dark:bg-[#0b0f19] relative"
+      {/* Mobil Alt Navigasyon Çubuğu (Uygulama Deneyimi) */}
+      <nav
+        aria-label="Mobil Alt Menü"
+        className="sm:hidden fixed bottom-0 inset-x-0 z-40 h-15 bg-white/95 dark:bg-[#0b0f19]/95 backdrop-blur-lg border-t border-slate-200/90 dark:border-slate-800/90 px-2 flex items-center justify-around shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
+      >
+        <Link
+          href="/"
+          className={`flex flex-col items-center justify-center gap-0.5 py-1 px-2.5 rounded-xl text-[10px] font-semibold transition-colors ${
+            pathname === '/'
+              ? 'text-indigo-600 dark:text-indigo-400'
+              : 'text-slate-500 dark:text-slate-400'
+          }`}
         >
-          <form onSubmit={handleSearch} className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-            <input
-              type="text"
-              autoFocus
-              autoComplete="off"
-              value={searchQuery}
-              onFocus={() => {
-                setSuggestionsOpen(true);
-                ensureSearchIndex();
-              }}
-              onChange={(e) => handleInputChange(e.target.value)}
-              onKeyDown={handleSearchKeyDown}
-              placeholder="Konu, etiket veya içerik ara..."
-              className="w-full pl-10 pr-8 py-2 rounded-xl text-sm bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={clearSearch}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-              >
-                <X className="w-4 h-4" />
-              </button>
+          <Layers className="w-4 h-4" />
+          <span>Forum</span>
+        </Link>
+
+        <Link
+          href="/haberler"
+          className={`flex flex-col items-center justify-center gap-0.5 py-1 px-2.5 rounded-xl text-[10px] font-semibold transition-colors ${
+            pathname.startsWith('/haberler')
+              ? 'text-emerald-600 dark:text-emerald-400'
+              : 'text-slate-500 dark:text-slate-400'
+          }`}
+        >
+          <Newspaper className="w-4 h-4" />
+          <span>Gündem</span>
+        </Link>
+
+        <Link
+          href={user ? '/yeni-konu' : '/giris'}
+          className="flex flex-col items-center justify-center -mt-4"
+        >
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 text-white flex items-center justify-center shadow-lg shadow-indigo-500/30 border-2 border-white dark:border-[#0b0f19]">
+            <PlusCircle className="w-5 h-5" />
+          </div>
+          <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 mt-0.5">
+            Yeni Konu
+          </span>
+        </Link>
+
+        <Link
+          href="/kurallar"
+          className={`flex flex-col items-center justify-center gap-0.5 py-1 px-2.5 rounded-xl text-[10px] font-semibold transition-colors ${
+            pathname.startsWith('/kurallar') || pathname.startsWith('/gizlilik')
+              ? 'text-indigo-600 dark:text-indigo-400'
+              : 'text-slate-500 dark:text-slate-400'
+          }`}
+        >
+          <BookOpen className="w-4 h-4" />
+          <span>Kurallar</span>
+        </Link>
+
+        {user ? (
+          <Link
+            href={user.role === 'ADMIN' ? '/admin' : `/kullanici/${user.username}`}
+            className={`flex flex-col items-center justify-center gap-0.5 py-1 px-2.5 rounded-xl text-[10px] font-semibold transition-colors ${
+              pathname.startsWith('/kullanici') || pathname.startsWith('/admin')
+                ? 'text-indigo-600 dark:text-indigo-400'
+                : 'text-slate-500 dark:text-slate-400'
+            }`}
+          >
+            {user.role === 'ADMIN' ? (
+              <>
+                <Shield className="w-4 h-4" />
+                <span>Yönetim</span>
+              </>
+            ) : (
+              <>
+                <UserIcon className="w-4 h-4" />
+                <span>Profilim</span>
+              </>
             )}
-          </form>
-          {renderSuggestionsDropdown()}
-        </div>
-      )}
-    </header>
+          </Link>
+        ) : (
+          <Link
+            href="/giris"
+            className={`flex flex-col items-center justify-center gap-0.5 py-1 px-2.5 rounded-xl text-[10px] font-semibold transition-colors ${
+              pathname.startsWith('/giris')
+                ? 'text-indigo-600 dark:text-indigo-400'
+                : 'text-slate-500 dark:text-slate-400'
+            }`}
+          >
+            <UserIcon className="w-4 h-4" />
+            <span>Giriş</span>
+          </Link>
+        )}
+      </nav>
+    </>
   );
 }

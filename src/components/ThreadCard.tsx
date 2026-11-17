@@ -204,7 +204,20 @@ export function ThreadCard({
         </div>
 
         {/* Sağ: Profesyonel Forum Tablo Metrikleri (Yanıt, Görüntülenme, Son Aktivite) */}
-        <div className="flex items-center gap-4 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+          {/* Mobil Kompakt Yanıt Rozeti */}
+          <Link
+            href={`/konu/${thread.slug}#yorumlar`}
+            className={`sm:hidden inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold border ${
+              thread.isSolved
+                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
+                : 'bg-slate-50 dark:bg-slate-800/70 border-slate-200/70 dark:border-slate-700/70 text-slate-600 dark:text-slate-300'
+            }`}
+          >
+            <MessageSquare className="w-3 h-3" />
+            {thread.commentCount}
+          </Link>
+
           <div className="hidden sm:flex items-center gap-3 text-center">
             <div
               className={`min-w-[54px] px-2 py-1 rounded-xl border text-xs ${
@@ -354,41 +367,43 @@ export function ThreadCard({
             )}
           </div>
 
-          {/* Sağ Üst: Beğeni, Yanıt & Görüntülenme Metrikleri */}
+          {/* Sağ Üst: Masaüstü/Tablet için Beğeni, Yanıt & Görüntülenme Metrikleri */}
           <div className="flex items-center gap-2 text-xs">
-            <VoteButtons
-              threadId={thread.id}
-              initialScore={thread.score}
-              initialUserVote={thread.userVote}
-              compact={true}
-              isLoggedIn={isLoggedIn}
-            />
+            <div className="hidden sm:flex items-center gap-2">
+              <VoteButtons
+                threadId={thread.id}
+                initialScore={thread.score}
+                initialUserVote={thread.userVote}
+                compact={true}
+                isLoggedIn={isLoggedIn}
+              />
 
-            <Link
-              href={`/konu/${thread.slug}#yorumlar`}
-              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg font-semibold border transition-colors ${
-                thread.isSolved
-                  ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-700 dark:text-emerald-300'
-                  : thread.commentCount > 0
-                  ? 'bg-slate-50 dark:bg-slate-800/70 border-slate-200/70 dark:border-slate-700/70 text-slate-700 dark:text-slate-300 hover:text-indigo-500'
-                  : 'border-transparent text-slate-400 hover:text-indigo-500'
-              }`}
-              title="Yanıt Sayısı"
-            >
-              <MessageSquare className="w-3.5 h-3.5" />
-              {thread.commentCount} yanıt
-            </Link>
+              <Link
+                href={`/konu/${thread.slug}#yorumlar`}
+                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg font-semibold border transition-colors ${
+                  thread.isSolved
+                    ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-700 dark:text-emerald-300'
+                    : thread.commentCount > 0
+                    ? 'bg-slate-50 dark:bg-slate-800/70 border-slate-200/70 dark:border-slate-700/70 text-slate-700 dark:text-slate-300 hover:text-indigo-500'
+                    : 'border-transparent text-slate-400 hover:text-indigo-500'
+                }`}
+                title="Yanıt Sayısı"
+              >
+                <MessageSquare className="w-3.5 h-3.5" />
+                {thread.commentCount} yanıt
+              </Link>
 
-            <span
-              className="hidden sm:inline-flex items-center gap-1 text-slate-400 dark:text-slate-500 pl-1"
-              title="Görüntülenme"
-            >
-              <Eye className="w-3.5 h-3.5" />
-              {thread.views}
-            </span>
+              <span
+                className="inline-flex items-center gap-1 text-slate-400 dark:text-slate-500 pl-1"
+                title="Görüntülenme"
+              >
+                <Eye className="w-3.5 h-3.5" />
+                {thread.views}
+              </span>
+            </div>
 
             {canModerate && (
-              <div className="inline-flex items-center gap-1 pl-1.5 border-l border-slate-200 dark:border-slate-800">
+              <div className="inline-flex items-center gap-1 sm:pl-1.5 sm:border-l border-slate-200 dark:border-slate-800">
                 <Link
                   href={`/konu/${thread.slug}?duzenle=1`}
                   className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-colors"
@@ -482,6 +497,32 @@ export function ThreadCard({
                 </span>
               </span>
             )}
+          </div>
+
+          {/* Mobil Alt Etkileşim Çubuğu (Beğeni, Yanıt, Okunma) */}
+          <div className="flex sm:hidden items-center gap-1.5 text-xs ml-auto">
+            <VoteButtons
+              threadId={thread.id}
+              initialScore={thread.score}
+              initialUserVote={thread.userVote}
+              compact={true}
+              isLoggedIn={isLoggedIn}
+            />
+            <Link
+              href={`/konu/${thread.slug}#yorumlar`}
+              className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg font-semibold border text-[11px] ${
+                thread.isSolved
+                  ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-700 dark:text-emerald-300'
+                  : 'bg-slate-50 dark:bg-slate-800/70 border-slate-200/70 dark:border-slate-700/70 text-slate-600 dark:text-slate-300'
+              }`}
+            >
+              <MessageSquare className="w-3 h-3" />
+              {thread.commentCount}
+            </Link>
+            <span className="inline-flex items-center gap-0.5 text-[11px] text-slate-400 pl-0.5">
+              <Eye className="w-3 h-3" />
+              {thread.views}
+            </span>
           </div>
 
           {/* Etiketler */}

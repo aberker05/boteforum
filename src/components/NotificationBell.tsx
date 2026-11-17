@@ -120,7 +120,7 @@ export function NotificationBell() {
           if (!open) fetchNotifications();
         }}
         title="Bildirimler"
-        className="relative p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors"
+        className="relative p-2 sm:p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors cursor-pointer"
       >
         <Bell className="w-4 h-4" />
         {unreadCount > 0 && (
@@ -136,7 +136,7 @@ export function NotificationBell() {
             className="fixed inset-0 z-10"
             onClick={() => setOpen(false)}
           />
-          <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl z-20 overflow-hidden">
+          <div className="fixed left-3 right-3 top-15 sm:static sm:left-auto sm:right-0 sm:top-auto sm:absolute sm:mt-2 sm:w-96 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl z-20 overflow-hidden">
             {/* Üst Başlık */}
             <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/70 dark:bg-slate-900/80">
               <div className="flex items-center gap-2">

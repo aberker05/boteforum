@@ -230,12 +230,12 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
       </div>
 
       {/* Kategori Filtreleri ve Arama Çubuğu */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-white/95 dark:bg-slate-900/90 p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs backdrop-blur-md">
-        <div className="flex items-center gap-1.5 flex-wrap">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-white/95 dark:bg-slate-900/90 p-3 sm:p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs backdrop-blur-md">
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5 sm:flex-wrap">
           <button
             type="button"
             onClick={() => setSelectedCategory('')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               selectedCategory === ''
                 ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-500/30'
                 : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
@@ -252,7 +252,7 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
                 onClick={() =>
                   setSelectedCategory(active ? '' : cat.name)
                 }
-                className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                   active
                     ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-500/30'
                     : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'

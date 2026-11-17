@@ -301,8 +301,8 @@ export function HomeFeedClient({
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
       {/* SOL KENAR ÇUBUĞU: Forum Navigasyonu & Kategoriler */}
       <aside className="order-2 lg:order-1 lg:col-span-3 space-y-5 lg:sticky lg:top-22">
-        {/* Forum Görünümleri */}
-        <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900/90 p-3.5">
+        {/* Forum Görünümleri (Masaüstünde görünür, mobil/tablette üst şeritte yer alır) */}
+        <div className="hidden lg:block rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900/90 p-3.5">
           <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-2.5 mb-2">
             Forum Akışı
           </h3>
@@ -425,8 +425,8 @@ export function HomeFeedClient({
           </div>
         </div>
 
-        {/* Forum Kategorileri */}
-        <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900/90 p-4">
+        {/* Forum Kategorileri (Masaüstünde görünür, mobil/tablette üst şeritte yer alır) */}
+        <div className="hidden lg:block rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900/90 p-4">
           <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-2 mb-2.5">
             Forum Kategorileri
           </h3>
@@ -494,41 +494,102 @@ export function HomeFeedClient({
       </aside>
 
       {/* ORTA SÜTUN: Ana Forum Tartışma Akışı */}
-      <div className="order-1 lg:order-2 lg:col-span-6 space-y-4">
-        {/* Mobil Hızlı Kategori Şeridi */}
-        <div className="lg:hidden flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
-          <button
-            type="button"
-            onClick={() => selectCategory('')}
-            className={`shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors ${
-              !activeCategory
-                ? 'bg-indigo-600 border-indigo-600 text-white'
-                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300'
-            }`}
-          >
-            Tümü
-          </button>
-          {categories.map((cat) => {
-            const isActive = activeCategory === cat.slug;
-            return (
+      <div className="order-1 lg:order-2 lg:col-span-6 space-y-3.5 sm:space-y-4 min-w-0">
+        {/* Mobil & Tablet Hızlı Filtre ve Kategori Şeridi */}
+        <div className="lg:hidden space-y-2">
+          {/* Satır 1: Hızlı Durum Filtreleri */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 no-scrollbar">
+            <button
+              type="button"
+              onClick={() => selectFilter('')}
+              className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
+                !activeCategory && !filterBy && !activeTag && !searchQuery
+                  ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs'
+                  : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5" />
+              Tüm Konular ({threads.length})
+            </button>
+
+            <button
+              type="button"
+              onClick={() => selectFilter('cevapsiz')}
+              className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
+                filterBy === 'cevapsiz'
+                  ? 'bg-amber-600 border-amber-600 text-white shadow-xs'
+                  : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300'
+              }`}
+            >
+              <HelpCircle className="w-3.5 h-3.5 text-amber-500" />
+              Cevapsız ({unansweredCount})
+            </button>
+
+            <button
+              type="button"
+              onClick={() => selectFilter('cozuldu')}
+              className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
+                filterBy === 'cozuldu'
+                  ? 'bg-emerald-600 border-emerald-600 text-white shadow-xs'
+                  : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300'
+              }`}
+            >
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+              Çözülen ({solvedCount})
+            </button>
+
+            {isLoggedIn && (
               <button
-                key={cat.id}
                 type="button"
-                onClick={() => selectCategory(cat.slug)}
-                className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors ${
-                  isActive
-                    ? 'bg-indigo-600 border-indigo-600 text-white'
-                    : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300'
+                onClick={() => selectFilter('kaydedilenler')}
+                className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
+                  filterBy === 'kaydedilenler'
+                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs'
+                    : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300'
                 }`}
               >
-                <span
-                  className="w-2 h-2 rounded-full"
-                  style={{ backgroundColor: isActive ? '#ffffff' : cat.color }}
-                />
-                {cat.name}
+                <Bookmark className="w-3.5 h-3.5 text-indigo-500" />
+                Kaydedilenler
               </button>
-            );
-          })}
+            )}
+          </div>
+
+          {/* Satır 2: Yatay Kaydırılabilir Kategori Sekmeleri */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 no-scrollbar">
+            <button
+              type="button"
+              onClick={() => selectCategory('')}
+              className={`shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors cursor-pointer ${
+                !activeCategory
+                  ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white'
+                  : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300'
+              }`}
+            >
+              Tüm Kategoriler
+            </button>
+            {categories.map((cat) => {
+              const isActive = activeCategory === cat.slug;
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => selectCategory(cat.slug)}
+                  className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors cursor-pointer ${
+                    isActive
+                      ? 'bg-indigo-600 border-indigo-600 text-white'
+                      : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300'
+                  }`}
+                >
+                  <span
+                    className="w-2 h-2 rounded-full"
+                    style={{ backgroundColor: isActive ? '#ffffff' : cat.color }}
+                  />
+                  {cat.name}
+                  <span className="text-[10px] opacity-65">({cat._count.threads})</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Kategori Başlık Kartı veya Profesyonel Forum Üst Barı */}
@@ -872,7 +933,7 @@ export function HomeFeedClient({
       </div>
 
       {/* SAĞ KENAR ÇUBUĞU: Topluluk Nabzı, Teknoloji Radarı ve Liderlik Tablosu */}
-      <aside className="order-3 lg:col-span-3 space-y-5 lg:sticky lg:top-22">
+      <aside className="order-3 lg:col-span-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-4 sm:gap-5 lg:sticky lg:top-22">
         {/* Topluluk Nabzı */}
         <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900/90 p-4">
           <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-3 flex items-center gap-1.5">

@@ -62,12 +62,16 @@ export function BrandLogo({
   size?: 'sm' | 'md';
   showTagline?: boolean;
 }) {
-  const boxSize = size === 'sm' ? 'w-8 h-8 rounded-xl' : 'w-9 h-9 rounded-xl';
-  const iconSize = size === 'sm' ? 'w-4 h-4' : 'w-5 h-5';
-  const titleSize = size === 'sm' ? 'text-base' : 'text-lg';
+  const boxSize =
+    size === 'sm'
+      ? 'w-8 h-8 rounded-xl'
+      : 'w-8 h-8 sm:w-9 sm:h-9 rounded-xl';
+  const iconSize = size === 'sm' ? 'w-4 h-4' : 'w-4 h-4 sm:w-5 sm:h-5';
+  const titleSize =
+    size === 'sm' ? 'text-base' : 'text-base sm:text-lg';
 
   return (
-    <div className="flex items-center gap-2.5 shrink-0 group">
+    <div className="flex items-center gap-2 sm:gap-2.5 shrink-0 group">
       {settings.logoType === 'image' && settings.logoImageUrl ? (
         <div
           className={`${boxSize} overflow-hidden flex items-center justify-center bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 shadow-xs shrink-0 group-hover:scale-105 transition-transform`}
@@ -107,7 +111,7 @@ export function BrandLogo({
           )}
         </span>
         {showTagline && settings.siteTagline && (
-          <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500 tracking-wider uppercase mt-0.5">
+          <span className="hidden sm:block text-[10px] font-medium text-slate-400 dark:text-slate-500 tracking-wider uppercase mt-0.5 truncate max-w-[180px] lg:max-w-none">
             {settings.siteTagline}
           </span>
         )}

@@ -31,18 +31,18 @@ export default async function RootLayout({
 
   return (
     <html lang="tr" className="dark" suppressHydrationWarning>
-      <body className="min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+      <body className="min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white pb-16 sm:pb-0">
         <ThemeProvider>
-          <Suspense fallback={<div className="h-16 border-b border-slate-800" />}>
+          <Suspense fallback={<div className="h-14 sm:h-16 border-b border-slate-800" />}>
             <Navbar user={user} siteSettings={siteSettings} />
           </Suspense>
-          <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
             {children}
           </main>
-          <footer className="border-t border-slate-200/90 dark:border-slate-800/90 bg-white/80 dark:bg-slate-900/60 mt-16">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-8 pb-8 border-b border-slate-200/70 dark:border-slate-800/70">
-                <div className="md:col-span-5 space-y-3">
+          <footer className="border-t border-slate-200/90 dark:border-slate-800/90 bg-white/80 dark:bg-slate-900/60 mt-10 sm:mt-16">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+              <div className="grid grid-cols-2 md:grid-cols-12 gap-6 sm:gap-8 pb-8 border-b border-slate-200/70 dark:border-slate-800/70">
+                <div className="col-span-2 md:col-span-5 space-y-3">
                   <Link href="/" className="inline-flex items-center">
                     <BrandLogo
                       settings={siteSettings}

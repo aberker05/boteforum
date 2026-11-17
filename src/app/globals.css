@@ -17,10 +17,13 @@
     --text-secondary: #94a3b8;
   }
 
+  html,
   body {
     background-color: var(--bg-primary);
     color: var(--text-primary);
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
   }
 }
 
@@ -123,10 +126,12 @@
 }
 
 .markdown-body table {
+  display: block;
   width: 100%;
+  overflow-x: auto;
   border-collapse: collapse;
   margin: 1rem 0;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
 }
 
 .markdown-body th,
@@ -162,4 +167,14 @@
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(99, 102, 241, 0.6);
+}
+
+/* Mobil Yatay Kaydırma Çubuklarında Scrollbar Gizleme */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

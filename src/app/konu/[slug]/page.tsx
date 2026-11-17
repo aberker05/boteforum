@@ -479,7 +479,7 @@ export default async function ThreadDetailPage({ params }: ThreadDetailProps) {
         </div>
 
         {/* SAĞ SÜTUN: Profesyonel Forum Bilgi Paneli (Sticky Sidebar) */}
-        <aside className="lg:col-span-4 xl:col-span-3 space-y-5 lg:sticky lg:top-22">
+        <aside className="lg:col-span-4 xl:col-span-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-4 sm:gap-5 lg:sticky lg:top-22">
           {/* Konu Özeti & Metrikler */}
           <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900/90 p-4 space-y-4">
             <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
