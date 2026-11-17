@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { randomInt } from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
+import { getSiteSettings } from '@/lib/siteSettings';
+import { isEmailConfigured, sendPasswordResetEmail } from '@/lib/email';
 import {
   checkLoginRateLimit,
   recordFailedLogin,
@@ -77,13 +79,13 @@ export async function POST(request: Request) {
 
     // KRİTİK YÖNETİCİ GÜVENLİĞİ: Gerçek SMTP e-posta doğrulaması olmadan ADMIN veya MODERATOR şifresi sıfırlanamaz!
     const isPrivileged = user.role === 'ADMIN' || user.role === 'MODERATOR';
-    const isSmtpConfigured = Boolean(process.env.SMTP_HOST);
+    const emailReady = isEmailConfigured();
 
-    if (isPrivileged && !isSmtpConfigured) {
+    if (isPrivileged && !emailReady) {
       return NextResponse.json(
         {
           error:
-            'Güvenlik politikası gereği Yönetici (ADMIN) ve Moderatör hesaplarının şifresi doğrulanmış e-posta sunucusu (SMTP) olmadan sıfırlanamaz. Lütfen şifrenizi giriş yaptıktan sonra Profil Ayarları menüsünden güncelleyin.',
+            'Güvenlik politikası gereği Yönetici (ADMIN) ve Moderatör hesaplarının şifresi doğrulanmış e-posta sunucusu (SMTP_USER & SMTP_PASS) tanımlanmadan sıfırlanamaz.',
         },
         { status: 403 }
       );
@@ -106,14 +108,39 @@ export async function POST(request: Request) {
       VALUES (${id}, ${user.id}, ${user.email}, ${code}, ${expiresAt}, ${nowIso})
     `;
 
-    const isDevDemoMode =
-      process.env.NODE_ENV !== 'production' && !isSmtpConfigured && !isPrivileged;
+    if (emailReady) {
+      const settings = await getSiteSettings();
+      const siteName = `${settings.siteNamePrimary}${settings.siteNameAccent}`;
+      const mailResult = await sendPasswordResetEmail({
+        to: user.email,
+        displayName: user.displayName,
+        username: user.username,
+        code,
+        siteName,
+      });
+
+      if (!mailResult.sent) {
+        return NextResponse.json(
+          {
+            error:
+              'Doğrulama e-postası gönderilirken bir hata oluştu. Lütfen SMTP ayarlarınızı (Uygulama Şifresi) kontrol edin.',
+          },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json({
+        success: true,
+        deliveryMethod: 'email',
+        message: '6 haneli doğrulama kodu e-posta adresinize gönderildi.',
+      });
+    }
 
     return NextResponse.json({
       success: true,
+      deliveryMethod: 'screen',
       message: 'Doğrulama kodu oluşturuldu.',
-      // Yalnızca yerel geliştirme ortamında ve standart üyeler için döner; canlıda (production) asla dönmez
-      resetCode: isDevDemoMode ? code : undefined,
+      resetCode: !isPrivileged ? code : undefined,
     });
   } catch (error) {
     console.error('Forgot password POST error:', error);

@@ -199,7 +199,7 @@ export default function ForgotPasswordPage() {
 
         {step === 'verify' && (
           <form onSubmit={handleResetPassword} className="space-y-4">
-            {generatedCode && (
+            {generatedCode ? (
               <div className="p-3.5 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800/70 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
@@ -229,6 +229,10 @@ export default function ForgotPasswordPage() {
                 <p className="text-[11px] text-slate-500 dark:text-slate-400">
                   Kod 15 dakika boyunca geçerlidir.
                 </p>
+              </div>
+            ) : (
+              <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-700 dark:text-emerald-300 leading-relaxed">
+                📧 6 haneli doğrulama kodunuz <strong>{email}</strong> adresine e-posta olarak gönderildi. Lütfen gelen kutunuzu (ve gerekirse Spam/Gereksiz klasörünü) kontrol edin.
               </div>
             )}
 
