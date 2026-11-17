@@ -4,8 +4,8 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react'],
     staleTimes: {
-      dynamic: 30,
-      static: 180,
+      dynamic: 180,
+      static: 300,
     },
   },
   async headers() {

@@ -46,11 +46,17 @@ export async function ensureReportTable() {
 }
 
 export async function getAllReports(): Promise<ContentReportItem[]> {
-  await ensureReportTable();
-
-  const rows = await prisma.$queryRaw<ContentReportItem[]>`
-    SELECT * FROM "ContentReport" ORDER BY CASE WHEN "status" = 'PENDING' THEN 0 ELSE 1 END, "createdAt" DESC
-  `;
+  let rows: ContentReportItem[];
+  try {
+    rows = await prisma.$queryRaw<ContentReportItem[]>`
+      SELECT * FROM "ContentReport" ORDER BY CASE WHEN "status" = 'PENDING' THEN 0 ELSE 1 END, "createdAt" DESC
+    `;
+  } catch {
+    await ensureReportTable();
+    rows = await prisma.$queryRaw<ContentReportItem[]>`
+      SELECT * FROM "ContentReport" ORDER BY CASE WHEN "status" = 'PENDING' THEN 0 ELSE 1 END, "createdAt" DESC
+    `;
+  }
 
   if (rows.length === 0) return [];
 

@@ -262,7 +262,7 @@ const globalForTechNews = globalThis as unknown as {
   techNewsListCache?: { data: TechNewsItem[]; expiresAt: number };
 };
 
-const TECH_NEWS_TTL_MS = 30_000;
+const TECH_NEWS_TTL_MS = 120_000;
 
 export function invalidateTechNewsCache() {
   globalForTechNews.techNewsListCache = undefined;
@@ -354,8 +354,6 @@ export async function ensureTechNewsTable() {
 }
 
 export async function getAllTechNews(category?: string, search?: string): Promise<TechNewsItem[]> {
-  await ensureTechNewsTable();
-
   const now = Date.now();
   let allWithCounts: TechNewsItem[];
 
@@ -365,14 +363,35 @@ export async function getAllTechNews(category?: string, search?: string): Promis
   ) {
     allWithCounts = globalForTechNews.techNewsListCache.data;
   } else {
-    const [items, commentCounts] = await Promise.all([
-      prisma.$queryRaw<TechNewsItem[]>`
-        SELECT * FROM "TechNews" ORDER BY "isFeatured" DESC, "createdAt" DESC
-      `,
-      prisma.$queryRaw<{ newsId: string; count: bigint | number }[]>`
-        SELECT "newsId", COUNT(*) as count FROM "TechNewsComment" GROUP BY "newsId"
-      `,
-    ]);
+    let items: TechNewsItem[];
+    let commentCounts: { newsId: string; count: bigint | number }[];
+
+    try {
+      [items, commentCounts] = await Promise.all([
+        prisma.$queryRaw<TechNewsItem[]>`
+          SELECT * FROM "TechNews" ORDER BY "isFeatured" DESC, "createdAt" DESC
+        `,
+        prisma.$queryRaw<{ newsId: string; count: bigint | number }[]>`
+          SELECT "newsId", COUNT(*) as count FROM "TechNewsComment" GROUP BY "newsId"
+        `,
+      ]);
+      if (items.length === 0 && !globalForTechNews.techNewsInitialized) {
+        await ensureTechNewsTable();
+        items = await prisma.$queryRaw<TechNewsItem[]>`
+          SELECT * FROM "TechNews" ORDER BY "isFeatured" DESC, "createdAt" DESC
+        `;
+      }
+    } catch {
+      await ensureTechNewsTable();
+      [items, commentCounts] = await Promise.all([
+        prisma.$queryRaw<TechNewsItem[]>`
+          SELECT * FROM "TechNews" ORDER BY "isFeatured" DESC, "createdAt" DESC
+        `,
+        prisma.$queryRaw<{ newsId: string; count: bigint | number }[]>`
+          SELECT "newsId", COUNT(*) as count FROM "TechNewsComment" GROUP BY "newsId"
+        `,
+      ]);
+    }
 
     const countMap: Record<string, number> = {};
     commentCounts.forEach((row) => {
@@ -408,15 +427,40 @@ export async function getAllTechNews(category?: string, search?: string): Promis
 export const getTechNewsBySlug = cache(async function getTechNewsBySlugImpl(
   slug: string
 ): Promise<TechNewsItem | null> {
-  await ensureTechNewsTable();
+  // Önbellekte varsa doğrudan 0ms'de kullan
+  const now = Date.now();
+  if (
+    globalForTechNews.techNewsListCache &&
+    globalForTechNews.techNewsListCache.expiresAt > now
+  ) {
+    const cached = globalForTechNews.techNewsListCache.data.find(
+      (n) => n.slug === slug
+    );
+    if (cached) {
+      prisma.$executeRaw`
+        UPDATE "TechNews" SET "views" = "views" + 1 WHERE "id" = ${cached.id}
+      `.catch(() => {});
+      return {
+        ...cached,
+        views: Number(cached.views) + 1,
+      };
+    }
+  }
 
-  const items = await prisma.$queryRaw<TechNewsItem[]>`
-    SELECT * FROM "TechNews" WHERE "slug" = ${slug} LIMIT 1
-  `;
+  let items: TechNewsItem[];
+  try {
+    items = await prisma.$queryRaw<TechNewsItem[]>`
+      SELECT * FROM "TechNews" WHERE "slug" = ${slug} LIMIT 1
+    `;
+  } catch {
+    await ensureTechNewsTable();
+    items = await prisma.$queryRaw<TechNewsItem[]>`
+      SELECT * FROM "TechNews" WHERE "slug" = ${slug} LIMIT 1
+    `;
+  }
 
   if (!items[0]) return null;
 
-  // Sayfa geçişini bekletmemek için okunma sayısını arka planda artır
   prisma.$executeRaw`
     UPDATE "TechNews" SET "views" = "views" + 1 WHERE "id" = ${items[0].id}
   `.catch(() => {});
@@ -577,20 +621,25 @@ export async function deleteTechNews(id: string): Promise<void> {
 }
 
 export async function getTechNewsComments(newsId: string): Promise<TechNewsCommentItem[]> {
-  await ensureTechNewsTable();
+  let rows: {
+    id: string;
+    newsId: string;
+    authorId: string;
+    content: string;
+    parentId: string | null;
+    createdAt: string;
+  }[];
 
-  const rows = await prisma.$queryRaw<
-    {
-      id: string;
-      newsId: string;
-      authorId: string;
-      content: string;
-      parentId: string | null;
-      createdAt: string;
-    }[]
-  >`
-    SELECT * FROM "TechNewsComment" WHERE "newsId" = ${newsId} ORDER BY "createdAt" ASC
-  `;
+  try {
+    rows = await prisma.$queryRaw`
+      SELECT * FROM "TechNewsComment" WHERE "newsId" = ${newsId} ORDER BY "createdAt" ASC
+    `;
+  } catch {
+    await ensureTechNewsTable();
+    rows = await prisma.$queryRaw`
+      SELECT * FROM "TechNewsComment" WHERE "newsId" = ${newsId} ORDER BY "createdAt" ASC
+    `;
+  }
 
   if (rows.length === 0) return [];
 
@@ -688,23 +737,28 @@ export interface AdminTechNewsCommentItem extends TechNewsCommentItem {
 export async function getAllTechNewsCommentsForAdmin(): Promise<
   AdminTechNewsCommentItem[]
 > {
-  await ensureTechNewsTable();
+  let rows: {
+    id: string;
+    newsId: string;
+    authorId: string;
+    content: string;
+    parentId: string | null;
+    createdAt: string;
+  }[];
+  let newsRows: { id: string; title: string; slug: string }[];
 
-  const [rows, newsRows] = await Promise.all([
-    prisma.$queryRaw<
-      {
-        id: string;
-        newsId: string;
-        authorId: string;
-        content: string;
-        parentId: string | null;
-        createdAt: string;
-      }[]
-    >`SELECT * FROM "TechNewsComment" ORDER BY "createdAt" DESC`,
-    prisma.$queryRaw<{ id: string; title: string; slug: string }[]>`
-      SELECT "id", "title", "slug" FROM "TechNews"
-    `,
-  ]);
+  try {
+    [rows, newsRows] = await Promise.all([
+      prisma.$queryRaw<typeof rows>`SELECT * FROM "TechNewsComment" ORDER BY "createdAt" DESC`,
+      prisma.$queryRaw<typeof newsRows>`SELECT "id", "title", "slug" FROM "TechNews"`,
+    ]);
+  } catch {
+    await ensureTechNewsTable();
+    [rows, newsRows] = await Promise.all([
+      prisma.$queryRaw<typeof rows>`SELECT * FROM "TechNewsComment" ORDER BY "createdAt" DESC`,
+      prisma.$queryRaw<typeof newsRows>`SELECT "id", "title", "slug" FROM "TechNews"`,
+    ]);
+  }
 
   if (rows.length === 0) return [];
 

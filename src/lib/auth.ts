@@ -122,6 +122,37 @@ export async function verifyToken(token: string): Promise<SessionPayload | null>
   }
 }
 
+const globalForAuthCache = globalThis as unknown as {
+  userSessionCache?: Map<
+    string,
+    {
+      data: {
+        id: string;
+        username: string;
+        email: string;
+        displayName: string;
+        bio: string | null;
+        avatarColor: string;
+        role: string;
+        reputation: number;
+        createdAt: Date;
+      } | null;
+      expiresAt: number;
+    }
+  >;
+};
+
+const USER_SESSION_TTL_MS = 15_000;
+
+export function invalidateUserCache(userId?: string) {
+  if (!globalForAuthCache.userSessionCache) return;
+  if (userId) {
+    globalForAuthCache.userSessionCache.delete(userId);
+  } else {
+    globalForAuthCache.userSessionCache.clear();
+  }
+}
+
 export const getCurrentUser = cache(async function getCurrentUserImpl() {
   try {
     const cookieStore = await cookies();
@@ -130,6 +161,16 @@ export const getCurrentUser = cache(async function getCurrentUserImpl() {
 
     const payload = await verifyToken(token);
     if (!payload?.userId) return null;
+
+    if (!globalForAuthCache.userSessionCache) {
+      globalForAuthCache.userSessionCache = new Map();
+    }
+
+    const now = Date.now();
+    const cached = globalForAuthCache.userSessionCache.get(payload.userId);
+    if (cached && cached.expiresAt > now) {
+      return cached.data;
+    }
 
     const user = await prisma.user.findUnique({
       where: { id: payload.userId },
@@ -147,8 +188,17 @@ export const getCurrentUser = cache(async function getCurrentUserImpl() {
     });
 
     if (!user || user.role === 'BANNED') {
+      globalForAuthCache.userSessionCache.set(payload.userId, {
+        data: null,
+        expiresAt: now + USER_SESSION_TTL_MS,
+      });
       return null;
     }
+
+    globalForAuthCache.userSessionCache.set(payload.userId, {
+      data: user,
+      expiresAt: now + USER_SESSION_TTL_MS,
+    });
 
     return user;
   } catch {

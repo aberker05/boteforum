@@ -6,6 +6,7 @@ import './globals.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { Navbar } from '@/components/Navbar';
 import { BrandLogo } from '@/components/BrandLogo';
+import { NavigationProgress } from '@/components/NavigationProgress';
 import { getCurrentUser } from '@/lib/auth';
 import { getSiteSettings, getFooterCategories } from '@/lib/siteSettings';
 
@@ -33,6 +34,9 @@ export default async function RootLayout({
     <html lang="tr" className="dark" suppressHydrationWarning>
       <body className="min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white pb-16 sm:pb-0">
         <ThemeProvider>
+          <Suspense fallback={null}>
+            <NavigationProgress />
+          </Suspense>
           <Suspense fallback={<div className="h-14 sm:h-16 border-b border-slate-800" />}>
             <Navbar user={user} siteSettings={siteSettings} />
           </Suspense>

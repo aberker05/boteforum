@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
-import { getCurrentUser } from '@/lib/auth';
+import { getCurrentUser, invalidateUserCache } from '@/lib/auth';
 import { checkContentModeration } from '@/lib/moderation';
 import { validateContentLength, verifyRequestOrigin } from '@/lib/security';
 import { isSafeLogoUrl } from '@/lib/siteSettings';
@@ -146,6 +146,7 @@ export async function PATCH(request: Request) {
       },
     });
 
+    invalidateUserCache(user.id);
     return NextResponse.json({ user: updated });
   } catch (error) {
     console.error('Profile update error:', error);

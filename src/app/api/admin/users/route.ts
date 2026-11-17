@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
-import { getCurrentUser } from '@/lib/auth';
+import { getCurrentUser, invalidateUserCache } from '@/lib/auth';
 import { verifyRequestOrigin } from '@/lib/security';
 
 const VALID_ROLES = ['MEMBER', 'MODERATOR', 'ADMIN', 'BANNED'];
@@ -152,6 +152,7 @@ export async function PATCH(request: Request) {
       },
     });
 
+    invalidateUserCache(userId);
     return NextResponse.json({ user: updated });
   } catch (error) {
     console.error('Admin update user error:', error);
@@ -184,6 +185,7 @@ export async function DELETE(request: Request) {
     }
 
     await prisma.user.delete({ where: { id: userId } });
+    invalidateUserCache(userId);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Admin delete user error:', error);

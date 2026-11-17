@@ -71,30 +71,40 @@ export async function getUserNotifications(
   userId: string,
   limit = 25
 ): Promise<{ notifications: NotificationItem[]; unreadCount: number }> {
-  await ensureNotificationTable();
+  let rows: Array<{
+    id: string;
+    userId: string;
+    type: NotificationType;
+    actorUsername: string;
+    actorDisplayName: string;
+    actorAvatarColor: string;
+    message: string;
+    link: string;
+    isRead: number | boolean;
+    createdAt: string;
+  }>;
+  let unreadRows: Array<{ count: number | bigint }>;
 
-  const rows = await prisma.$queryRaw<
-    Array<{
-      id: string;
-      userId: string;
-      type: NotificationType;
-      actorUsername: string;
-      actorDisplayName: string;
-      actorAvatarColor: string;
-      message: string;
-      link: string;
-      isRead: number | boolean;
-      createdAt: string;
-    }>
-  >`
-    SELECT * FROM "Notification" WHERE "userId" = ${userId} ORDER BY "createdAt" DESC LIMIT ${limit}
-  `;
-
-  const unreadRows = await prisma.$queryRaw<
-    Array<{ count: number | bigint }>
-  >`
-    SELECT COUNT(*) as count FROM "Notification" WHERE "userId" = ${userId} AND "isRead" = 0
-  `;
+  try {
+    [rows, unreadRows] = await Promise.all([
+      prisma.$queryRaw<typeof rows>`
+        SELECT * FROM "Notification" WHERE "userId" = ${userId} ORDER BY "createdAt" DESC LIMIT ${limit}
+      `,
+      prisma.$queryRaw<typeof unreadRows>`
+        SELECT COUNT(*) as count FROM "Notification" WHERE "userId" = ${userId} AND "isRead" = 0
+      `,
+    ]);
+  } catch {
+    await ensureNotificationTable();
+    [rows, unreadRows] = await Promise.all([
+      prisma.$queryRaw<typeof rows>`
+        SELECT * FROM "Notification" WHERE "userId" = ${userId} ORDER BY "createdAt" DESC LIMIT ${limit}
+      `,
+      prisma.$queryRaw<typeof unreadRows>`
+        SELECT COUNT(*) as count FROM "Notification" WHERE "userId" = ${userId} AND "isRead" = 0
+      `,
+    ]);
+  }
 
   const unreadCount = unreadRows[0] ? Number(unreadRows[0].count) : 0;
 

@@ -97,11 +97,17 @@ export async function getPollByThreadId(
   threadId: string,
   currentUserId?: string
 ): Promise<ThreadPollView | null> {
-  await ensurePollTables();
-
-  const polls = await prisma.$queryRaw<
-    Array<{ id: string; threadId: string; question: string }>
-  >`SELECT "id", "threadId", "question" FROM "ThreadPoll" WHERE "threadId" = ${threadId} LIMIT 1`;
+  let polls: Array<{ id: string; threadId: string; question: string }>;
+  try {
+    polls = await prisma.$queryRaw<
+      Array<{ id: string; threadId: string; question: string }>
+    >`SELECT "id", "threadId", "question" FROM "ThreadPoll" WHERE "threadId" = ${threadId} LIMIT 1`;
+  } catch {
+    await ensurePollTables();
+    polls = await prisma.$queryRaw<
+      Array<{ id: string; threadId: string; question: string }>
+    >`SELECT "id", "threadId", "question" FROM "ThreadPoll" WHERE "threadId" = ${threadId} LIMIT 1`;
+  }
 
   if (polls.length === 0) return null;
   const poll = polls[0];
@@ -115,13 +121,14 @@ export async function getPollDetailsById(
   question: string,
   currentUserId?: string
 ): Promise<ThreadPollView> {
-  const options = await prisma.$queryRaw<
-    Array<{ id: string; text: string; orderIndex: number }>
-  >`SELECT "id", "text", "orderIndex" FROM "ThreadPollOption" WHERE "pollId" = ${pollId} ORDER BY "orderIndex" ASC`;
-
-  const votes = await prisma.$queryRaw<
-    Array<{ optionId: string; userId: string }>
-  >`SELECT "optionId", "userId" FROM "ThreadPollVote" WHERE "pollId" = ${pollId}`;
+  const [options, votes] = await Promise.all([
+    prisma.$queryRaw<
+      Array<{ id: string; text: string; orderIndex: number }>
+    >`SELECT "id", "text", "orderIndex" FROM "ThreadPollOption" WHERE "pollId" = ${pollId} ORDER BY "orderIndex" ASC`,
+    prisma.$queryRaw<
+      Array<{ optionId: string; userId: string }>
+    >`SELECT "optionId", "userId" FROM "ThreadPollVote" WHERE "pollId" = ${pollId}`,
+  ]);
 
   const totalVotes = votes.length;
   const userVotedOptionId = currentUserId

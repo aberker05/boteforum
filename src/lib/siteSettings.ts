@@ -42,8 +42,8 @@ const globalForSiteSettings = globalThis as unknown as {
   };
 };
 
-const SITE_SETTINGS_TTL_MS = 60_000;
-const FOOTER_CATEGORIES_TTL_MS = 60_000;
+const SITE_SETTINGS_TTL_MS = 300_000;
+const FOOTER_CATEGORIES_TTL_MS = 300_000;
 
 export function invalidateCategoryCache() {
   globalForSiteSettings.footerCategoriesCache = undefined;
@@ -124,7 +124,7 @@ export async function ensureSiteSettingsTable() {
   globalForSiteSettings.siteSettingsTableReady = true;
 }
 
-export async function getSiteSettings(): Promise<SiteSettings> {
+export const getSiteSettings = async function getSiteSettingsImpl(): Promise<SiteSettings> {
   const now = Date.now();
   if (
     globalForSiteSettings.siteSettingsCache &&
@@ -134,22 +134,25 @@ export async function getSiteSettings(): Promise<SiteSettings> {
   }
 
   try {
-    await ensureSiteSettingsTable();
+    let rows: Array<{
+      siteNamePrimary: string;
+      siteNameAccent: string;
+      siteTagline: string;
+      logoType: string;
+      logoIcon: string;
+      logoText: string;
+      logoImageUrl: string;
+      brandColor: string;
+      footerDescription: string;
+      copyrightText: string;
+    }>;
 
-    const rows = await prisma.$queryRaw<
-      Array<{
-        siteNamePrimary: string;
-        siteNameAccent: string;
-        siteTagline: string;
-        logoType: string;
-        logoIcon: string;
-        logoText: string;
-        logoImageUrl: string;
-        brandColor: string;
-        footerDescription: string;
-        copyrightText: string;
-      }>
-    >`SELECT * FROM "SiteSettings" WHERE "id" = 'default' LIMIT 1`;
+    try {
+      rows = await prisma.$queryRaw`SELECT * FROM "SiteSettings" WHERE "id" = 'default' LIMIT 1`;
+    } catch {
+      await ensureSiteSettingsTable();
+      rows = await prisma.$queryRaw`SELECT * FROM "SiteSettings" WHERE "id" = 'default' LIMIT 1`;
+    }
 
     if (!rows[0]) {
       globalForSiteSettings.siteSettingsCache = {
