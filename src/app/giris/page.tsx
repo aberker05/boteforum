@@ -151,14 +151,6 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div className="my-5 flex items-center gap-3">
-          <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800" />
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-            veya
-          </span>
-          <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800" />
-        </div>
-
         <GoogleSignInButton label="Google ile Giriş Yap" />
 
         <div className="mt-5 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed text-center">

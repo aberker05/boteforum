@@ -167,6 +167,32 @@ export function validateContentLength(
   return { valid: true };
 }
 
+// Güçlü Parola Politikası: En az 8 karakter, en az 1 harf ve en az 1 rakam
+export function validatePasswordStrength(password: string): {
+  valid: boolean;
+  error?: string;
+} {
+  if (!password || password.length < 8) {
+    return {
+      valid: false,
+      error: 'Güvenliğiniz için şifreniz en az 8 karakter uzunluğunda olmalıdır.',
+    };
+  }
+  if (password.length > 128) {
+    return {
+      valid: false,
+      error: 'Şifre en fazla 128 karakter olabilir.',
+    };
+  }
+  if (!/[a-zA-ZğüşöçıİĞÜŞÖÇ]/.test(password) || !/[0-9]/.test(password)) {
+    return {
+      valid: false,
+      error: 'Şifreniz en az bir harf ve en az bir rakam içermelidir.',
+    };
+  }
+  return { valid: true };
+}
+
 const SAFE_DATA_IMAGE_GLOBAL_REGEX =
   /data:image\/(?:png|jpeg|jpg|webp|gif);base64,[a-zA-Z0-9+/=]+/gi;
 

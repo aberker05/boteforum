@@ -62,8 +62,13 @@ export default function ForgotPasswordPage() {
       return;
     }
 
-    if (newPassword.length < 6) {
-      setError('Yeni şifre en az 6 karakter olmalıdır.');
+    if (newPassword.length < 8) {
+      setError('Güvenliğiniz için yeni şifreniz en az 8 karakter olmalıdır.');
+      return;
+    }
+
+    if (!/[a-zA-ZğüşöçıİĞÜŞÖÇ]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+      setError('Yeni şifreniz en az bir harf ve en az bir rakam içermelidir.');
       return;
     }
 
@@ -253,15 +258,15 @@ export default function ForgotPasswordPage() {
 
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                Yeni Şifre (En az 6 karakter)
+                Yeni Şifre (En az 8 karakter, harf ve rakam)
               </label>
               <input
                 type="password"
                 required
-                minLength={6}
+                minLength={8}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="••••••"
+                placeholder="••••••••"
                 className="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
               />
             </div>

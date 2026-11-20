@@ -3,7 +3,11 @@ import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser, invalidateUserCache } from '@/lib/auth';
 import { checkContentModeration } from '@/lib/moderation';
-import { validateContentLength, verifyRequestOrigin } from '@/lib/security';
+import {
+  validateContentLength,
+  validatePasswordStrength,
+  verifyRequestOrigin,
+} from '@/lib/security';
 import { isSafeLogoUrl } from '@/lib/siteSettings';
 
 function isValidAvatarPayload(raw: string): boolean {
@@ -94,9 +98,10 @@ export async function PATCH(request: Request) {
         );
       }
 
-      if (newPassword.length < 6) {
+      const pwCheck = validatePasswordStrength(String(newPassword));
+      if (!pwCheck.valid) {
         return NextResponse.json(
-          { error: 'Yeni şifre en az 6 karakter olmalıdır.' },
+          { error: pwCheck.error },
           { status: 400 }
         );
       }

@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
-import { randomInt } from 'node:crypto';
+import { randomInt, createHash } from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
+import { invalidateUserCache } from '@/lib/auth';
 import { getSiteSettings } from '@/lib/siteSettings';
 import { isEmailConfigured, sendPasswordResetEmail } from '@/lib/email';
 import {
@@ -10,8 +11,13 @@ import {
   clearLoginAttempts,
   checkRateLimit,
   getClientIp,
+  validatePasswordStrength,
   verifyRequestOrigin,
 } from '@/lib/security';
+
+function hashResetCode(code: string): string {
+  return createHash('sha256').update(code.trim()).digest('hex');
+}
 
 async function ensurePasswordResetTable() {
   await prisma.$executeRaw`
@@ -26,7 +32,7 @@ async function ensurePasswordResetTable() {
   `;
 }
 
-// 1. Adım: Kullanıcı adı + E-posta doğrulaması ve 6 haneli sıfırlama kodu üretimi
+// 1. Adım: Kullanıcı adı + E-posta doğrulaması ve 6 haneli sıfırlama kodunun gerçek e-postaya gönderimi
 export async function POST(request: Request) {
   try {
     if (!verifyRequestOrigin(request)) {
@@ -41,6 +47,16 @@ export async function POST(request: Request) {
           error: `Çok fazla sıfırlama talebi gönderdiniz. Lütfen ${rate.retryAfterSeconds} saniye sonra tekrar deneyin.`,
         },
         { status: 429 }
+      );
+    }
+
+    if (!isEmailConfigured()) {
+      return NextResponse.json(
+        {
+          error:
+            'Güvenlik politikası gereği şifre sıfırlama kodları yalnızca doğrulanmış e-posta adresine gönderilir. E-posta sunucusu (SMTP_USER & SMTP_PASS) henüz yapılandırılmamıştır.',
+        },
+        { status: 503 }
       );
     }
 
@@ -77,27 +93,13 @@ export async function POST(request: Request) {
       );
     }
 
-    // KRİTİK YÖNETİCİ GÜVENLİĞİ: Gerçek SMTP e-posta doğrulaması olmadan ADMIN veya MODERATOR şifresi sıfırlanamaz!
-    const isPrivileged = user.role === 'ADMIN' || user.role === 'MODERATOR';
-    const emailReady = isEmailConfigured();
-
-    if (isPrivileged && !emailReady) {
-      return NextResponse.json(
-        {
-          error:
-            'Güvenlik politikası gereği Yönetici (ADMIN) ve Moderatör hesaplarının şifresi doğrulanmış e-posta sunucusu (SMTP_USER & SMTP_PASS) tanımlanmadan sıfırlanamaz.',
-        },
-        { status: 403 }
-      );
-    }
-
-    // Kriptografik olarak güvenli 6 haneli doğrulama kodu üret
-    const code = String(randomInt(100000, 1000000));
+    // Kriptografik olarak güvenli 6 haneli doğrulama kodu üret ve SHA-256 ile özetleyerek kaydet
+    const rawCode = String(randomInt(100000, 1000000));
+    const hashedCode = hashResetCode(rawCode);
     const id = `rst_${Date.now()}_${randomInt(1000, 9999)}`;
     const now = new Date();
     const expiresAt = new Date(now.getTime() + 15 * 60 * 1000).toISOString(); // 15 dakika geçerli
 
-    // Bu kullanıcının eski kodlarını temizle
     await prisma.$executeRaw`
       DELETE FROM "PasswordReset" WHERE "userId" = ${user.id}
     `;
@@ -105,42 +107,37 @@ export async function POST(request: Request) {
     const nowIso = now.toISOString();
     await prisma.$executeRaw`
       INSERT INTO "PasswordReset" ("id", "userId", "email", "code", "expiresAt", "createdAt")
-      VALUES (${id}, ${user.id}, ${user.email}, ${code}, ${expiresAt}, ${nowIso})
+      VALUES (${id}, ${user.id}, ${user.email}, ${hashedCode}, ${expiresAt}, ${nowIso})
     `;
 
-    if (emailReady) {
-      const settings = await getSiteSettings();
-      const siteName = `${settings.siteNamePrimary}${settings.siteNameAccent}`;
-      const mailResult = await sendPasswordResetEmail({
-        to: user.email,
-        displayName: user.displayName,
-        username: user.username,
-        code,
-        siteName,
-      });
+    const settings = await getSiteSettings();
+    const siteName = `${settings.siteNamePrimary}${settings.siteNameAccent}`;
+    const mailResult = await sendPasswordResetEmail({
+      to: user.email,
+      displayName: user.displayName,
+      username: user.username,
+      code: rawCode,
+      siteName,
+    });
 
-      if (!mailResult.sent) {
-        return NextResponse.json(
-          {
-            error:
-              'Doğrulama e-postası gönderilirken bir hata oluştu. Lütfen SMTP ayarlarınızı (Uygulama Şifresi) kontrol edin.',
-          },
-          { status: 500 }
-        );
-      }
-
-      return NextResponse.json({
-        success: true,
-        deliveryMethod: 'email',
-        message: '6 haneli doğrulama kodu e-posta adresinize gönderildi.',
-      });
+    if (!mailResult.sent) {
+      await prisma.$executeRaw`
+        DELETE FROM "PasswordReset" WHERE "id" = ${id}
+      `;
+      return NextResponse.json(
+        {
+          error:
+            'Doğrulama e-postası gönderilirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.',
+        },
+        { status: 500 }
+      );
     }
 
+    // Güvenlik: Kod asla API yanıtında dönmez, yalnızca kullanıcının e-posta kutusuna gider!
     return NextResponse.json({
       success: true,
-      deliveryMethod: 'screen',
-      message: 'Doğrulama kodu oluşturuldu.',
-      resetCode: !isPrivileged ? code : undefined,
+      deliveryMethod: 'email',
+      message: '6 haneli doğrulama kodu kayıtlı e-posta adresinize gönderildi.',
     });
   } catch (error) {
     console.error('Forgot password POST error:', error);
@@ -184,7 +181,7 @@ export async function PATCH(request: Request) {
     const cleanEmail = String(email).trim().toLowerCase();
     const attemptKey = `reset_verify:${cleanEmail}`;
 
-    // 6 haneli kodun kaba kuvvetle (Brute-Force) tahmin edilmesini engelle
+    // 6 haneli kodun kaba kuvvetle (Brute-Force) tahmin edilmesini engelle (5 hatalı denemede kod imha edilir)
     const rateCheck = checkLoginRateLimit(attemptKey);
     if (!rateCheck.allowed) {
       await prisma.$executeRaw`
@@ -199,18 +196,23 @@ export async function PATCH(request: Request) {
       );
     }
 
-    if (String(newPassword).length < 6 || String(newPassword).length > 128) {
+    const pwCheck = validatePasswordStrength(String(newPassword));
+    if (!pwCheck.valid) {
       return NextResponse.json(
-        { error: 'Yeni şifre en az 6 karakter olmalıdır.' },
+        { error: pwCheck.error },
         { status: 400 }
       );
     }
 
     const cleanCode = String(code).trim();
+    const hashedIncoming = hashResetCode(cleanCode);
+
     const rows = await prisma.$queryRaw<
       { id: string; userId: string; code: string; expiresAt: string }[]
     >`
-      SELECT * FROM "PasswordReset" WHERE "email" = ${cleanEmail} AND "code" = ${cleanCode} LIMIT 1
+      SELECT * FROM "PasswordReset"
+      WHERE "email" = ${cleanEmail} AND ("code" = ${hashedIncoming} OR "code" = ${cleanCode})
+      LIMIT 1
     `;
 
     const resetRecord = rows[0];
@@ -249,6 +251,7 @@ export async function PATCH(request: Request) {
       where: { id: resetRecord.userId },
       data: { password: hashedPassword },
     });
+    invalidateUserCache(resetRecord.userId);
 
     await prisma.$executeRaw`
       DELETE FROM "PasswordReset" WHERE "userId" = ${resetRecord.userId}

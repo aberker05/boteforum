@@ -98,8 +98,12 @@ export function ProfileEditModal({
         setError('Yeni şifreler birbiriyle eşleşmiyor.');
         return;
       }
-      if (newPassword.length < 6) {
-        setError('Yeni şifre en az 6 karakter olmalıdır.');
+      if (newPassword.length < 8) {
+        setError('Güvenliğiniz için yeni şifreniz en az 8 karakter olmalıdır.');
+        return;
+      }
+      if (!/[a-zA-ZğüşöçıİĞÜŞÖÇ]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+        setError('Yeni şifreniz en az bir harf ve en az bir rakam içermelidir.');
         return;
       }
     }
@@ -361,7 +365,7 @@ export function ProfileEditModal({
 
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                      Yeni Şifre (En az 6 karakter)
+                      Yeni Şifre (En az 8 karakter, harf ve rakam)
                     </label>
                     <input
                       type="password"

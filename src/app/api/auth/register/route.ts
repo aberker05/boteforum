@@ -7,6 +7,7 @@ import {
   checkRateLimit,
   getClientIp,
   validateContentLength,
+  validatePasswordStrength,
   verifyRequestOrigin,
 } from '@/lib/security';
 
@@ -69,9 +70,10 @@ export async function POST(request: Request) {
       );
     }
 
-    if (String(password).length < 6 || String(password).length > 128) {
+    const pwCheck = validatePasswordStrength(String(password));
+    if (!pwCheck.valid) {
       return NextResponse.json(
-        { error: 'Şifre en az 6 karakter olmalıdır.' },
+        { error: pwCheck.error },
         { status: 400 }
       );
     }

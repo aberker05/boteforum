@@ -46,8 +46,13 @@ export default function RegisterPage() {
       return;
     }
 
-    if (password.length < 6) {
-      setError('Şifre en az 6 karakter olmalıdır.');
+    if (password.length < 8) {
+      setError('Güvenliğiniz için şifreniz en az 8 karakter olmalıdır.');
+      return;
+    }
+
+    if (!/[a-zA-ZğüşöçıİĞÜŞÖÇ]/.test(password) || !/[0-9]/.test(password)) {
+      setError('Şifreniz en az bir harf ve en az bir rakam içermelidir.');
       return;
     }
 
@@ -215,16 +220,16 @@ export default function RegisterPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Şifre (En az 6 krk)
+                Şifre (En az 8 krk, harf + rakam)
               </label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
-                  minLength={6}
+                  minLength={8}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••"
+                  placeholder="••••••••"
                   className="w-full pl-3.5 pr-9 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
                 />
                 <button
@@ -245,10 +250,10 @@ export default function RegisterPage() {
               <input
                 type={showPassword ? 'text' : 'password'}
                 required
-                minLength={6}
+                minLength={8}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="••••••"
+                placeholder="••••••••"
                 className="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
               />
             </div>
@@ -293,14 +298,6 @@ export default function RegisterPage() {
             {loading ? 'Hesap Oluşturuluyor...' : 'Kayıt Ol'}
           </button>
         </form>
-
-        <div className="my-5 flex items-center gap-3">
-          <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800" />
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-            veya
-          </span>
-          <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800" />
-        </div>
 
         <GoogleSignInButton label="Google ile Hızlı Kayıt Ol" />
 
