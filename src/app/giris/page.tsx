@@ -66,10 +66,16 @@ export default function LoginPage() {
       } else {
         try {
           sessionStorage.setItem('novaforum_active_tab', '1');
+          sessionStorage.removeItem('novaforum_prompt_dismissed');
           localStorage.setItem(
             'novaforum_session_pref',
             rememberMe ? 'keep' : 'ask'
           );
+          if (rememberMe) {
+            localStorage.setItem('novaforum_session_decided', '1');
+          } else {
+            localStorage.removeItem('novaforum_session_decided');
+          }
         } catch {
           // ignore
         }

@@ -149,20 +149,15 @@ export function Navbar({
     if (!user) return;
 
     const rawPref = localStorage.getItem('novaforum_session_pref');
+    const isDecided = localStorage.getItem('novaforum_session_decided') === '1';
     const savedPref: 'ask' | 'close' | 'keep' =
       rawPref === 'close' || rawPref === 'keep' || rawPref === 'ask'
         ? rawPref
         : 'ask';
     setSessionPref(savedPref);
 
-    // Eğer kullanıcı daha önce hiç tercih yapmadıysa (mevcut açık oturum), varsayılan olarak 'ask' kaydet ve tercih penceresini göster
     if (!rawPref) {
       localStorage.setItem('novaforum_session_pref', 'ask');
-      sessionStorage.setItem('novaforum_active_tab', '1');
-      const timer = window.setTimeout(() => {
-        setExitPromptOpen(true);
-      }, 800);
-      return () => window.clearTimeout(timer);
     }
 
     // Eğer kullanıcı "Siteden Çıkınca Oturumu Kapat" seçtiyse ve sekme/tarayıcı kapatılıp yeniden açıldıysa oturumu sonlandır
@@ -176,6 +171,14 @@ export function Navbar({
 
     sessionStorage.setItem('novaforum_active_tab', '1');
 
+    // Kullanıcı henüz kalıcı bir tercih seçmediyse (veya yeni giriş yaptıysa) doğrudan tercih penceresini aç
+    if (
+      !isDecided &&
+      sessionStorage.getItem('novaforum_prompt_dismissed') !== '1'
+    ) {
+      setExitPromptOpen(true);
+    }
+
     // Sekme kapatılırken 'close' modundaysa arka planda çıkış sinyali gönder
     const handlePageHide = () => {
       if (localStorage.getItem('novaforum_session_pref') === 'close') {
@@ -183,42 +186,53 @@ export function Navbar({
       }
     };
 
-    // Kullanıcı henüz kalıcı bir tercih yapmadıysa ('ask') sekmeyi kapatmaya çalıştığında uyar ve tercih penceresini aç
+    // Kullanıcı 'ask' (Çıkarken Sor) modundaysa sekmeyi kapatmaya çalıştığında uyar ve tercih penceresini aç
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (localStorage.getItem('novaforum_session_pref') === 'ask') {
+      const currentPref = localStorage.getItem('novaforum_session_pref') || 'ask';
+      if (currentPref === 'ask') {
         setExitPromptOpen(true);
         e.preventDefault();
         e.returnValue = '';
       }
     };
 
-    // Masaüstünde fare sekme kapatma çubuğuna / adres çubuğuna (üst sınıra) çıktığında 'ask' modundaysa sor
-    let canAskOnExit = true;
-    const handleMouseEnter = () => {
-      canAskOnExit = true;
+    // Fare sayfa içerisindeyken sekme kapatma çubuğuna / üst sınıra çıktığında 'ask' modundaysa anında sor
+    let armedForExit = false;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const currentPref = localStorage.getItem('novaforum_session_pref') || 'ask';
+      if (currentPref !== 'ask') return;
+
+      // Fare sayfanın orta/alt kısmına indiğinde çıkış tetikleyicisini hazırla
+      if (e.clientY > 70) {
+        armedForExit = true;
+      } else if (armedForExit && e.clientY <= 12) {
+        // Fare tarayıcı sekme çubuğuna (en üst 12px) çıktığında pencereyi aç
+        armedForExit = false;
+        setExitPromptOpen(true);
+      }
     };
 
-    const handleMouseLeave = (e: MouseEvent) => {
-      if (
-        e.clientY <= 60 &&
-        canAskOnExit &&
-        localStorage.getItem('novaforum_session_pref') === 'ask'
-      ) {
-        canAskOnExit = false;
+    const handleMouseOut = (e: MouseEvent) => {
+      const currentPref = localStorage.getItem('novaforum_session_pref') || 'ask';
+      if (currentPref !== 'ask') return;
+
+      if (!e.relatedTarget && e.clientY <= 50) {
+        armedForExit = false;
         setExitPromptOpen(true);
       }
     };
 
     window.addEventListener('pagehide', handlePageHide);
     window.addEventListener('beforeunload', handleBeforeUnload);
-    document.documentElement.addEventListener('mouseenter', handleMouseEnter);
-    document.documentElement.addEventListener('mouseleave', handleMouseLeave);
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    window.addEventListener('mouseout', handleMouseOut);
 
     return () => {
       window.removeEventListener('pagehide', handlePageHide);
       window.removeEventListener('beforeunload', handleBeforeUnload);
-      document.documentElement.removeEventListener('mouseenter', handleMouseEnter);
-      document.documentElement.removeEventListener('mouseleave', handleMouseLeave);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseout', handleMouseOut);
     };
   }, [user]);
 
@@ -528,17 +542,25 @@ export function Navbar({
   const handleLogout = async () => {
     sessionStorage.removeItem('novaforum_active_tab');
     sessionStorage.removeItem('novaforum_exit_asked');
+    sessionStorage.removeItem('novaforum_prompt_dismissed');
+    localStorage.removeItem('novaforum_session_decided');
     await fetch('/api/auth/logout', { method: 'POST' });
     setMenuOpen(false);
     setExitPromptOpen(false);
     window.location.href = '/';
   };
 
+  const handleDismissExitPrompt = () => {
+    sessionStorage.setItem('novaforum_prompt_dismissed', '1');
+    setExitPromptOpen(false);
+  };
+
   const handleSaveSessionPref = async (pref: 'ask' | 'close' | 'keep') => {
     setSessionPref(pref);
     localStorage.setItem('novaforum_session_pref', pref);
+    localStorage.setItem('novaforum_session_decided', '1');
     sessionStorage.setItem('novaforum_active_tab', '1');
-    sessionStorage.setItem('novaforum_exit_asked', '1');
+    sessionStorage.setItem('novaforum_prompt_dismissed', '1');
     setExitPromptOpen(false);
     try {
       await fetch('/api/auth/me', {
@@ -1030,7 +1052,7 @@ export function Navbar({
               </div>
               <button
                 type="button"
-                onClick={() => setExitPromptOpen(false)}
+                onClick={handleDismissExitPrompt}
                 className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
@@ -1127,7 +1149,7 @@ export function Navbar({
               </button>
               <button
                 type="button"
-                onClick={() => setExitPromptOpen(false)}
+                onClick={handleDismissExitPrompt}
                 className="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
               >
                 Gezinmeye Devam Et
