@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { username, email, password, displayName } = body;
+    const { username, email, password, displayName, rememberMe } = body;
 
     if (!username || !email || !password) {
       return NextResponse.json(
@@ -134,7 +134,7 @@ export async function POST(request: Request) {
       secure: process.env.NODE_ENV === 'production',
       path: '/',
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 30,
+      ...(rememberMe ? { maxAge: 60 * 60 * 24 * 30 } : {}),
     });
 
     return response;

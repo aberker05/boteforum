@@ -24,6 +24,7 @@ import {
   Layers,
   ArrowRight,
   CornerDownLeft,
+  Lock,
 } from 'lucide-react';
 import { useTheme } from './ThemeProvider';
 import { NotificationBell } from './NotificationBell';
@@ -117,6 +118,8 @@ export function Navbar({
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [sessionPref, setSessionPref] = useState<'ask' | 'close' | 'keep'>('ask');
+  const [exitPromptOpen, setExitPromptOpen] = useState(false);
 
   // Canlı arama önerileri (Autocomplete) durumları
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
@@ -140,6 +143,84 @@ export function Navbar({
     window.addEventListener('novaforum:clear-search', handleClear);
     return () => window.removeEventListener('novaforum:clear-search', handleClear);
   }, []);
+
+  // Oturum Açık Kalma / Siteden Çıkış Tercihi Yönetimi (Admin ve tüm üyeler için geçerli)
+  useEffect(() => {
+    if (!user) return;
+
+    const rawPref = localStorage.getItem('novaforum_session_pref');
+    const savedPref: 'ask' | 'close' | 'keep' =
+      rawPref === 'close' || rawPref === 'keep' || rawPref === 'ask'
+        ? rawPref
+        : 'ask';
+    setSessionPref(savedPref);
+
+    // Eğer kullanıcı daha önce hiç tercih yapmadıysa (mevcut açık oturum), varsayılan olarak 'ask' kaydet ve tercih penceresini göster
+    if (!rawPref) {
+      localStorage.setItem('novaforum_session_pref', 'ask');
+      sessionStorage.setItem('novaforum_active_tab', '1');
+      const timer = window.setTimeout(() => {
+        setExitPromptOpen(true);
+      }, 800);
+      return () => window.clearTimeout(timer);
+    }
+
+    // Eğer kullanıcı "Siteden Çıkınca Oturumu Kapat" seçtiyse ve sekme/tarayıcı kapatılıp yeniden açıldıysa oturumu sonlandır
+    const hasActiveTab = sessionStorage.getItem('novaforum_active_tab') === '1';
+    if (!hasActiveTab && savedPref === 'close') {
+      fetch('/api/auth/logout', { method: 'POST' }).finally(() => {
+        window.location.reload();
+      });
+      return;
+    }
+
+    sessionStorage.setItem('novaforum_active_tab', '1');
+
+    // Sekme kapatılırken 'close' modundaysa arka planda çıkış sinyali gönder
+    const handlePageHide = () => {
+      if (localStorage.getItem('novaforum_session_pref') === 'close') {
+        navigator.sendBeacon('/api/auth/logout');
+      }
+    };
+
+    // Kullanıcı henüz kalıcı bir tercih yapmadıysa ('ask') sekmeyi kapatmaya çalıştığında uyar ve tercih penceresini aç
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (localStorage.getItem('novaforum_session_pref') === 'ask') {
+        setExitPromptOpen(true);
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    // Masaüstünde fare sekme kapatma çubuğuna / adres çubuğuna (üst sınıra) çıktığında 'ask' modundaysa sor
+    let canAskOnExit = true;
+    const handleMouseEnter = () => {
+      canAskOnExit = true;
+    };
+
+    const handleMouseLeave = (e: MouseEvent) => {
+      if (
+        e.clientY <= 60 &&
+        canAskOnExit &&
+        localStorage.getItem('novaforum_session_pref') === 'ask'
+      ) {
+        canAskOnExit = false;
+        setExitPromptOpen(true);
+      }
+    };
+
+    window.addEventListener('pagehide', handlePageHide);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.documentElement.addEventListener('mouseenter', handleMouseEnter);
+    document.documentElement.addEventListener('mouseleave', handleMouseLeave);
+
+    return () => {
+      window.removeEventListener('pagehide', handlePageHide);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.documentElement.removeEventListener('mouseenter', handleMouseEnter);
+      document.documentElement.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, [user]);
 
   // Dışarı tıklandığında öneri penceresini kapat
   useEffect(() => {
@@ -445,9 +526,29 @@ export function Navbar({
   };
 
   const handleLogout = async () => {
+    sessionStorage.removeItem('novaforum_active_tab');
+    sessionStorage.removeItem('novaforum_exit_asked');
     await fetch('/api/auth/logout', { method: 'POST' });
     setMenuOpen(false);
+    setExitPromptOpen(false);
     window.location.href = '/';
+  };
+
+  const handleSaveSessionPref = async (pref: 'ask' | 'close' | 'keep') => {
+    setSessionPref(pref);
+    localStorage.setItem('novaforum_session_pref', pref);
+    sessionStorage.setItem('novaforum_active_tab', '1');
+    sessionStorage.setItem('novaforum_exit_asked', '1');
+    setExitPromptOpen(false);
+    try {
+      await fetch('/api/auth/me', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rememberMe: pref === 'keep' }),
+      });
+    } catch {
+      // ignore network error
+    }
   };
 
   const renderSuggestionsDropdown = () => {
@@ -733,6 +834,26 @@ export function Navbar({
                           Kaydedilen Konular
                         </Link>
                         <button
+                          type="button"
+                          onClick={() => {
+                            setMenuOpen(false);
+                            setExitPromptOpen(true);
+                          }}
+                          className="w-full flex items-center justify-between gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                        >
+                          <span className="flex items-center gap-2.5">
+                            <Lock className="w-4 h-4 text-slate-400" />
+                            Oturum Tercihi
+                          </span>
+                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400">
+                            {sessionPref === 'keep'
+                              ? 'Açık Tut'
+                              : sessionPref === 'close'
+                              ? 'Çıkınca Kapat'
+                              : 'Çıkarken Sor'}
+                          </span>
+                        </button>
+                        <button
                           onClick={handleLogout}
                           className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
                         >
@@ -888,6 +1009,133 @@ export function Navbar({
           </Link>
         )}
       </nav>
+
+      {/* Siteden Ayrılırken Oturum Tercihi Modalı */}
+      {user && exitPromptOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111827] p-5 sm:p-6 shadow-2xl space-y-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
+                  <Lock className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                    Siteden Ayrılırken Oturum Tercihiniz
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Sekmeyi veya tarayıcıyı kapattığınızda hesabınız nasıl davransın?
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setExitPromptOpen(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-2.5">
+              <button
+                type="button"
+                onClick={() => handleSaveSessionPref('close')}
+                className={`w-full p-3.5 rounded-xl border text-left transition-all cursor-pointer flex items-start gap-3 ${
+                  sessionPref === 'close'
+                    ? 'border-emerald-500 bg-emerald-500/10'
+                    : 'border-slate-200 dark:border-slate-800 hover:border-emerald-500/50 hover:bg-slate-50 dark:hover:bg-slate-800/60'
+                }`}
+              >
+                <div className="w-8 h-8 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
+                  <Shield className="w-4 h-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                      Siteden Çıktığımda Oturumu Otomatik Kapat
+                    </span>
+                    {sessionPref === 'close' && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500 text-white shrink-0">
+                        Aktif
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                    Sekmeyi kapattığınızda oturumunuz otomatik sonlandırılır. Ortak veya okul bilgisayarları için en güvenli seçenektir.
+                  </p>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleSaveSessionPref('keep')}
+                className={`w-full p-3.5 rounded-xl border text-left transition-all cursor-pointer flex items-start gap-3 ${
+                  sessionPref === 'keep'
+                    ? 'border-indigo-500 bg-indigo-500/10'
+                    : 'border-slate-200 dark:border-slate-800 hover:border-indigo-500/50 hover:bg-slate-50 dark:hover:bg-slate-800/60'
+                }`}
+              >
+                <div className="w-8 h-8 rounded-lg bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 mt-0.5">
+                  <CheckCircle2 className="w-4 h-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                      Bu Cihazda Oturumu Açık Tut (Beni Hatırla)
+                    </span>
+                    {sessionPref === 'keep' && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-600 text-white shrink-0">
+                        Aktif
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                    Kendi kişisel telefonunuz veya bilgisayarınızsa 30 gün boyunca tekrar şifre girmeden hesabınız açık kalır.
+                  </p>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleSaveSessionPref('ask')}
+                className={`w-full px-3.5 py-2.5 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${
+                  sessionPref === 'ask'
+                    ? 'border-amber-500/60 bg-amber-500/10 text-amber-700 dark:text-amber-300'
+                    : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/60'
+                }`}
+              >
+                <span className="text-xs font-semibold">
+                  Siteden çıkarken bana sormaya devam et
+                </span>
+                {sessionPref === 'ask' && (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500 text-white">
+                    Varsayılan
+                  </span>
+                )}
+              </button>
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 transition-colors cursor-pointer"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                Şimdi Oturumu Kapat
+              </button>
+              <button
+                type="button"
+                onClick={() => setExitPromptOpen(false)}
+                className="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+              >
+                Gezinmeye Devam Et
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

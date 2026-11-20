@@ -25,6 +25,7 @@ export default function LoginPage() {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -54,6 +55,7 @@ export default function LoginPage() {
         body: JSON.stringify({
           identifier: identifier.trim(),
           password,
+          rememberMe,
         }),
       });
 
@@ -62,6 +64,15 @@ export default function LoginPage() {
         setError(data.error || 'Giriş yapılamadı.');
         setLoading(false);
       } else {
+        try {
+          sessionStorage.setItem('novaforum_active_tab', '1');
+          localStorage.setItem(
+            'novaforum_session_pref',
+            rememberMe ? 'keep' : 'ask'
+          );
+        } catch {
+          // ignore
+        }
         window.location.href = '/';
       }
     } catch {
@@ -140,6 +151,23 @@ export default function LoginPage() {
               </button>
             </div>
           </div>
+
+          <label className="flex items-start gap-2.5 pt-1 text-xs text-slate-600 dark:text-slate-300 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="mt-0.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+            />
+            <span className="leading-snug">
+              <strong className="text-slate-800 dark:text-slate-200">
+                Oturumu bu cihazda açık tut (Beni Hatırla)
+              </strong>
+              <span className="block text-[11px] text-slate-400 mt-0.5">
+                İşaretlenmezse siteden çıkarken oturum tercihiniz sorulur veya sekme kapandığında oturum kapatılır.
+              </span>
+            </span>
+          </label>
 
           <button
             type="submit"
