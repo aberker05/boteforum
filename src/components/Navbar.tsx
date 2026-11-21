@@ -838,7 +838,7 @@ export function Navbar({
                   }`}
                 >
                   <Lock className="w-3.5 h-3.5 shrink-0" />
-                  <span className="hidden md:inline">
+                  <span>
                     {sessionPref === 'close'
                       ? 'Çıkınca Kapat'
                       : sessionPref === 'keep'

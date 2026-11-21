@@ -10,6 +10,8 @@ import { NavigationProgress } from '@/components/NavigationProgress';
 import { getCurrentUser } from '@/lib/auth';
 import { getSiteSettings, getFooterCategories } from '@/lib/siteSettings';
 
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
   const fullName = `${settings.siteNamePrimary}${settings.siteNameAccent}`;
