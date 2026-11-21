@@ -120,6 +120,7 @@ export function Navbar({
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [sessionPref, setSessionPref] = useState<'ask' | 'close' | 'keep'>('ask');
   const [exitPromptOpen, setExitPromptOpen] = useState(false);
+  const [autoLoggingOut, setAutoLoggingOut] = useState(false);
 
   // Canlı arama önerileri (Autocomplete) durumları
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
@@ -149,7 +150,6 @@ export function Navbar({
     if (!user) return;
 
     const rawPref = localStorage.getItem('novaforum_session_pref');
-    const isDecided = localStorage.getItem('novaforum_session_decided') === '1';
     const savedPref: 'ask' | 'close' | 'keep' =
       rawPref === 'close' || rawPref === 'keep' || rawPref === 'ask'
         ? rawPref
@@ -160,31 +160,64 @@ export function Navbar({
       localStorage.setItem('novaforum_session_pref', 'ask');
     }
 
-    // Eğer kullanıcı "Siteden Çıkınca Oturumu Kapat" seçtiyse ve sekme/tarayıcı kapatılıp yeniden açıldıysa oturumu sonlandır
+    // Kullanıcının sekmeyi/tarayıcıyı kapatıp siteden ayrıldıktan sonra geri dönüp dönmediğini tespit et
     const hasActiveTab = sessionStorage.getItem('novaforum_active_tab') === '1';
-    if (!hasActiveTab && savedPref === 'close') {
-      fetch('/api/auth/logout', { method: 'POST' }).finally(() => {
-        window.location.reload();
+    const lastActiveRaw = localStorage.getItem('novaforum_last_active_ts');
+    const lastActiveTs = lastActiveRaw ? Number(lastActiveRaw) : 0;
+    const now = Date.now();
+    const timeSinceLastActive = lastActiveTs > 0 ? now - lastActiveTs : 0;
+
+    // Sayfa yenileme (F5) mi yoksa yeni giriş / yeniden açılış mı kontrol et
+    let isPageReload = false;
+    try {
+      const navEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+      if (navEntries && navEntries.length > 0 && navEntries[0].type === 'reload') {
+        isPageReload = true;
+      }
+    } catch {
+      // ignore
+    }
+
+    // Sekme kapatılıp yeniden açıldıysa veya siteden çıkılıp (>4 sn) tekrar girildiyse
+    const leftSiteAndReturned =
+      !hasActiveTab || (!isPageReload && timeSinceLastActive > 4000);
+
+    // Eğer kullanıcı "Siteden Çıkınca Oturumu Kapat" ('close') seçtiyse ve siteden çıkıp tekrar girdiyse anında oturumu kapat
+    if (leftSiteAndReturned && savedPref === 'close') {
+      setAutoLoggingOut(true);
+      sessionStorage.removeItem('novaforum_active_tab');
+      fetch('/api/auth/logout', {
+        method: 'POST',
+        cache: 'no-store',
+        keepalive: true,
+      }).finally(() => {
+        window.location.replace('/');
       });
       return;
     }
 
     sessionStorage.setItem('novaforum_active_tab', '1');
+    localStorage.setItem('novaforum_last_active_ts', String(now));
 
-    // Kullanıcı henüz kalıcı bir tercih seçmediyse (veya yeni giriş yaptıysa) doğrudan tercih penceresini aç
+    // Eğer siteden çıkıp geri döndüyse ve mod 'ask' ise "daha önce soruldu" bayrağını sıfırla ki tekrar sorsun
+    if (leftSiteAndReturned && savedPref === 'ask') {
+      sessionStorage.removeItem('novaforum_prompt_dismissed');
+    }
+
+    // Kullanıcı 'ask' (Çıkarken Sor) modundaysa ve bu sekmede henüz pencereyi kapatmadıysa doğrudan tercih penceresini aç
     if (
-      !isDecided &&
+      savedPref === 'ask' &&
       sessionStorage.getItem('novaforum_prompt_dismissed') !== '1'
     ) {
       setExitPromptOpen(true);
     }
 
-    // Sekme kapatılırken 'close' modundaysa arka planda çıkış sinyali gönder
-    const handlePageHide = () => {
-      if (localStorage.getItem('novaforum_session_pref') === 'close') {
-        navigator.sendBeacon('/api/auth/logout');
+    // Sekme açık olduğu sürece her 1.5 saniyede bir aktiflik zaman damgasını güncelle
+    const heartbeatTimer = window.setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        localStorage.setItem('novaforum_last_active_ts', String(Date.now()));
       }
-    };
+    }, 1500);
 
     // Kullanıcı 'ask' (Çıkarken Sor) modundaysa sekmeyi kapatmaya çalıştığında uyar ve tercih penceresini aç
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -196,43 +229,48 @@ export function Navbar({
       }
     };
 
-    // Fare sayfa içerisindeyken sekme kapatma çubuğuna / üst sınıra çıktığında 'ask' modundaysa anında sor
-    let armedForExit = false;
+    // Fare sayfa içerisindeyken sekme kapatma çubuğuna / adres çubuğuna (üst sınıra) çıktığında 'ask' modundaysa anında sor
+    let armedForExit = true;
+    let lastClientY = 200;
 
     const handleMouseMove = (e: MouseEvent) => {
       const currentPref = localStorage.getItem('novaforum_session_pref') || 'ask';
       if (currentPref !== 'ask') return;
 
-      // Fare sayfanın orta/alt kısmına indiğinde çıkış tetikleyicisini hazırla
-      if (e.clientY > 70) {
+      if (e.clientY > 75) {
         armedForExit = true;
-      } else if (armedForExit && e.clientY <= 12) {
-        // Fare tarayıcı sekme çubuğuna (en üst 12px) çıktığında pencereyi aç
+      } else if (
+        armedForExit &&
+        e.clientY <= 42 &&
+        e.clientY < lastClientY
+      ) {
         armedForExit = false;
         setExitPromptOpen(true);
       }
+      lastClientY = e.clientY;
     };
 
-    const handleMouseOut = (e: MouseEvent) => {
+    const handleMouseLeaveDocument = (e: MouseEvent) => {
       const currentPref = localStorage.getItem('novaforum_session_pref') || 'ask';
       if (currentPref !== 'ask') return;
 
-      if (!e.relatedTarget && e.clientY <= 50) {
+      if (e.clientY <= 80) {
         armedForExit = false;
         setExitPromptOpen(true);
       }
     };
 
-    window.addEventListener('pagehide', handlePageHide);
     window.addEventListener('beforeunload', handleBeforeUnload);
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
-    window.addEventListener('mouseout', handleMouseOut);
+    document.addEventListener('mouseleave', handleMouseLeaveDocument);
+    document.documentElement.addEventListener('mouseleave', handleMouseLeaveDocument);
 
     return () => {
-      window.removeEventListener('pagehide', handlePageHide);
+      window.clearInterval(heartbeatTimer);
       window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseout', handleMouseOut);
+      document.removeEventListener('mouseleave', handleMouseLeaveDocument);
+      document.documentElement.removeEventListener('mouseleave', handleMouseLeaveDocument);
     };
   }, [user]);
 
@@ -544,10 +582,11 @@ export function Navbar({
     sessionStorage.removeItem('novaforum_exit_asked');
     sessionStorage.removeItem('novaforum_prompt_dismissed');
     localStorage.removeItem('novaforum_session_decided');
-    await fetch('/api/auth/logout', { method: 'POST' });
+    localStorage.removeItem('novaforum_last_active_ts');
+    await fetch('/api/auth/logout', { method: 'POST', cache: 'no-store' });
     setMenuOpen(false);
     setExitPromptOpen(false);
-    window.location.href = '/';
+    window.location.replace('/');
   };
 
   const handleDismissExitPrompt = () => {
@@ -558,7 +597,12 @@ export function Navbar({
   const handleSaveSessionPref = async (pref: 'ask' | 'close' | 'keep') => {
     setSessionPref(pref);
     localStorage.setItem('novaforum_session_pref', pref);
-    localStorage.setItem('novaforum_session_decided', '1');
+    if (pref === 'keep' || pref === 'close') {
+      localStorage.setItem('novaforum_session_decided', '1');
+    } else {
+      localStorage.removeItem('novaforum_session_decided');
+    }
+    localStorage.setItem('novaforum_last_active_ts', String(Date.now()));
     sessionStorage.setItem('novaforum_active_tab', '1');
     sessionStorage.setItem('novaforum_prompt_dismissed', '1');
     setExitPromptOpen(false);
@@ -781,6 +825,28 @@ export function Navbar({
 
             {user ? (
               <>
+                <button
+                  type="button"
+                  onClick={() => setExitPromptOpen(true)}
+                  title="Siteden Çıkarken Oturum Tercihi"
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold border transition-colors cursor-pointer ${
+                    sessionPref === 'close'
+                      ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20'
+                      : sessionPref === 'keep'
+                      ? 'border-indigo-500/40 bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-500/20'
+                      : 'border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300 hover:bg-amber-500/20'
+                  }`}
+                >
+                  <Lock className="w-3.5 h-3.5 shrink-0" />
+                  <span className="hidden md:inline">
+                    {sessionPref === 'close'
+                      ? 'Çıkınca Kapat'
+                      : sessionPref === 'keep'
+                      ? 'Oturum Açık'
+                      : 'Çıkarken Sor'}
+                  </span>
+                </button>
+
                 <NotificationBell />
 
                 <Link
@@ -1031,6 +1097,18 @@ export function Navbar({
           </Link>
         )}
       </nav>
+
+      {/* Otomatik Güvenli Çıkış Ekranı ('close' modunda sekme kapatılıp tekrar girildiğinde) */}
+      {autoLoggingOut && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900 px-6 py-5 text-center space-y-2 shadow-2xl">
+            <Shield className="w-8 h-8 text-emerald-400 mx-auto animate-pulse" />
+            <p className="text-sm font-bold text-white">
+              Tercihiniz doğrultusunda önceki açık oturumunuz güvenli şekilde kapatılıyor...
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Siteden Ayrılırken Oturum Tercihi Modalı */}
       {user && exitPromptOpen && (
