@@ -135,6 +135,9 @@ export function resolveNewsImageUrl(item: {
   slug?: string;
   category?: string;
 }): string {
+  if (item.imageUrl && item.imageUrl.trim() === 'none') {
+    return '';
+  }
   if (item.imageUrl && item.imageUrl.trim()) {
     return item.imageUrl.trim();
   }
@@ -529,10 +532,13 @@ export async function createTechNews(input: {
   const cleanTitle = input.title.trim();
   const cleanSummary = input.summary.trim();
   const cleanContent = input.content.trim();
-  const cleanImageUrl = resolveNewsImageUrl({
-    imageUrl: input.imageUrl,
-    category: input.category,
-  });
+  const cleanImageUrl =
+    input.imageUrl?.trim() === 'none'
+      ? 'none'
+      : resolveNewsImageUrl({
+          imageUrl: input.imageUrl,
+          category: input.category,
+        });
 
   await prisma.$executeRaw`
     INSERT INTO "TechNews" ("id", "title", "slug", "summary", "content", "category", "badgeColor", "source", "readTime", "isFeatured", "views", "createdAt", "imageUrl")
@@ -617,10 +623,14 @@ export async function updateTechNews(input: {
       : Number(curr.isFeatured);
   const nextImageUrl =
     input.imageUrl !== undefined
-      ? resolveNewsImageUrl({
-          imageUrl: input.imageUrl,
-          category: nextCategory,
-        })
+      ? input.imageUrl.trim() === 'none'
+        ? 'none'
+        : resolveNewsImageUrl({
+            imageUrl: input.imageUrl,
+            category: nextCategory,
+          })
+      : curr.imageUrl === 'none'
+      ? 'none'
       : resolveNewsImageUrl({
           imageUrl: curr.imageUrl,
           category: nextCategory,

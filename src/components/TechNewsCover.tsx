@@ -7,6 +7,8 @@ import {
   X,
   Check,
   Palette,
+  Trash2,
+  RotateCcw,
 } from 'lucide-react';
 import {
   resolveNewsImageUrl,
@@ -250,15 +252,26 @@ export function TechNewsCoverPicker({
             <Upload className="w-3 h-3" />
             {uploading ? 'İşleniyor...' : 'Bilgisayardan Yükle'}
           </button>
+          {imageUrl !== 'none' && (
+            <button
+              type="button"
+              onClick={() => onChange('none')}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-500/15 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 text-[11px] font-semibold transition-all cursor-pointer"
+              title="Fotoğrafı tamamen kaldır ve sadece ikonlu siber kapağı kullan"
+            >
+              <Trash2 className="w-3 h-3" />
+              Resmi Kaldır
+            </button>
+          )}
           {imageUrl && (
             <button
               type="button"
               onClick={() => onChange('')}
-              className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-800 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 text-[11px] transition-all cursor-pointer"
-              title="Varsayılan kategori görseline sıfırla"
+              className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] transition-all cursor-pointer"
+              title="Varsayılan kategori görseline döndür"
             >
-              <X className="w-3 h-3" />
-              Sıfırla
+              <RotateCcw className="w-3 h-3" />
+              Varsayılan Görsel
             </button>
           )}
         </div>
@@ -283,14 +296,20 @@ export function TechNewsCoverPicker({
         <div className="sm:col-span-8 space-y-2">
           <input
             type="text"
-            value={imageUrl.startsWith('data:image/') ? '' : imageUrl}
+            value={
+              imageUrl.startsWith('data:image/') || imageUrl === 'none'
+                ? ''
+                : imageUrl
+            }
             onChange={(e) => onChange(e.target.value)}
             placeholder={
-              imageUrl.startsWith('data:image/')
-                ? 'Bilgisayardan özel görsel yüklendi (Değiştirmek için URL girin veya sıfırlayın)'
+              imageUrl === 'none'
+                ? 'Resim kaldırıldı — Yalnızca ikonlu siber kapak kullanılıyor'
+                : imageUrl.startsWith('data:image/')
+                ? 'Bilgisayardan özel görsel yüklendi (Kaldırmak için üstteki "Resmi Kaldır" butonuna basın)'
                 : 'https://... görsel bağlantısı yapıştırın veya aşağıdan hazır kapak seçin'
             }
-            className="w-full bg-slate-900/90 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500/60"
+            className="w-full bg-slate-900/90 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500/60"
           />
 
           {/* Hazır Teknoloji Kapakları */}

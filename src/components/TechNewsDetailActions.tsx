@@ -12,6 +12,11 @@ export function TechNewsDetailActions({ item }: { item: TechNewsItem }) {
   const [editOpen, setEditOpen] = useState(false);
   const [title, setTitle] = useState(item.title);
   const [category, setCategory] = useState(item.category);
+  const [badgeColor, setBadgeColor] = useState(
+    item.badgeColor ||
+      TECH_NEWS_CATEGORIES.find((c) => c.name === item.category)?.color ||
+      '#10b981'
+  );
   const [summary, setSummary] = useState(item.summary);
   const [content, setContent] = useState(item.content);
   const [source, setSource] = useState(item.source);
@@ -38,6 +43,7 @@ export function TechNewsDetailActions({ item }: { item: TechNewsItem }) {
           id: item.id,
           title,
           category,
+          badgeColor,
           summary,
           content,
           source,
@@ -90,6 +96,12 @@ export function TechNewsDetailActions({ item }: { item: TechNewsItem }) {
           onClick={() => {
             setTitle(item.title);
             setCategory(item.category);
+            setBadgeColor(
+              item.badgeColor ||
+                TECH_NEWS_CATEGORIES.find((c) => c.name === item.category)
+                  ?.color ||
+                '#10b981'
+            );
             setSummary(item.summary);
             setContent(item.content);
             setSource(item.source);
@@ -160,7 +172,14 @@ export function TechNewsDetailActions({ item }: { item: TechNewsItem }) {
                   </label>
                   <select
                     value={category}
-                    onChange={(e) => setCategory(e.target.value)}
+                    onChange={(e) => {
+                      const nextCat = e.target.value;
+                      setCategory(nextCat);
+                      const found = TECH_NEWS_CATEGORIES.find(
+                        (c) => c.name === nextCat
+                      );
+                      if (found) setBadgeColor(found.color);
+                    }}
                     className="w-full px-3 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
                   >
                     {TECH_NEWS_CATEGORIES.map((c) => (
@@ -200,6 +219,8 @@ export function TechNewsDetailActions({ item }: { item: TechNewsItem }) {
                 imageUrl={imageUrl}
                 category={category}
                 onChange={setImageUrl}
+                badgeColor={badgeColor}
+                onBadgeColorChange={setBadgeColor}
               />
 
               <div>

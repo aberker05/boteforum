@@ -50,7 +50,7 @@ export async function POST(request: Request) {
       );
     }
 
-    if (imageUrl && !isSafeLogoUrl(String(imageUrl))) {
+    if (imageUrl && imageUrl !== 'none' && !isSafeLogoUrl(String(imageUrl))) {
       return NextResponse.json(
         { error: 'Geçersiz kapak görseli formatı veya adresi.' },
         { status: 400 }
@@ -115,7 +115,12 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: 'Haber ID gerekli.' }, { status: 400 });
     }
 
-    if (imageUrl !== undefined && imageUrl !== '' && !isSafeLogoUrl(String(imageUrl))) {
+    if (
+      imageUrl !== undefined &&
+      imageUrl !== '' &&
+      imageUrl !== 'none' &&
+      !isSafeLogoUrl(String(imageUrl))
+    ) {
       return NextResponse.json(
         { error: 'Geçersiz kapak görseli formatı veya adresi.' },
         { status: 400 }
