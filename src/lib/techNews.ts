@@ -85,6 +85,18 @@ export const DEFAULT_NEWS_IMAGES_BY_SLUG: Record<string, string> = {
     'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?auto=format&fit=crop&w=1200&q=80',
   'dusuk-dunya-yorungesi-leo-uydu-agi-ile-akilli-telefonlarda-dogrudan-uydu-genisbant':
     'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1200&q=80',
+  'yapay-zeka-destekli-sifir-gun-zero-day-zafiyet-avciligi-ve-otonom-soc-savunmasi':
+    'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1200&q=80',
+  'egitim-teknolojilerinde-bote-kisisellestirilmis-yapay-zeka-ogretmenler-ve-xr-laboratuvarlar':
+    'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1200&q=80',
+  'genel-amacli-insansi-robotlarda-gorsel-dil-eylem-vla-modelleri-ve-sifir-atis-ogrenme':
+    'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=1200&q=80',
+  'postgresql-uzerinde-hnsw-vektor-indeksleme-ve-hibrit-rag-mimarilerinde-milisaniye-alti-arama':
+    'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80',
+  'gercek-zamanli-sinirsel-isin-izleme-neural-path-tracing-ve-oyunlarda-uretken-npcler':
+    'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80',
+  'rust-tabanli-ultra-hizli-web-arac-zincirleri-ve-sunucusuz-edge-veritabanlari':
+    'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=1200&q=80',
 };
 
 export const TECH_NEWS_PRESET_COVERS = [
@@ -285,6 +297,149 @@ Uzay tabanlı baz istasyonu olarak çalışan yeni nesil **Direct-to-Cell (D2C)*
     views: 175,
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 44).toISOString(),
   },
+  {
+    title: 'Yapay Zeka Destekli Sıfır-Gün (Zero-Day) Zafiyet Avcılığı ve Otonom SOC Savunma Sistemleri',
+    slug: 'yapay-zeka-destekli-sifir-gun-zero-day-zafiyet-avciligi-ve-otonom-soc-savunmasi',
+    summary:
+      'Semantik kod analizi yapan güvenlik ajanları ve eBPF çekirdek telemetrisi, bellek taşması ile yetki yükseltme zafiyetlerini saldırganlardan önce tespit edip saniyeler içinde otomatik yama üretiyor.',
+    content: `### Siber Güvenlikte Otonom Savunma (SecOps 2.0) Dönemi
+
+Geleneksel imza tabanlı güvenlik duvarları ve statik kod tarayıcıları (SAST), karmaşık mantıksal güvenlik açıklarını yakalamakta yetersiz kalırken; **akıl yürüten güvenlik ajanları (AI Red & Blue Teams)** siber savunmada yeni bir standart oluşturdu.
+
+#### Öne Çıkan Siber Güvenlik Teknolojileri
+1. **Semantik Fuzzing ve Mantıksal Zafiyet Tespiti:** Büyük dil modelleri kaynak kodun veri akış grafiğini (AST & CFG) inceleyerek yetkilendirme atlatma (IDOR), yarış durumu (Race Condition) ve bellek bozulması hatalarını otomatik simüle ediyor.
+2. **eBPF Tabanlı Çekirdek (Kernel) Gözlemlenebilirliği:** Linux çekirdeği seviyesinde sıfır ek yükle çalışan eBPF sensörleri, konteyner kaçış girişimlerini ve beklenmeyen sistem çağrılarını (` + '`syscall`' + `) milisaniyede izole ediyor.
+3. **Otomatik Yama (Auto-Remediation) Boru Hatları:** Tespit edilen bir zafiyet için anında birim testiyle doğrulanmış Pull Request üretiliyor.
+
+\`\`\`typescript
+// Örnek: Otonom güvenlik taraması ve otomatik yama doğrulama akışı
+async function auditAndPatchEndpoint(routeAst: ASTNode) {
+  const vulnReport = await securityAgent.detectLogicFlaws(routeAst);
+  if (!vulnReport.hasCriticalRisk) return { status: 'SAFE' };
+
+  const candidatePatch = await securityAgent.generateMinimalPatch(vulnReport);
+  const exploitBlocked = await sandbox.replayExploit(candidatePatch, vulnReport.poc);
+  return { status: exploitBlocked ? 'PATCH_VERIFIED' : 'MANUAL_REVIEW', candidatePatch };
+}
+\`\`\`
+
+Kurumlar için artık en güçlü savunma stratejisi, **Sıfır Güven (Zero Trust)** mimarisini sürekli çalışan otonom sızma testi ajanlarıyla birleştirmektir.`,
+    category: 'Siber Güvenlik',
+    badgeColor: '#ef4444',
+    source: 'CyberSec & RedTeam Radar',
+    readTime: '5 dk okuma',
+    isFeatured: 1,
+    views: 524,
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 1).toISOString(),
+  },
+  {
+    title: 'Eğitim Teknolojilerinde (BÖTE) Kişiselleştirilmiş Yapay Zeka Öğretmenler ve XR Sanal Laboratuvarlar',
+    slug: 'egitim-teknolojilerinde-bote-kisisellestirilmis-yapay-zeka-ogretmenler-ve-xr-laboratuvarlar',
+    summary:
+      'Her öğrencinin bilişsel öğrenme hızına göre gerçek zamanlı uyarlanan Sokratik yapay zeka asistanları ve WebXR tabanlı 3B sanal laboratuvarlar, eğitimde fırsat eşitliğini ve kalıcılığı üst seviyeye taşıyor.',
+    content: `### BÖTE ve Öğretim Tasarımında Birebir Uyarlanabilir Öğrenme Çağı
+
+Eğitim bilimlerinde Benjamin Bloom'un ünlü **"2 Sigma Problemi"** (birebir özel ders alan öğrencilerin standart sınıf ortamına göre %98 daha başarılı olması), yeni nesil **pedagojik yapay zeka ajanları ve uzamsal bilişim (WebXR)** araçlarıyla ilk kez kitlesel ölçekte çözüme kavuşuyor.
+
+#### Eğitim Teknolojilerinde 3 Büyük Dönüşüm
+- **Sokratik Kodlama ve Bilim Rehberleri:** Öğrenciye doğrudan hazır cevabı vermek yerine, hatanın nedenini bulduran ipuçları ve kademeli sorular (Scaffolding) yönelten pedagojik dil modelleri.
+- **Tarayıcı İçi WebXR Laboratuvarları:** Pahalı donanım gerektirmeden standart web tarayıcısı üzerinden ağ topolojisi kurma, mikrodenetleyici simülasyonu ve siber güvenlik CTF laboratuvarlarını 3 boyutlu deneyimleme imkanı.
+- **Öğrenme Analitiği ve Bilişsel Yük Takibi:** Öğrencinin zorlandığı kavramları erken tespit ederek materyali görsel, işitsel veya etkileşimli kod bloklarıyla dinamik olarak yeniden yapılandıran akıllı öğretim yönetim sistemleri (LMS).`,
+    category: 'Eğitim Teknolojileri (BÖTE)',
+    badgeColor: '#6366f1',
+    source: 'BÖTE & EdTech Akademi',
+    readTime: '4 dk okuma',
+    isFeatured: 1,
+    views: 468,
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
+  },
+  {
+    title: 'Genel Amaçlı İnsansı Robotlarda Görsel-Dil-Eylem (VLA) Modelleri ve Sıfır-Atış Beceri Öğrenimi',
+    slug: 'genel-amacli-insansi-robotlarda-gorsel-dil-eylem-vla-modelleri-ve-sifir-atis-ogrenme',
+    summary:
+      'Kamera görüntüsünü ve doğal dil komutlarını doğrudan motor eklem torklarına dönüştüren uçtan uca VLA (Vision-Language-Action) modelleri, robotların daha önce görmedikleri nesneleri hassasiyetle kullanmasını sağlıyor.',
+    content: `### Fiziksel Yapay Zeka (Embodied AI) Sahaya İniyor
+
+Yıllarca yalnızca önceden programlanmış sabit koordinatlarda çalışabilen endüstriyel robotların yerini, çevresini görsel-işitsel olarak algılayıp doğal dildeki komutları yerine getiren **VLA (Vision-Language-Action)** tabanlı insansı robotlar alıyor.
+
+#### Öne Çıkan Mühendislik Atılımları
+1. **Sim-to-Real Pekiştirmeli Öğrenme:** Fizik motorlarında gerçek zamanın 10.000 katı hızında simüle edilen milyonlarca saatlik deneme-yanılma eğitimi, sıfır kayıpla gerçek robot donanımına aktarılıyor.
+2. **Dokunsal (Tactile) Parmak Ucu Sensörleri:** Milimetrik basınç ve kayma algılayan yapay deri sensörleri sayesinde robotlar yumurta kırmadan tutmaktan hassas devre lehimlemeye kadar ince motor becerileri sergiliyor.`,
+    category: 'Robotik & Otomasyon',
+    badgeColor: '#14b8a6',
+    source: 'Robotics & AI Lab',
+    readTime: '4 dk okuma',
+    isFeatured: 0,
+    views: 342,
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 11).toISOString(),
+  },
+  {
+    title: 'PostgreSQL Üzerinde HNSW Vektör İndeksleme ve Hibrit RAG Mimarilerinde Milisaniye Altı Arama',
+    slug: 'postgresql-uzerinde-hnsw-vektor-indeksleme-ve-hibrit-rag-mimarilerinde-milisaniye-alti-arama',
+    summary:
+      'Ayrı bir vektör veritabanı kurma maliyetini ortadan kaldıran pgvector HNSW indeksleri ve tam metin (BM25) aramasını birleştiren RRF (Reciprocal Rank Fusion) sorguları kurumsal yapay zeka uygulamalarında standart haline geldi.',
+    content: `### Veritabanı Mimarilerinde Tekil Platform (Unified Data Layer) Yaklaşımı
+
+Kurumsal RAG (Retrieval-Augmented Generation) sistemlerinde ilişkisel verilerle vektör gömmelerini (embeddings) ayrı veritabanlarında tutmak senkronizasyon ve güvenlik sorunlarına yol açıyordu. **PostgreSQL ve pgvector** üzerindeki yeni nesil HNSW (Hierarchical Navigable Small World) optimizasyonları bu sorunu kökünden çözdü.
+
+\`\`\`sql
+-- Örnek: PostgreSQL üzerinde Semantik Vektör + Tam Metin Hibrit Arama
+SELECT id, title,
+       1 - (embedding <=> $1::vector) AS semantic_score
+FROM knowledge_articles
+WHERE is_published = true
+ORDER BY embedding <=> $1::vector
+LIMIT 5;
+\`\`\`
+
+- **Niceleme (Scalar & Binary Quantization):** Vektör bellek kullanımını %75 azaltırken doğruluk oranını %99 seviyesinde koruyor.
+- **Satır Düzeyinde Güvenlik (RLS):** Kullanıcı yalnızca kendi yetkisi dahilindeki belgelerin vektör sonuçlarını görebiliyor.`,
+    category: 'Veri Bilimi & Ağ',
+    badgeColor: '#06b6d4',
+    source: 'Data Systems Digest',
+    readTime: '4 dk okuma',
+    isFeatured: 0,
+    views: 389,
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 18).toISOString(),
+  },
+  {
+    title: 'Gerçek Zamanlı Sinirsel Işın İzleme (Neural Path Tracing) ve Oyun Motorlarında Üretken NPC’ler',
+    slug: 'gercek-zamanli-sinirsel-isin-izleme-neural-path-tracing-ve-oyunlarda-uretken-npcler',
+    summary:
+      'Sinirsel ışıma önbellekleri (Neural Radiance Cache) ile saniyede 240 kare tam ışın izleme mümkün hale gelirken, ekran kartı NPU biriminde çalışan mikro dil modelleri oyun karakterlerine dinamik hafıza kazandırıyor.',
+    content: `### Oyun Geliştirme ve Gerçek Zamanlı Simülasyonda Sinirsel Grafik Çağı
+
+Klasik rasterizasyon tekniklerinin yerini tamamen **Sinirsel İşleme (Neural Rendering)** boru hatlarına bıraktığı yeni nesil oyun motorları, fotogerçekçi sinema kalitesini gerçek zamanlı kare hızlarına taşıdı.
+
+- **Sinirsel Işıma Önbelleği (NRC):** Sahnedeki çoklu ışık yansımalarını birkaç ışın örneğiyle tahmin ederek gürültü giderme (denoising) gecikmesini sıfıra indiriyor.
+- **Dinamik Hafızalı NPC Mimarisi:** Oyuncunun geçmiş kararlarını hatırlayan ve senaryo sınırları içinde doğaçlama diyalog ile strateji üreten yerel SLM (Small Language Model) ajanları.`,
+    category: 'Oyun & Simülasyon',
+    badgeColor: '#a855f7',
+    source: 'GameDev & Graphics Foundry',
+    readTime: '3 dk okuma',
+    isFeatured: 0,
+    views: 295,
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 28).toISOString(),
+  },
+  {
+    title: 'Rust Tabanlı Ultra Hızlı Web Araç Zincirleri ve Sunucusuz (Serverless) Edge Veritabanları',
+    slug: 'rust-tabanli-ultra-hizli-web-arac-zincirleri-ve-sunucusuz-edge-veritabanlari',
+    summary:
+      'Çok çekirdekli Rust derleyicileri büyük ölçekli TypeScript projelerinde derleme sürelerini saniyenin altına indirirken, küresel uç noktalara (Edge) çoğaltılan dağıtık veritabanları ilk bayt süresini (TTFB) 10ms altına çekiyor.',
+    content: `### Modern Web Mühendisliğinde Sıfır Gecikme Hedefi
+
+Önyüz ve tam yığın (Full-Stack) web geliştirmede JavaScript tabanlı derleme araçlarının yerini tamamen **Rust ile yazılmış paralel araç zincirleri** aldı.
+
+- **Milisaniye Mertebesinde HMR ve Build:** Yüz binlerce modülden oluşan kurumsal monorepo projeleri bile sıfır yapılandırmayla saniyeler içinde paketleniyor.
+- **Küresel Okuma Replikaları:** Kullanıcıya coğrafi olarak en yakın uç veri merkezinden yanıt veren sunucusuz SQL veritabanları sayesinde dünyanın her yerinde anlık sayfa geçişleri sağlanıyor.`,
+    category: 'Web & Yazılım',
+    badgeColor: '#3b82f6',
+    source: 'Modern Stack Radar',
+    readTime: '3 dk okuma',
+    isFeatured: 0,
+    views: 310,
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 36).toISOString(),
+  },
 ];
 
 const globalForTechNews = globalThis as unknown as {
@@ -320,21 +475,32 @@ export async function ensureTechNewsTable() {
     )
   `;
 
-  const countResult = await prisma.$queryRaw<{ count: bigint | number }[]>`
-    SELECT COUNT(*) as count FROM "TechNews"
+  const existingRows = await prisma.$queryRaw<{ slug: string }[]>`
+    SELECT "slug" FROM "TechNews"
   `;
-  const count = Number(countResult[0]?.count || 0);
+  const existingSlugs = new Set(existingRows.map((r) => r.slug));
 
-  if (count === 0) {
+  if (existingSlugs.size < INITIAL_NEWS.length) {
     for (let i = 0; i < INITIAL_NEWS.length; i++) {
       const item = INITIAL_NEWS[i];
-      const id = `news_${Date.now()}_${i}`;
+      if (existingSlugs.has(item.slug)) continue;
+      // Eğer başlangıçtaki ilk 6 haber zaten varsa sadece yeni eklenen (i >= 6) özel dosyaları otomatik tamamla
+      if (existingSlugs.size > 0 && i < 6) continue;
+
+      const id = `news_seed_2026_${i + 1}`;
       const cleanTitle = item.title.trim();
       const imgUrl = resolveNewsImageUrl(item);
       await prisma.$executeRaw`
         INSERT INTO "TechNews" ("id", "title", "slug", "summary", "content", "category", "badgeColor", "source", "readTime", "isFeatured", "views", "createdAt", "imageUrl")
         VALUES (${id}, ${cleanTitle}, ${item.slug}, ${item.summary}, ${item.content}, ${item.category}, ${item.badgeColor}, ${item.source}, ${item.readTime}, ${item.isFeatured}, ${item.views}, ${item.createdAt}, ${imgUrl})
-      `;
+        ON CONFLICT ("id") DO NOTHING
+      `.catch(async () => {
+        // SQLite/Postgres uyumluluğu için yedek INSERT
+        await prisma.$executeRaw`
+          INSERT INTO "TechNews" ("id", "title", "slug", "summary", "content", "category", "badgeColor", "source", "readTime", "isFeatured", "views", "createdAt", "imageUrl")
+          VALUES (${`news_${Date.now()}_${i}`}, ${cleanTitle}, ${item.slug}, ${item.summary}, ${item.content}, ${item.category}, ${item.badgeColor}, ${item.source}, ${item.readTime}, ${item.isFeatured}, ${item.views}, ${item.createdAt}, ${imgUrl})
+        `.catch(() => {});
+      });
     }
   }
 
@@ -398,6 +564,9 @@ export async function getAllTechNews(category?: string, search?: string): Promis
     let commentCounts: { newsId: string; count: bigint | number }[];
 
     try {
+      if (!globalForTechNews.techNewsInitialized) {
+        await ensureTechNewsTable();
+      }
       [items, commentCounts] = await Promise.all([
         prisma.$queryRaw<TechNewsItem[]>`
           SELECT * FROM "TechNews" ORDER BY "isFeatured" DESC, "createdAt" DESC
@@ -406,12 +575,6 @@ export async function getAllTechNews(category?: string, search?: string): Promis
           SELECT "newsId", COUNT(*) as count FROM "TechNewsComment" GROUP BY "newsId"
         `,
       ]);
-      if (items.length === 0 && !globalForTechNews.techNewsInitialized) {
-        await ensureTechNewsTable();
-        items = await prisma.$queryRaw<TechNewsItem[]>`
-          SELECT * FROM "TechNews" ORDER BY "isFeatured" DESC, "createdAt" DESC
-        `;
-      }
     } catch {
       await ensureTechNewsTable();
       [items, commentCounts] = await Promise.all([

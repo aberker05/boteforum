@@ -39,6 +39,8 @@ interface TechNewsClientProps {
 export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState<'newest' | 'popular' | 'discussed'>('newest');
+  const [activeHeroIdx, setActiveHeroIdx] = useState<number>(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<TechNewsItem | null>(null);
 
@@ -94,23 +96,51 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
     setModalOpen(true);
   };
 
-  const filteredNews = initialNews.filter((item) => {
-    if (selectedCategory && item.category !== selectedCategory) return false;
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      return (
-        item.title.toLowerCase().includes(q) ||
-        item.summary.toLowerCase().includes(q) ||
-        item.category.toLowerCase().includes(q)
-      );
-    }
-    return true;
-  });
+  const filteredNews = initialNews
+    .filter((item) => {
+      if (selectedCategory && item.category !== selectedCategory) return false;
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        return (
+          item.title.toLowerCase().includes(q) ||
+          item.summary.toLowerCase().includes(q) ||
+          item.category.toLowerCase().includes(q) ||
+          item.source.toLowerCase().includes(q)
+        );
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'popular') {
+        return (Number(b.views) || 0) - (Number(a.views) || 0);
+      }
+      if (sortBy === 'discussed') {
+        return (Number(b.commentCount) || 0) - (Number(a.commentCount) || 0);
+      }
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
 
   const featuredNews = filteredNews.filter((n) => Number(n.isFeatured) === 1);
   const regularNews = filteredNews.filter((n) => Number(n.isFeatured) !== 1);
+  const topTrendingNews = [...initialNews]
+    .sort((a, b) => (Number(b.views) || 0) - (Number(a.views) || 0))
+    .slice(0, 4);
+
+  const categoryCounts = initialNews.reduce<Record<string, number>>((acc, item) => {
+    acc[item.category] = (acc[item.category] || 0) + 1;
+    return acc;
+  }, {});
 
   const totalViews = initialNews.reduce((sum, n) => sum + (Number(n.views) || 0), 0);
+  const totalComments = initialNews.reduce(
+    (sum, n) => sum + (Number(n.commentCount) || 0),
+    0
+  );
+  const activeHeroItem =
+    featuredNews[activeHeroIdx] || featuredNews[0] || filteredNews[0] || null;
+  const sideFeaturedItems = featuredNews.filter(
+    (item) => !activeHeroItem || item.id !== activeHeroItem.id
+  );
 
   const handleCreateNews = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -183,11 +213,40 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
         </div>
       </div>
 
+      {/* Canlı Son Dakika & Radar Şeridi */}
+      {initialNews.length > 0 && (
+        <div className="rounded-2xl border border-indigo-500/25 bg-slate-950/95 px-3.5 py-2.5 flex items-center gap-3 overflow-x-auto no-scrollbar shadow-md">
+          <span className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-extrabold uppercase tracking-wider bg-gradient-to-r from-rose-500 to-amber-500 text-white shadow-xs">
+            <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+            Sıcak Gündem
+          </span>
+          <div className="flex items-center gap-4 text-xs text-slate-300 shrink-0">
+            {initialNews.slice(0, 4).map((n) => (
+              <Link
+                key={n.id}
+                href={`/haberler/${n.slug}`}
+                className="inline-flex items-center gap-2 hover:text-emerald-300 transition-colors group"
+              >
+                <span
+                  className="w-2 h-2 rounded-full shrink-0"
+                  style={{ backgroundColor: n.badgeColor }}
+                />
+                <span className="font-semibold text-white/90 group-hover:text-emerald-300 truncate max-w-[230px] sm:max-w-[300px]">
+                  {n.title}
+                </span>
+                <span className="text-[10px] text-slate-500">•</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Estetik Sinematik Hero Banner */}
-      <div className="rounded-3xl bg-gradient-to-br from-[#090d16] via-indigo-950/95 to-slate-950 p-6 sm:p-9 text-white shadow-2xl border border-indigo-500/20 relative overflow-hidden">
+      <div className="rounded-3xl bg-gradient-to-br from-[#070b14] via-indigo-950/95 to-[#090d16] p-6 sm:p-9 text-white shadow-2xl border border-indigo-500/25 relative overflow-hidden">
         {/* Arka Plan Siber Dekoratif Işıklar ve Izgara */}
-        <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-indigo-500/20 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-24 w-80 h-80 rounded-full bg-emerald-500/15 blur-3xl pointer-events-none" />
+        <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-indigo-500/25 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -left-24 w-80 h-80 rounded-full bg-emerald-500/20 blur-3xl pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-40 rounded-full bg-rose-500/10 blur-3xl pointer-events-none" />
         <div
           className="absolute inset-0 opacity-15 pointer-events-none"
           style={{
@@ -212,13 +271,17 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
                 <TrendingUp className="w-3.5 h-3.5 text-amber-300" />
                 {totalViews.toLocaleString('tr-TR')} Okunma
               </div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-white/10 text-slate-200 border border-white/10 backdrop-blur-md">
+                <MessageSquare className="w-3.5 h-3.5 text-pink-300" />
+                {totalComments} Tartışma Yorumu
+              </div>
             </div>
 
             <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-white via-indigo-100 to-emerald-200 bg-clip-text text-transparent">
-              Güncel Teknolojik Gelişmeler
+              Teknoloji Gündemi & İnovasyon Radarı
             </h1>
             <p className="text-xs sm:text-sm text-slate-300/95 leading-relaxed">
-              Yapay zeka mimarileri, 2nm yarı iletken çip teknolojileri, kuantum siber güvenlik standartları, uzay araştırmaları ve modern yazılım dünyasındaki en son kırılmaları görsel dosyalarla keşfedin.
+              Otonom yapay zeka ajanları, siber güvenlikte sıfır-gün savunması, BÖTE & eğitim teknolojilerinde XR laboratuvarlar, 2nm yarı iletkenler ve modern yazılım mimarilerindeki en son kırılmaları derinlemesine inceleyin.
             </p>
           </div>
 
@@ -237,12 +300,15 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
         </div>
       </div>
 
-      {/* Kategori Filtreleri ve Arama Çubuğu */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-white/95 dark:bg-slate-900/90 p-3 sm:p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs backdrop-blur-md">
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5 sm:flex-wrap">
+      {/* Kategori Filtreleri, Sıralama ve Arama Çubuğu */}
+      <div className="space-y-3 bg-white/95 dark:bg-slate-900/90 p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs backdrop-blur-md">
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 sm:flex-wrap">
           <button
             type="button"
-            onClick={() => setSelectedCategory('')}
+            onClick={() => {
+              setSelectedCategory('');
+              setActiveHeroIdx(0);
+            }}
             className={`shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               selectedCategory === ''
                 ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-500/30'
@@ -253,159 +319,369 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
           </button>
           {TECH_NEWS_CATEGORIES.map((cat) => {
             const active = selectedCategory === cat.name;
+            const count = categoryCounts[cat.name] || 0;
             return (
               <button
                 key={cat.name}
                 type="button"
-                onClick={() =>
-                  setSelectedCategory(active ? '' : cat.name)
-                }
-                className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                onClick={() => {
+                  setSelectedCategory(active ? '' : cat.name);
+                  setActiveHeroIdx(0);
+                }}
+                className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
                   active
-                    ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-500/30'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    ? 'bg-indigo-600 text-white border-indigo-500 shadow-sm shadow-indigo-500/30'
+                    : 'border-transparent text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                 }`}
               >
                 <span style={{ color: active ? '#ffffff' : cat.color }}>
                   {getCategoryIcon(cat.name, 'w-3.5 h-3.5')}
                 </span>
-                {cat.name}
+                <span>{cat.name}</span>
+                {count > 0 && (
+                  <span
+                    className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                      active
+                        ? 'bg-white/20 text-white'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                    }`}
+                  >
+                    {count}
+                  </span>
+                )}
               </button>
             );
           })}
         </div>
 
-        <div className="relative w-full lg:w-72 shrink-0">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Teknoloji gündeminde ara..."
-            className="w-full pl-9 pr-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/80 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
-          />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-800/80">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mr-1">
+              Sırala:
+            </span>
+            {(
+              [
+                { id: 'newest', label: 'En Yeni' },
+                { id: 'popular', label: 'En Çok Okunan' },
+                { id: 'discussed', label: 'En Çok Tartışılan' },
+              ] as const
+            ).map((opt) => (
+              <button
+                key={opt.id}
+                type="button"
+                onClick={() => setSortBy(opt.id)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
+                  sortBy === opt.id
+                    ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
+                    : 'bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="relative w-full sm:w-72 shrink-0">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Başlık, kategori veya kaynak ara..."
+              className="w-full pl-9 pr-7 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/80 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Manşet / Öne Çıkan Gelişmeler (Görsel Sinematik Kartlar) */}
-      {featuredNews.length > 0 && (
+      {/* Bento-Grid Sinematik Manşet Vitrini */}
+      {featuredNews.length > 0 && activeHeroItem && (
         <div className="space-y-3.5">
-          <div className="flex items-center justify-between px-1">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+          <div className="flex flex-wrap items-center justify-between gap-2 px-1">
+            <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
               <Flame className="w-4 h-4 text-amber-500" />
-              Manşet & Öne Çıkan Teknolojik Gelişmeler
+              Editörün Seçimi & Manşet Dosyaları
             </h2>
+
+            {featuredNews.length > 1 && (
+              <div className="flex items-center gap-1.5">
+                {featuredNews.map((fn, idx) => (
+                  <button
+                    key={fn.id}
+                    type="button"
+                    onClick={() => setActiveHeroIdx(idx)}
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                      activeHeroItem.id === fn.id
+                        ? 'bg-indigo-600 text-white shadow-xs'
+                        : 'bg-slate-200/70 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    0{idx + 1}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            {featuredNews.map((item) => (
-              <div
-                key={item.id}
-                className="group relative rounded-3xl overflow-hidden border border-slate-200/80 dark:border-slate-800/90 bg-slate-950 shadow-lg hover:shadow-2xl hover:border-indigo-500/50 transition-all duration-300 flex flex-col justify-end min-h-[360px] sm:min-h-[400px]"
-              >
-                {/* Tam Boyutlu Görsel Arka Plan */}
-                <TechNewsCover
-                  title={item.title}
-                  category={item.category}
-                  badgeColor={item.badgeColor}
-                  imageUrl={item.imageUrl}
-                  slug={item.slug}
-                  className="absolute inset-0 w-full h-full"
-                  overlayVariant="hero"
-                />
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+            {/* Sol Büyük Vitrin (Ana Manşet) */}
+            <div
+              className={`${
+                sideFeaturedItems.length > 0 ? 'lg:col-span-7' : 'lg:col-span-12'
+              } group relative rounded-3xl overflow-hidden border border-slate-200/80 dark:border-slate-800/90 bg-slate-950 shadow-xl hover:shadow-2xl hover:border-indigo-500/50 transition-all duration-300 flex flex-col justify-end min-h-[390px] sm:min-h-[450px]`}
+            >
+              <TechNewsCover
+                title={activeHeroItem.title}
+                category={activeHeroItem.category}
+                badgeColor={activeHeroItem.badgeColor}
+                imageUrl={activeHeroItem.imageUrl}
+                slug={activeHeroItem.slug}
+                className="absolute inset-0 w-full h-full"
+                overlayVariant="hero"
+              />
 
-                {/* Üst Yüzen Rozetler ve Yönetici Butonları */}
-                <div className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span
-                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold backdrop-blur-md shadow-sm border"
-                      style={{
-                        backgroundColor: `${item.badgeColor}28`,
-                        borderColor: `${item.badgeColor}60`,
-                        color: '#ffffff',
-                      }}
-                    >
-                      <span
-                        className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: item.badgeColor }}
-                      />
-                      {item.category}
-                    </span>
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-amber-500/90 text-slate-950 shadow-sm">
-                      <Flame className="w-3 h-3 fill-slate-950" />
-                      MANŞET
-                    </span>
-                  </div>
-
-                  {canModerate && (
-                    <div className="flex items-center gap-1.5 bg-slate-950/75 backdrop-blur-md p-1 rounded-xl border border-white/15">
-                      <button
-                        type="button"
-                        onClick={() => openEditModal(item)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-indigo-300 hover:bg-indigo-500/25 transition-colors cursor-pointer"
-                        title="Haberi Düzenle"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                        <span>Düzenle</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(item.id, item.title)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-rose-300 hover:bg-rose-500/25 transition-colors cursor-pointer"
-                        title="Haberi Sil"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        <span>Sil</span>
-                      </button>
-                    </div>
-                  )}
+              {/* Üst Yüzen Rozetler ve Yönetici Butonları */}
+              <div className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold backdrop-blur-md shadow-sm border"
+                    style={{
+                      backgroundColor: 'rgba(9, 13, 22, 0.80)',
+                      borderColor: `${activeHeroItem.badgeColor}75`,
+                      color: activeHeroItem.badgeColor,
+                    }}
+                  >
+                    {getCategoryIcon(activeHeroItem.category, 'w-3.5 h-3.5')}
+                    {activeHeroItem.category}
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 shadow-sm">
+                    <Flame className="w-3 h-3 fill-slate-950" />
+                    BAŞ MANŞET
+                  </span>
                 </div>
 
-                {/* Alt İçerik Katmanı */}
-                <div className="relative z-10 p-6 sm:p-7 pt-24 flex flex-col justify-end bg-gradient-to-t from-[#070a12] via-[#070a12]/90 to-transparent">
-                  <div className="flex items-center gap-2 text-xs text-slate-300/90 mb-2">
-                    <span className="font-semibold text-emerald-300">
-                      {item.source}
-                    </span>
-                    <span>•</span>
-                    <span>{formatRelativeTime(item.createdAt)}</span>
-                  </div>
-
-                  <Link href={`/haberler/${item.slug}`}>
-                    <h3 className="text-xl sm:text-2xl font-extrabold text-white group-hover:text-emerald-300 transition-colors leading-snug">
-                      {item.title}
-                    </h3>
-                  </Link>
-
-                  <p className="mt-2.5 text-xs sm:text-sm text-slate-300 leading-relaxed line-clamp-2">
-                    {item.summary}
-                  </p>
-
-                  <div className="mt-5 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-300">
-                    <div className="flex items-center gap-3.5">
-                      <span className="inline-flex items-center gap-1">
-                        <Clock className="w-3.5 h-3.5 text-indigo-400" />
-                        {item.readTime}
-                      </span>
-                      <span className="inline-flex items-center gap-1">
-                        <Eye className="w-3.5 h-3.5 text-emerald-400" />
-                        {item.views}
-                      </span>
-                      <span className="inline-flex items-center gap-1">
-                        <MessageSquare className="w-3.5 h-3.5 text-amber-400" />
-                        {item.commentCount || 0} yorum
-                      </span>
-                    </div>
-
-                    <Link
-                      href={`/haberler/${item.slug}`}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-bold bg-white/10 hover:bg-emerald-500 hover:text-slate-950 text-white border border-white/15 transition-all"
+                {canModerate && (
+                  <div className="flex items-center gap-1.5 bg-slate-950/80 backdrop-blur-md p-1 rounded-xl border border-white/15">
+                    <button
+                      type="button"
+                      onClick={() => openEditModal(activeHeroItem)}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-indigo-300 hover:bg-indigo-500/25 transition-colors cursor-pointer"
+                      title="Haberi Düzenle"
                     >
-                      Oku & Tartış <ArrowRight className="w-3.5 h-3.5" />
-                    </Link>
+                      <Edit2 className="w-3.5 h-3.5" />
+                      <span>Düzenle</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleDelete(activeHeroItem.id, activeHeroItem.title)
+                      }
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-rose-300 hover:bg-rose-500/25 transition-colors cursor-pointer"
+                      title="Haberi Sil"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Sil</span>
+                    </button>
                   </div>
+                )}
+              </div>
+
+              {/* Alt İçerik Katmanı */}
+              <div className="relative z-10 p-6 sm:p-8 pt-28 flex flex-col justify-end bg-gradient-to-t from-[#060911] via-[#060911]/92 to-transparent">
+                <div className="flex items-center gap-2 text-xs text-slate-300/90 mb-2">
+                  <span className="font-bold text-emerald-300">
+                    {activeHeroItem.source}
+                  </span>
+                  <span>•</span>
+                  <span>{formatRelativeTime(activeHeroItem.createdAt)}</span>
+                </div>
+
+                <Link href={`/haberler/${activeHeroItem.slug}`}>
+                  <h3 className="text-xl sm:text-3xl font-extrabold text-white group-hover:text-emerald-300 transition-colors leading-tight">
+                    {activeHeroItem.title}
+                  </h3>
+                </Link>
+
+                <p className="mt-3 text-xs sm:text-sm text-slate-300 leading-relaxed line-clamp-3">
+                  {activeHeroItem.summary}
+                </p>
+
+                <div className="mt-5 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-300">
+                  <div className="flex items-center gap-4">
+                    <span className="inline-flex items-center gap-1">
+                      <Clock className="w-3.5 h-3.5 text-indigo-400" />
+                      {activeHeroItem.readTime}
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <Eye className="w-3.5 h-3.5 text-emerald-400" />
+                      {activeHeroItem.views} okunma
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <MessageSquare className="w-3.5 h-3.5 text-amber-400" />
+                      {activeHeroItem.commentCount || 0} yorum
+                    </span>
+                  </div>
+
+                  <Link
+                    href={`/haberler/${activeHeroItem.slug}`}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 shadow-md transition-all"
+                  >
+                    Dosyayı İncele <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
                 </div>
               </div>
+            </div>
+
+            {/* Sağ Sütun: Diğer Manşet Kartları */}
+            {sideFeaturedItems.length > 0 && (
+              <div className="lg:col-span-5 flex flex-col justify-between gap-4">
+                {sideFeaturedItems.slice(0, 3).map((item) => (
+                  <div
+                    key={item.id}
+                    className="group relative flex-1 rounded-3xl overflow-hidden border border-slate-200/80 dark:border-slate-800/90 bg-slate-950 shadow-md hover:shadow-xl hover:border-indigo-500/50 transition-all duration-300 flex flex-col justify-end min-h-[140px]"
+                  >
+                    <TechNewsCover
+                      title={item.title}
+                      category={item.category}
+                      badgeColor={item.badgeColor}
+                      imageUrl={item.imageUrl}
+                      slug={item.slug}
+                      className="absolute inset-0 w-full h-full"
+                      overlayVariant="hero"
+                    />
+
+                    <div className="relative z-10 p-4 sm:p-5 bg-gradient-to-t from-[#060911] via-[#060911]/85 to-slate-950/30 flex flex-col justify-between h-full">
+                      <div className="flex items-center justify-between gap-2">
+                        <span
+                          className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold backdrop-blur-md border"
+                          style={{
+                            backgroundColor: 'rgba(9, 13, 22, 0.80)',
+                            borderColor: `${item.badgeColor}65`,
+                            color: item.badgeColor,
+                          }}
+                        >
+                          {getCategoryIcon(item.category, 'w-3 h-3')}
+                          {item.category}
+                        </span>
+
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] font-semibold text-slate-300 bg-slate-950/70 px-2 py-0.5 rounded-md border border-white/10">
+                            {item.readTime}
+                          </span>
+                          {canModerate && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => openEditModal(item)}
+                                className="p-1 rounded-lg bg-slate-950/80 text-indigo-300 hover:bg-indigo-500/30 transition-colors cursor-pointer"
+                                title="Haberi Düzenle"
+                              >
+                                <Edit2 className="w-3 h-3" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDelete(item.id, item.title)}
+                                className="p-1 rounded-lg bg-slate-950/80 text-rose-300 hover:bg-rose-500/30 transition-colors cursor-pointer"
+                                title="Haberi Sil"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="mt-3">
+                        <Link href={`/haberler/${item.slug}`}>
+                          <h4 className="text-sm sm:text-base font-extrabold text-white group-hover:text-emerald-300 transition-colors leading-snug line-clamp-2">
+                            {item.title}
+                          </h4>
+                        </Link>
+                        <div className="mt-2 flex items-center justify-between text-[11px] text-slate-300/90">
+                          <span className="text-emerald-300 font-semibold truncate">
+                            {item.source}
+                          </span>
+                          <div className="flex items-center gap-2.5 shrink-0">
+                            <span className="inline-flex items-center gap-1">
+                              <Eye className="w-3 h-3 text-slate-400" />
+                              {item.views}
+                            </span>
+                            <Link
+                              href={`/haberler/${item.slug}`}
+                              className="inline-flex items-center gap-0.5 font-bold text-white group-hover:text-emerald-300"
+                            >
+                              Oku <ArrowRight className="w-3 h-3" />
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* En Çok Okunanlar / Trend Radar Barı */}
+      {!selectedCategory && !searchQuery && topTrendingNews.length >= 4 && (
+        <div className="rounded-3xl border border-slate-200/80 dark:border-slate-800/90 bg-white/90 dark:bg-slate-900/80 p-5 space-y-3.5 shadow-xs">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
+              <TrendingUp className="w-4 h-4 text-emerald-500" />
+              Haftanın En Çok Okunan Teknoloji Dosyaları
+            </h2>
+            <span className="text-[11px] text-slate-400 font-medium">
+              Okunma Sıralaması
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            {topTrendingNews.map((item, idx) => (
+              <Link
+                key={item.id}
+                href={`/haberler/${item.slug}`}
+                className="group relative rounded-2xl border border-slate-200/70 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/60 p-3.5 hover:border-indigo-500/40 hover:bg-white dark:hover:bg-slate-900 transition-all flex items-start gap-3"
+              >
+                <div
+                  className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs shrink-0 border"
+                  style={{
+                    backgroundColor: `${item.badgeColor}15`,
+                    borderColor: `${item.badgeColor}40`,
+                    color: item.badgeColor,
+                  }}
+                >
+                  0{idx + 1}
+                </div>
+                <div className="min-w-0 flex-1 space-y-1">
+                  <span
+                    className="text-[10px] font-bold uppercase tracking-wider block truncate"
+                    style={{ color: item.badgeColor }}
+                  >
+                    {item.category}
+                  </span>
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2 leading-snug">
+                    {item.title}
+                  </h4>
+                  <div className="flex items-center gap-2 text-[10px] text-slate-400">
+                    <span className="inline-flex items-center gap-0.5">
+                      <Eye className="w-3 h-3" /> {item.views}
+                    </span>
+                    <span>•</span>
+                    <span>{item.readTime}</span>
+                  </div>
+                </div>
+              </Link>
             ))}
           </div>
         </div>
@@ -430,8 +706,13 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
             {(regularNews.length > 0 ? regularNews : filteredNews).map((item) => (
               <div
                 key={item.id}
-                className="group rounded-3xl overflow-hidden border border-slate-200/80 dark:border-slate-800/90 bg-white dark:bg-slate-900/95 hover:border-indigo-500/50 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between"
+                className="group rounded-3xl overflow-hidden border border-slate-200/80 dark:border-slate-800/90 bg-white dark:bg-slate-900/95 hover:border-indigo-500/50 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between relative"
               >
+                {/* Kategori Rengi Üst Vurgu Şeridi */}
+                <div
+                  className="h-1 w-full"
+                  style={{ backgroundColor: item.badgeColor }}
+                />
                 <div>
                   {/* Üst Görsel Kapak Alanı */}
                   <div className="relative h-48 w-full overflow-hidden">
