@@ -1,56 +1,16 @@
 'use client';
 
 import React from 'react';
-import {
-  Sparkles,
-  Code2,
-  Rocket,
-  MessageSquare,
-  Shield,
-  Layers,
-  Cpu,
-  Globe,
-  Zap,
-  Terminal,
-} from 'lucide-react';
 import type { SiteSettings } from '@/lib/siteSettings';
+import { CATEGORY_ICON_OPTIONS, CategoryIcon } from './CategoryIcon';
 
-export const BRAND_LOGO_ICONS = [
-  { name: 'Sparkles', label: 'Parıltı' },
-  { name: 'Code2', label: 'Kod' },
-  { name: 'Rocket', label: 'Roket' },
-  { name: 'MessageSquare', label: 'Sohbet' },
-  { name: 'Terminal', label: 'Terminal' },
-  { name: 'Cpu', label: 'Çip / Donanım' },
-  { name: 'Globe', label: 'Küresel' },
-  { name: 'Zap', label: 'Enerji' },
-  { name: 'Layers', label: 'Katmanlar' },
-  { name: 'Shield', label: 'Kalkan' },
-];
+export const BRAND_LOGO_ICONS = CATEGORY_ICON_OPTIONS.map((item) => ({
+  name: item.name,
+  label: item.label.split(' (')[0],
+}));
 
 export function renderBrandIcon(name: string, className = 'w-5 h-5') {
-  switch (name) {
-    case 'Code2':
-      return <Code2 className={className} />;
-    case 'Rocket':
-      return <Rocket className={className} />;
-    case 'MessageSquare':
-      return <MessageSquare className={className} />;
-    case 'Shield':
-      return <Shield className={className} />;
-    case 'Layers':
-      return <Layers className={className} />;
-    case 'Cpu':
-      return <Cpu className={className} />;
-    case 'Globe':
-      return <Globe className={className} />;
-    case 'Zap':
-      return <Zap className={className} />;
-    case 'Terminal':
-      return <Terminal className={className} />;
-    default:
-      return <Sparkles className={className} />;
-  }
+  return <CategoryIcon name={name || 'Sparkles'} className={className} />;
 }
 
 export function BrandLogo({

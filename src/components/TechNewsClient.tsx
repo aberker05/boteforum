@@ -45,6 +45,7 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
   // Yeni / Düzenlenen Haber Formu
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState(TECH_NEWS_CATEGORIES[0].name);
+  const [badgeColor, setBadgeColor] = useState(TECH_NEWS_CATEGORIES[0].color);
   const [summary, setSummary] = useState('');
   const [content, setContent] = useState('');
   const [source, setSource] = useState('');
@@ -63,6 +64,7 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
     setEditingItem(null);
     setTitle('');
     setCategory(TECH_NEWS_CATEGORIES[0].name);
+    setBadgeColor(TECH_NEWS_CATEGORIES[0].color);
     setSummary('');
     setContent('');
     setSource('');
@@ -77,6 +79,11 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
     setEditingItem(item);
     setTitle(item.title);
     setCategory(item.category);
+    setBadgeColor(
+      item.badgeColor ||
+        TECH_NEWS_CATEGORIES.find((c) => c.name === item.category)?.color ||
+        '#10b981'
+    );
     setSummary(item.summary);
     setContent(item.content);
     setSource(item.source);
@@ -122,6 +129,7 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
           ...(editingItem ? { id: editingItem.id } : {}),
           title,
           category,
+          badgeColor,
           summary,
           content,
           source,
@@ -581,7 +589,14 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
                   </label>
                   <select
                     value={category}
-                    onChange={(e) => setCategory(e.target.value)}
+                    onChange={(e) => {
+                      const nextCat = e.target.value;
+                      setCategory(nextCat);
+                      const found = TECH_NEWS_CATEGORIES.find(
+                        (c) => c.name === nextCat
+                      );
+                      if (found) setBadgeColor(found.color);
+                    }}
                     className="w-full px-3 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
                   >
                     {TECH_NEWS_CATEGORIES.map((c) => (
@@ -624,6 +639,8 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
                 imageUrl={imageUrl}
                 category={category}
                 onChange={setImageUrl}
+                badgeColor={badgeColor}
+                onBadgeColorChange={setBadgeColor}
               />
 
               <div>

@@ -2,20 +2,18 @@
 
 import { useState, useRef } from 'react';
 import {
-  Cpu,
-  Shield,
-  Sparkles,
-  Code2,
-  Rocket,
-  Globe,
   Upload,
   Image as ImageIcon,
   X,
+  Check,
+  Palette,
 } from 'lucide-react';
 import {
   resolveNewsImageUrl,
   TECH_NEWS_PRESET_COVERS,
+  TECH_NEWS_CATEGORIES,
 } from '@/lib/techNews';
+import { CategoryIcon, RICH_COLOR_PALETTE } from './CategoryIcon';
 
 interface TechNewsCoverProps {
   title: string;
@@ -28,21 +26,25 @@ interface TechNewsCoverProps {
 }
 
 export function getCategoryIcon(category: string, className = 'w-5 h-5') {
+  const matched = TECH_NEWS_CATEGORIES.find((c) => c.name === category);
+  if (matched?.icon) {
+    return <CategoryIcon name={matched.icon} className={className} />;
+  }
   switch (category) {
     case 'Yapay Zeka':
-      return <Sparkles className={className} />;
+      return <CategoryIcon name="Sparkles" className={className} />;
     case 'Siber Güvenlik':
-      return <Shield className={className} />;
+      return <CategoryIcon name="Shield" className={className} />;
     case 'Donanım & Çip':
-      return <Cpu className={className} />;
+      return <CategoryIcon name="Cpu" className={className} />;
     case 'Web & Yazılım':
-      return <Code2 className={className} />;
+      return <CategoryIcon name="Code2" className={className} />;
     case 'Uzay & Bilim':
-      return <Rocket className={className} />;
+      return <CategoryIcon name="Rocket" className={className} />;
     case 'Mobil & Bulut':
-      return <Globe className={className} />;
+      return <CategoryIcon name="Cloud" className={className} />;
     default:
-      return <Sparkles className={className} />;
+      return <CategoryIcon name="Sparkles" className={className} />;
   }
 }
 
@@ -187,16 +189,24 @@ interface TechNewsCoverPickerProps {
   imageUrl: string;
   category: string;
   onChange: (newUrl: string) => void;
+  badgeColor?: string;
+  onBadgeColorChange?: (newColor: string) => void;
 }
 
 export function TechNewsCoverPicker({
   imageUrl,
   category,
   onChange,
+  badgeColor,
+  onBadgeColorChange,
 }: TechNewsCoverPickerProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
+
+  const defaultCatColor =
+    TECH_NEWS_CATEGORIES.find((c) => c.name === category)?.color || '#10b981';
+  const activeColor = badgeColor || defaultCatColor;
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -260,7 +270,7 @@ export function TechNewsCoverPicker({
           <TechNewsCover
             title="Kapak Önizleme"
             category={category}
-            badgeColor="#10b981"
+            badgeColor={activeColor}
             imageUrl={imageUrl}
             className="w-full h-full"
             overlayVariant="card"
@@ -315,6 +325,38 @@ export function TechNewsCoverPicker({
           </div>
         </div>
       </div>
+
+      {onBadgeColorChange && (
+        <div className="pt-2 border-t border-slate-800/80 space-y-1.5">
+          <span className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-300">
+            <Palette className="w-3.5 h-3.5 text-indigo-400" />
+            İçerik Rozet & Atmosfer Rengi Seçin:
+          </span>
+          <div className="flex flex-wrap items-center gap-1.5">
+            {RICH_COLOR_PALETTE.map((c) => (
+              <button
+                key={c.hex}
+                type="button"
+                onClick={() => onBadgeColorChange(c.hex)}
+                title={c.label}
+                className="w-6 h-6 rounded-lg flex items-center justify-center text-white transition-transform hover:scale-110 cursor-pointer border border-white/10"
+                style={{ backgroundColor: c.hex }}
+              >
+                {activeColor.toLowerCase() === c.hex.toLowerCase() && (
+                  <Check className="w-3.5 h-3.5" />
+                )}
+              </button>
+            ))}
+            <input
+              type="color"
+              value={activeColor}
+              onChange={(e) => onBadgeColorChange(e.target.value)}
+              title="Özel Renk Seç"
+              className="w-7 h-7 rounded-lg cursor-pointer border border-slate-700 bg-transparent"
+            />
+          </div>
+        </div>
+      )}
 
       {uploadError && (
         <p className="text-[11px] text-rose-400 font-medium">{uploadError}</p>

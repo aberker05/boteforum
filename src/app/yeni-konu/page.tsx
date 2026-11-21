@@ -14,6 +14,7 @@ export default async function NewThreadPage() {
         name: true,
         description: true,
         color: true,
+        icon: true,
       },
     }),
   ]);

@@ -37,12 +37,16 @@ export interface TechNewsCommentItem {
 }
 
 export const TECH_NEWS_CATEGORIES = [
-  { name: 'Yapay Zeka', color: '#10b981' },
-  { name: 'Web & Yazılım', color: '#3b82f6' },
-  { name: 'Donanım & Çip', color: '#f59e0b' },
-  { name: 'Siber Güvenlik', color: '#f43f5e' },
-  { name: 'Uzay & Bilim', color: '#8b5cf6' },
-  { name: 'Mobil & Bulut', color: '#ec4899' },
+  { name: 'Yapay Zeka', color: '#10b981', icon: 'Sparkles' },
+  { name: 'Siber Güvenlik', color: '#f43f5e', icon: 'Shield' },
+  { name: 'Web & Yazılım', color: '#3b82f6', icon: 'Code2' },
+  { name: 'Donanım & Çip', color: '#f59e0b', icon: 'Cpu' },
+  { name: 'Mobil & Bulut', color: '#ec4899', icon: 'Cloud' },
+  { name: 'Veri Bilimi & Ağ', color: '#06b6d4', icon: 'Database' },
+  { name: 'Oyun & Simülasyon', color: '#a855f7', icon: 'Gamepad2' },
+  { name: 'Eğitim Teknolojileri (BÖTE)', color: '#6366f1', icon: 'GraduationCap' },
+  { name: 'Robotik & Otomasyon', color: '#14b8a6', icon: 'Bot' },
+  { name: 'Uzay & Bilim', color: '#8b5cf6', icon: 'Rocket' },
 ];
 
 export const DEFAULT_NEWS_IMAGES_BY_CATEGORY: Record<string, string> = {
@@ -58,6 +62,14 @@ export const DEFAULT_NEWS_IMAGES_BY_CATEGORY: Record<string, string> = {
     'https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=1200&q=80',
   'Mobil & Bulut':
     'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80',
+  'Veri Bilimi & Ağ':
+    'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80',
+  'Oyun & Simülasyon':
+    'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80',
+  'Eğitim Teknolojileri (BÖTE)':
+    'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1200&q=80',
+  'Robotik & Otomasyon':
+    'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=1200&q=80',
 };
 
 export const DEFAULT_NEWS_IMAGES_BY_SLUG: Record<string, string> = {
@@ -85,12 +97,28 @@ export const TECH_NEWS_PRESET_COVERS = [
     url: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=1200&q=80',
   },
   {
+    label: 'Siber Savunma & SOC',
+    url: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1200&q=80',
+  },
+  {
     label: 'İşlemci & Mikroçip',
     url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80',
   },
   {
     label: 'Kodlama & Yazılım',
     url: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=80',
+  },
+  {
+    label: 'Sunucu & Veri Merkezi',
+    url: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80',
+  },
+  {
+    label: 'Robotik & Otonom',
+    url: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=1200&q=80',
+  },
+  {
+    label: 'Eğitim & Laboratuvar',
+    url: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1200&q=80',
   },
   {
     label: 'Batarya & Enerji',
@@ -477,6 +505,7 @@ export async function createTechNews(input: {
   summary: string;
   content: string;
   category: string;
+  badgeColor?: string;
   source?: string;
   readTime?: string;
   isFeatured?: boolean;
@@ -488,7 +517,11 @@ export async function createTechNews(input: {
   const baseSlug = slugify(input.title) || 'teknoloji-haberi';
   const slug = `${baseSlug}-${Math.random().toString(36).substring(2, 6)}`;
   const catObj = TECH_NEWS_CATEGORIES.find((c) => c.name === input.category);
-  const badgeColor = catObj?.color || '#6366f1';
+  const customColor =
+    input.badgeColor && /^#[0-9a-fA-F]{6}$/.test(input.badgeColor.trim())
+      ? input.badgeColor.trim()
+      : undefined;
+  const badgeColor = customColor || catObj?.color || '#6366f1';
   const createdAt = new Date().toISOString();
   const isFeatured = input.isFeatured ? 1 : 0;
   const source = input.source?.trim() || 'Teknoloji Gündemi Masası';
@@ -530,6 +563,7 @@ export async function updateTechNews(input: {
   summary?: string;
   content?: string;
   category?: string;
+  badgeColor?: string;
   source?: string;
   readTime?: string;
   isFeatured?: boolean;
@@ -558,7 +592,17 @@ export async function updateTechNews(input: {
       ? input.category.trim() || curr.category
       : curr.category;
   const catObj = TECH_NEWS_CATEGORIES.find((c) => c.name === nextCategory);
-  const nextBadgeColor = catObj?.color || curr.badgeColor || '#6366f1';
+  const customColor =
+    input.badgeColor && /^#[0-9a-fA-F]{6}$/.test(input.badgeColor.trim())
+      ? input.badgeColor.trim()
+      : undefined;
+  const nextBadgeColor =
+    customColor ||
+    (input.category && input.category !== curr.category
+      ? catObj?.color
+      : curr.badgeColor) ||
+    catObj?.color ||
+    '#6366f1';
   const nextSource =
     input.source !== undefined ? input.source.trim() || curr.source : curr.source;
   const nextReadTime =

@@ -16,14 +16,29 @@ import {
   RotateCcw,
 } from 'lucide-react';
 import { MarkdownEditor } from './MarkdownEditor';
+import { CategoryIcon } from './CategoryIcon';
 
 const NEW_THREAD_DRAFT_KEY = 'novaforum_draft_new_thread';
+
+const QUICK_CUSTOM_TOPICS = [
+  { label: 'Siber Güvenlik & Pentest', icon: 'Shield', color: '#f43f5e' },
+  { label: 'Kriptografi & Ağ Güvenliği', icon: 'Lock', color: '#ef4444' },
+  { label: 'Yapay Zeka & LLM', icon: 'Sparkles', color: '#10b981' },
+  { label: 'Oyun Geliştirme', icon: 'Gamepad2', color: '#a855f7' },
+  { label: 'DevOps, Linux & Sunucu', icon: 'Terminal', color: '#06b6d4' },
+  { label: 'Veri Bilimi & SQL', icon: 'Database', color: '#3b82f6' },
+  { label: 'Donanım & Gömülü Sistem', icon: 'Cpu', color: '#f59e0b' },
+  { label: 'BÖTE & Eğitim Teknolojileri', icon: 'GraduationCap', color: '#6366f1' },
+  { label: 'Mobil Uygulama', icon: 'Smartphone', color: '#ec4899' },
+  { label: 'Robotik & Otomasyon', icon: 'Bot', color: '#14b8a6' },
+];
 
 interface CategoryOption {
   id: string;
   name: string;
   description: string;
   color: string;
+  icon?: string;
 }
 
 export function NewThreadForm({ categories }: { categories: CategoryOption[] }) {
@@ -282,11 +297,20 @@ export function NewThreadForm({ categories }: { categories: CategoryOption[] }) 
                         : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
                     }`}
                   >
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2.5">
                       <span
-                        className="w-2.5 h-2.5 rounded-full"
-                        style={{ backgroundColor: cat.color }}
-                      />
+                        className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                        style={{
+                          backgroundColor: `${cat.color}20`,
+                          color: cat.color,
+                        }}
+                      >
+                        <CategoryIcon
+                          name={cat.icon || 'MessageSquare'}
+                          className="w-4 h-4"
+                          color={cat.color}
+                        />
+                      </span>
                       <span className="text-xs font-bold text-slate-900 dark:text-white">
                         {cat.name}
                       </span>
@@ -322,20 +346,44 @@ export function NewThreadForm({ categories }: { categories: CategoryOption[] }) 
 
             {/* Diğer Seçildiğinde Açılan Özel Konu Alanı Kutusu */}
             {isOtherSelected && (
-              <div className="mt-3 p-4 rounded-2xl bg-indigo-50/50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800/60 space-y-1.5">
+              <div className="mt-3 p-4 rounded-2xl bg-indigo-50/50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800/60 space-y-2.5">
                 <label className="block text-xs font-bold text-indigo-900 dark:text-indigo-200">
-                  Diğer Konu Alanı / Alt Başlığı Belirtin *
+                  Diğer Konu Alanı / Alt Başlığı Seçin veya Yazın *
                 </label>
+                <div className="flex flex-wrap gap-1.5">
+                  {QUICK_CUSTOM_TOPICS.map((t) => {
+                    const active = customTopic === t.label;
+                    return (
+                      <button
+                        key={t.label}
+                        type="button"
+                        onClick={() => setCustomTopic(t.label)}
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold border transition-all cursor-pointer ${
+                          active
+                            ? 'bg-indigo-600 text-white border-indigo-500 shadow-xs'
+                            : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-indigo-400'
+                        }`}
+                      >
+                        <CategoryIcon
+                          name={t.icon}
+                          className="w-3.5 h-3.5"
+                          color={active ? '#ffffff' : t.color}
+                        />
+                        <span>{t.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
                 <input
                   type="text"
                   required
                   value={customTopic}
                   onChange={(e) => setCustomTopic(e.target.value)}
-                  placeholder="Örn: Oyun Geliştirme, Siber Güvenlik, Donanım Tavsiyesi, Robotik..."
+                  placeholder="Örn: Siber Güvenlik, Oyun Geliştirme, Donanım Tavsiyesi, Robotik..."
                   className="w-full px-3.5 py-2.5 rounded-xl text-sm bg-white dark:bg-slate-900 border border-indigo-200 dark:border-indigo-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
                 />
                 <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                  Yazdığınız bu özel konu alanı başlığın önünde ve etiketlerde otomatik olarak gösterilecektir.
+                  Yukarıdaki ikonlu alanlardan birine tıklayabilir veya kendi özel konu başlığınızı yazabilirsiniz.
                 </p>
               </div>
             )}

@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { title, summary, content, category, source, readTime, isFeatured, imageUrl } = body;
+    const { title, summary, content, category, badgeColor, source, readTime, isFeatured, imageUrl } = body;
 
     if (!title || !summary || !content || !category) {
       return NextResponse.json(
@@ -77,6 +77,7 @@ export async function POST(request: Request) {
       summary,
       content,
       category,
+      badgeColor: typeof badgeColor === 'string' ? badgeColor : undefined,
       source: source || `@${user.username} • Teknoloji Radarı`,
       readTime: readTime || '3 dk okuma',
       isFeatured: Boolean(isFeatured),
@@ -108,7 +109,7 @@ export async function PATCH(request: Request) {
     }
 
     const body = await request.json();
-    const { id, title, summary, content, category, source, readTime, isFeatured, imageUrl } = body;
+    const { id, title, summary, content, category, badgeColor, source, readTime, isFeatured, imageUrl } = body;
 
     if (!id) {
       return NextResponse.json({ error: 'Haber ID gerekli.' }, { status: 400 });
@@ -153,6 +154,7 @@ export async function PATCH(request: Request) {
       summary,
       content,
       category,
+      badgeColor: typeof badgeColor === 'string' ? badgeColor : undefined,
       source,
       readTime,
       isFeatured:

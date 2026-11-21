@@ -128,6 +128,7 @@ export function AdminContentManager({
   const [editingNews, setEditingNews] = useState<TechNewsItem | null>(null);
   const [nTitle, setNTitle] = useState('');
   const [nCategory, setNCategory] = useState(TECH_NEWS_CATEGORIES[0].name);
+  const [nBadgeColor, setNBadgeColor] = useState(TECH_NEWS_CATEGORIES[0].color);
   const [nSummary, setNSummary] = useState('');
   const [nContent, setNContent] = useState('');
   const [nSource, setNSource] = useState('');
@@ -408,6 +409,7 @@ export function AdminContentManager({
     setEditingNews(null);
     setNTitle('');
     setNCategory(TECH_NEWS_CATEGORIES[0].name);
+    setNBadgeColor(TECH_NEWS_CATEGORIES[0].color);
     setNSummary('');
     setNContent('');
     setNSource('');
@@ -421,6 +423,11 @@ export function AdminContentManager({
     setEditingNews(n);
     setNTitle(n.title);
     setNCategory(n.category);
+    setNBadgeColor(
+      n.badgeColor ||
+        TECH_NEWS_CATEGORIES.find((c) => c.name === n.category)?.color ||
+        '#10b981'
+    );
     setNSummary(n.summary);
     setNContent(n.content);
     setNSource(n.source);
@@ -442,6 +449,7 @@ export function AdminContentManager({
           ...(editingNews ? { id: editingNews.id } : {}),
           title: nTitle,
           category: nCategory,
+          badgeColor: nBadgeColor,
           summary: nSummary,
           content: nContent,
           source: nSource,
@@ -1160,7 +1168,14 @@ export function AdminContentManager({
                   </label>
                   <select
                     value={nCategory}
-                    onChange={(e) => setNCategory(e.target.value)}
+                    onChange={(e) => {
+                      const nextCat = e.target.value;
+                      setNCategory(nextCat);
+                      const found = TECH_NEWS_CATEGORIES.find(
+                        (c) => c.name === nextCat
+                      );
+                      if (found) setNBadgeColor(found.color);
+                    }}
                     className="w-full px-3 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
                   >
                     {TECH_NEWS_CATEGORIES.map((c) => (
@@ -1200,6 +1215,8 @@ export function AdminContentManager({
                 imageUrl={nImageUrl}
                 category={nCategory}
                 onChange={setNImageUrl}
+                badgeColor={nBadgeColor}
+                onBadgeColorChange={setNBadgeColor}
               />
 
               <div>

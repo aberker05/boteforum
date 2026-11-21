@@ -25,7 +25,11 @@ import {
   Ban,
   UserCheck,
 } from 'lucide-react';
-import { CategoryIcon } from './CategoryIcon';
+import {
+  CategoryIcon,
+  CATEGORY_ICON_OPTIONS,
+  RICH_COLOR_PALETTE,
+} from './CategoryIcon';
 import { BrandLogo, BRAND_LOGO_ICONS, renderBrandIcon } from './BrandLogo';
 import { UserAvatar } from './UserAvatar';
 import {
@@ -41,27 +45,9 @@ import type {
 } from '@/lib/techNews';
 import { formatRelativeTime } from '@/lib/utils';
 
-const ICONS = [
-  'Megaphone',
-  'Code2',
-  'Sparkles',
-  'Palette',
-  'Rocket',
-  'HelpCircle',
-  'MessageSquare',
-  'Layers',
-];
+const ICONS = CATEGORY_ICON_OPTIONS.map((i) => i.name);
 
-const COLORS = [
-  '#6366f1',
-  '#3b82f6',
-  '#10b981',
-  '#ec4899',
-  '#f59e0b',
-  '#8b5cf6',
-  '#14b8a6',
-  '#f43f5e',
-];
+const COLORS = RICH_COLOR_PALETTE.map((c) => c.hex);
 
 export interface AdminUserItem {
   id: string;
@@ -1277,44 +1263,60 @@ export function AdminDashboard({
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                İkon Seçimi
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {ICONS.map((iconName) => (
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  İkon Seçimi ({CATEGORY_ICON_OPTIONS.length} İkon)
+                </label>
+                <span className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400">
+                  {CATEGORY_ICON_OPTIONS.find((i) => i.name === catIcon)?.label || catIcon}
+                </span>
+              </div>
+              <div className="grid grid-cols-7 sm:grid-cols-8 gap-1.5 p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-800 max-h-48 overflow-y-auto">
+                {CATEGORY_ICON_OPTIONS.map((item) => (
                   <button
-                    key={iconName}
+                    key={item.name}
                     type="button"
-                    onClick={() => setCatIcon(iconName)}
-                    className={`w-9 h-9 rounded-xl flex items-center justify-center border transition-all ${
-                      catIcon === iconName
-                        ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400'
-                        : 'border-slate-200 dark:border-slate-800 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    title={`${item.label} (${item.group})`}
+                    onClick={() => setCatIcon(item.name)}
+                    className={`h-9 rounded-xl flex items-center justify-center border transition-all cursor-pointer ${
+                      catIcon === item.name
+                        ? 'border-indigo-500 bg-indigo-600 text-white shadow-sm scale-105'
+                        : 'border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-indigo-400'
                     }`}
                   >
-                    <CategoryIcon name={iconName} className="w-4 h-4" />
+                    <CategoryIcon name={item.name} className="w-4 h-4" />
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-3">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                  Renk
+                  Kategori Rengi ({RICH_COLOR_PALETTE.length} Hazır Ton + Özel Renk Seçici)
                 </label>
-                <div className="flex flex-wrap gap-2">
-                  {COLORS.map((color) => (
+                <div className="flex flex-wrap items-center gap-2">
+                  {RICH_COLOR_PALETTE.map((c) => (
                     <button
-                      key={color}
+                      key={c.hex}
                       type="button"
-                      onClick={() => setCatColor(color)}
-                      className="w-7 h-7 rounded-lg flex items-center justify-center text-white"
-                      style={{ backgroundColor: color }}
+                      title={c.label}
+                      onClick={() => setCatColor(c.hex)}
+                      className="w-7 h-7 rounded-lg flex items-center justify-center text-white transition-transform hover:scale-110 cursor-pointer shadow-2xs"
+                      style={{ backgroundColor: c.hex }}
                     >
-                      {catColor === color && <Check className="w-3.5 h-3.5" />}
+                      {catColor.toLowerCase() === c.hex.toLowerCase() && (
+                        <Check className="w-3.5 h-3.5" />
+                      )}
                     </button>
                   ))}
+                  <input
+                    type="color"
+                    value={catColor}
+                    onChange={(e) => setCatColor(e.target.value)}
+                    className="w-8 h-8 rounded-lg cursor-pointer border border-slate-200 dark:border-slate-700 bg-transparent"
+                    title="Özel Renk Seç"
+                  />
                 </div>
               </div>
 
