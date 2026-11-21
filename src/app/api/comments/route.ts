@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser, invalidateUserCache } from '@/lib/auth';
+import { invalidateHomeCache } from '@/lib/homeCache';
 import { checkContentModeration } from '@/lib/moderation';
 import {
   checkActionCooldown,
@@ -179,6 +180,7 @@ export async function POST(request: Request) {
       }
     })();
 
+    invalidateHomeCache();
     return NextResponse.json({
       comment: {
         ...comment,
@@ -305,6 +307,7 @@ export async function PATCH(request: Request) {
         });
       }
 
+      invalidateHomeCache();
       return NextResponse.json({ isAccepted: newStatus });
     }
 
@@ -343,6 +346,7 @@ export async function DELETE(request: Request) {
     }
 
     await prisma.comment.delete({ where: { id: commentId } });
+    invalidateHomeCache();
 
     // Silinen yorum kabul edilmiş çözüm ise konunun "Çözüldü" durumunu senkronize et
     if (comment.isAccepted) {

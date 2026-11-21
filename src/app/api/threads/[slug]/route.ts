@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
+import { invalidateHomeCache } from '@/lib/homeCache';
 import { checkContentModeration } from '@/lib/moderation';
 import {
   validateContentLength,
@@ -42,6 +43,7 @@ export async function PATCH(
         where: { id: thread.id },
         data: { isPinned: !thread.isPinned },
       });
+      invalidateHomeCache();
       return NextResponse.json({ thread: updated });
     }
 
@@ -50,6 +52,7 @@ export async function PATCH(
         where: { id: thread.id },
         data: { isLocked: !thread.isLocked },
       });
+      invalidateHomeCache();
       return NextResponse.json({ thread: updated });
     }
 
@@ -65,6 +68,7 @@ export async function PATCH(
           data: { isAccepted: false },
         });
       }
+      invalidateHomeCache();
       return NextResponse.json({ thread: updated });
     }
 
@@ -80,6 +84,7 @@ export async function PATCH(
         where: { id: thread.id },
         data: { categoryId: targetCat.id },
       });
+      invalidateHomeCache();
       return NextResponse.json({ thread: updated });
     }
 
@@ -137,6 +142,7 @@ export async function PATCH(
           categoryId: nextCategoryId,
         },
       });
+      invalidateHomeCache();
       return NextResponse.json({ thread: updated });
     }
 
@@ -174,6 +180,7 @@ export async function DELETE(
     }
 
     await prisma.thread.delete({ where: { id: thread.id } });
+    invalidateHomeCache();
 
     // İlişkili anket ve rapor kayıtlarını da temizle
     try {

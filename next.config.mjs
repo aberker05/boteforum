@@ -3,6 +3,10 @@ const nextConfig = {
   reactStrictMode: true,
   experimental: {
     optimizePackageImports: ['lucide-react'],
+    staleTimes: {
+      dynamic: 45,
+      static: 300,
+    },
   },
   async headers() {
     return [

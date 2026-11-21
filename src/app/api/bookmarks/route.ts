@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
+import { invalidateHomeCache } from '@/lib/homeCache';
 import { checkActionCooldown, verifyRequestOrigin } from '@/lib/security';
 
 export async function POST(request: Request) {
@@ -41,6 +42,7 @@ export async function POST(request: Request) {
 
     if (existing) {
       await prisma.bookmark.delete({ where: { id: existing.id } });
+      invalidateHomeCache();
       return NextResponse.json({ bookmarked: false });
     } else {
       await prisma.bookmark.create({
@@ -49,6 +51,7 @@ export async function POST(request: Request) {
           threadId,
         },
       });
+      invalidateHomeCache();
       return NextResponse.json({ bookmarked: true });
     }
   } catch (error) {

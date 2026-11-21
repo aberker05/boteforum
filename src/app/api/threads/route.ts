@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser, invalidateUserCache } from '@/lib/auth';
+import { invalidateHomeCache } from '@/lib/homeCache';
 import { slugify } from '@/lib/utils';
 import { checkContentModeration } from '@/lib/moderation';
 import { createPollForThread } from '@/lib/polls';
@@ -193,6 +194,7 @@ export async function POST(request: Request) {
       }
     })();
 
+    invalidateHomeCache();
     return NextResponse.json({ thread });
   } catch (error) {
     console.error('Create thread error:', error);

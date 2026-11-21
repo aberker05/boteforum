@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser, invalidateUserCache } from '@/lib/auth';
+import { invalidateHomeCache } from '@/lib/homeCache';
 import { createNotification } from '@/lib/notifications';
 import { checkActionCooldown, verifyRequestOrigin } from '@/lib/security';
 
@@ -112,6 +113,7 @@ export async function POST(request: Request) {
       const score = votes.length;
       const userVote = votes.some((v) => v.userId === user.id) ? 1 : 0;
 
+      invalidateHomeCache();
       return NextResponse.json({ score, userVote });
     }
 
@@ -200,6 +202,7 @@ export async function POST(request: Request) {
       const score = votes.length;
       const userVote = votes.some((v) => v.userId === user.id) ? 1 : 0;
 
+      invalidateHomeCache();
       return NextResponse.json({ score, userVote });
     }
 

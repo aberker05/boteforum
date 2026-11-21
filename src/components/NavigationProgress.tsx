@@ -11,8 +11,15 @@ export function NavigationProgress() {
   const [visible, setVisible] = useState(false);
   const prefetchedSet = useRef<Set<string>>(new Set());
 
-  // Rota değişimi tamamlandığında çubuğu %100 yapıp gizle
+  // Rota değişimi tamamlandığında çubuğu %100 yapıp gizle ve iç sayfalardayken ana sayfayı ('/') arka planda hazır tut
   useEffect(() => {
+    if (pathname !== '/') {
+      try {
+        router.prefetch('/');
+      } catch {
+        // ignore
+      }
+    }
     if (!visible) return;
     setProgress(100);
     const timer = setTimeout(() => {

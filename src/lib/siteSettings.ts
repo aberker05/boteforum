@@ -1,4 +1,5 @@
 import { prisma } from './prisma';
+import { invalidateHomeCache } from './homeCache';
 
 export interface SiteSettings {
   siteNamePrimary: string;
@@ -47,6 +48,7 @@ const FOOTER_CATEGORIES_TTL_MS = 300_000;
 
 export function invalidateCategoryCache() {
   globalForSiteSettings.footerCategoriesCache = undefined;
+  invalidateHomeCache();
 }
 
 export async function getFooterCategories(): Promise<
