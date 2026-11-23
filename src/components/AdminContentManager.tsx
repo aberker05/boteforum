@@ -106,6 +106,17 @@ export function AdminContentManager({
     AdminTechNewsCommentItem[]
   >(initialTechNewsComments);
 
+  // Yeni Forum Konusu Oluşturma Modal State (Admin Panelinden Doğrudan Konu Açma)
+  const [createThreadOpen, setCreateThreadOpen] = useState(false);
+  const [newTTitle, setNewTTitle] = useState('');
+  const [newTCategoryId, setNewTCategoryId] = useState(
+    categories[0]?.id || 'OTHER'
+  );
+  const [newTCustomTopic, setNewTCustomTopic] = useState('');
+  const [newTTags, setNewTTags] = useState('');
+  const [newTContent, setNewTContent] = useState('');
+  const [creatingThread, setCreatingThread] = useState(false);
+
   // Konu Düzenleme Modal State
   const [editingThread, setEditingThread] =
     useState<AdminThreadRecord | null>(null);
@@ -191,6 +202,79 @@ export function AdminContentManager({
   }, [techNewsComments, q]);
 
   // --- KONU İŞLEMLERİ ---
+  const openCreateThread = () => {
+    setNewTTitle('');
+    setNewTCategoryId(categories[0]?.id || 'OTHER');
+    setNewTCustomTopic('');
+    setNewTTags('');
+    setNewTContent('');
+    setCreateThreadOpen(true);
+  };
+
+  const handleCreateThread = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTTitle.trim() || !newTContent.trim() || !newTCategoryId) return;
+    if (newTCategoryId === 'OTHER' && !newTCustomTopic.trim()) {
+      showNotice('error', 'Lütfen Diğer alanı için özel konu başlığını yazın.');
+      return;
+    }
+
+    setCreatingThread(true);
+    try {
+      const res = await fetch('/api/threads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: newTTitle.trim(),
+          categoryId: newTCategoryId,
+          customTopic:
+            newTCategoryId === 'OTHER' ? newTCustomTopic.trim() : undefined,
+          tags: newTTags.trim(),
+          content: newTContent.trim(),
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        showNotice('error', data.error || 'Konu oluşturulamadı.');
+      } else if (data.thread) {
+        const matchedCat =
+          categories.find((c) => c.id === data.thread.categoryId) ||
+          categories[0] || {
+            id: 'OTHER',
+            name: 'Diğer',
+            color: '#6366f1',
+          };
+        const createdRecord: AdminThreadRecord = {
+          id: data.thread.id,
+          title: data.thread.title,
+          slug: data.thread.slug,
+          content: data.thread.content,
+          tags: data.thread.tags || '',
+          categoryId: data.thread.categoryId,
+          isPinned: Boolean(data.thread.isPinned),
+          isLocked: Boolean(data.thread.isLocked),
+          isSolved: Boolean(data.thread.isSolved),
+          views: 1,
+          createdAt: data.thread.createdAt || new Date().toISOString(),
+          author: {
+            username: 'admin',
+            displayName: 'Yönetici',
+            avatarColor: '#6366f1',
+          },
+          category: matchedCat,
+          _count: { comments: 0 },
+        };
+        setThreads((prev) => [createdRecord, ...prev]);
+        setCreateThreadOpen(false);
+        showNotice('success', 'Yeni forum konusu başarıyla yayınlandı.');
+      }
+    } catch {
+      showNotice('error', 'Bağlantı hatası oluştu.');
+    } finally {
+      setCreatingThread(false);
+    }
+  };
+
   const openEditThread = (t: AdminThreadRecord) => {
     setEditingThread(t);
     setTTitle(t.title);
@@ -553,11 +637,21 @@ export function AdminContentManager({
               className="w-full pl-9 pr-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
             />
           </div>
+          {subTab === 'threads' && (
+            <button
+              type="button"
+              onClick={openCreateThread}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors cursor-pointer"
+            >
+              <PlusCircle className="w-4 h-4" />
+              Yeni Konu Ekle
+            </button>
+          )}
           {subTab === 'news' && (
             <button
               type="button"
               onClick={openCreateNews}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors cursor-pointer"
             >
               <PlusCircle className="w-4 h-4" />
               Yeni Haber Ekle
@@ -998,6 +1092,122 @@ export function AdminContentManager({
               </div>
             ))
           )}
+        </div>
+      )}
+
+      {/* MODAL 0: YENİ FORUM KONUSU OLUŞTURMA (ADMİN PANELİNDEN DOĞRUDAN) */}
+      {createThreadOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="w-full max-w-2xl max-h-[92vh] overflow-y-auto rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <PlusCircle className="w-5 h-5 text-indigo-500" />
+                Yeni Forum Konusu Oluştur
+              </h3>
+              <button
+                type="button"
+                onClick={() => setCreateThreadOpen(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateThread} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Konu Başlığı *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newTTitle}
+                  onChange={(e) => setNewTTitle(e.target.value)}
+                  placeholder="Örn: Siber Güvenlik Laboratuvar Kurulumu ve Ağ Analizi Rehberi"
+                  className="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Kategori *
+                  </label>
+                  <select
+                    value={newTCategoryId}
+                    onChange={(e) => setNewTCategoryId(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
+                  >
+                    {categories
+                      .filter((c) => c.name !== 'Diğer')
+                      .map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </option>
+                      ))}
+                    <option value="OTHER">Diğer (Özel Konu Alanı)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Etiketler (Virgülle ayırın)
+                  </label>
+                  <input
+                    type="text"
+                    value={newTTags}
+                    onChange={(e) => setNewTTags(e.target.value)}
+                    placeholder="Örn: siber-guvenlik, ag, rehber"
+                    className="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              {newTCategoryId === 'OTHER' && (
+                <div>
+                  <label className="block text-xs font-bold text-indigo-600 dark:text-indigo-400 mb-1">
+                    Özel Konu Alanı / Alt Başlığı Belirtin *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={newTCustomTopic}
+                    onChange={(e) => setNewTCustomTopic(e.target.value)}
+                    placeholder="Örn: Siber Güvenlik, Eğitim Teknolojileri, BÖTE, Oyun Geliştirme..."
+                    className="w-full px-3.5 py-2.5 rounded-xl text-sm bg-indigo-50/50 dark:bg-indigo-950/30 border border-indigo-300 dark:border-indigo-700 text-slate-900 dark:text-white"
+                  />
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Konu İçeriği (Markdown, Kod Bloğu & Görsel Yükleme) *
+                </label>
+                <MarkdownEditor
+                  value={newTContent}
+                  onChange={setNewTContent}
+                  rows={8}
+                />
+              </div>
+
+              <div className="pt-2 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCreateThreadOpen(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                >
+                  Vazgeç
+                </button>
+                <button
+                  type="submit"
+                  disabled={creatingThread}
+                  className="px-5 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-50 cursor-pointer"
+                >
+                  {creatingThread ? 'Yayınlanıyor...' : 'Konuyu Yayınla'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 

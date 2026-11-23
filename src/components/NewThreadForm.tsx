@@ -28,7 +28,8 @@ const QUICK_CUSTOM_TOPICS = [
   { label: 'DevOps, Linux & Sunucu', icon: 'Terminal', color: '#06b6d4' },
   { label: 'Veri Bilimi & SQL', icon: 'Database', color: '#3b82f6' },
   { label: 'Donanım & Gömülü Sistem', icon: 'Cpu', color: '#f59e0b' },
-  { label: 'BÖTE & Eğitim Teknolojileri', icon: 'GraduationCap', color: '#6366f1' },
+  { label: 'Eğitim Teknolojileri', icon: 'BookOpen', color: '#6366f1' },
+  { label: 'BÖTE & Akademik', icon: 'GraduationCap', color: '#0ea5e9' },
   { label: 'Mobil Uygulama', icon: 'Smartphone', color: '#ec4899' },
   { label: 'Robotik & Otomasyon', icon: 'Bot', color: '#14b8a6' },
 ];

@@ -69,8 +69,8 @@ export const CATEGORY_ICON_OPTIONS: IconOption[] = [
   { name: 'LineChart', label: 'Veri Bilimi & Analitik', group: 'Teknoloji & AI' },
 
   // Eğitim, Tasarım & Topluluk
-  { name: 'GraduationCap', label: 'Akademi, BÖTE & Eğitim', group: 'Eğitim & Topluluk' },
-  { name: 'BookOpen', label: 'Ders Notu & Kaynaklar', group: 'Eğitim & Topluluk' },
+  { name: 'BookOpen', label: 'Eğitim Teknolojileri & Öğretim Tasarımı', group: 'Eğitim & Topluluk' },
+  { name: 'GraduationCap', label: 'BÖTE & Akademik Çalışmalar', group: 'Eğitim & Topluluk' },
   { name: 'Palette', label: 'UI/UX & Grafik Tasarım', group: 'Eğitim & Topluluk' },
   { name: 'Gamepad2', label: 'Oyun Geliştirme & E-Spor', group: 'Eğitim & Topluluk' },
   { name: 'Video', label: 'Multimedya & İçerik Üretimi', group: 'Eğitim & Topluluk' },

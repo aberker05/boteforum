@@ -44,7 +44,8 @@ export const TECH_NEWS_CATEGORIES = [
   { name: 'Mobil & Bulut', color: '#ec4899', icon: 'Cloud' },
   { name: 'Veri Bilimi & Ağ', color: '#06b6d4', icon: 'Database' },
   { name: 'Oyun & Simülasyon', color: '#a855f7', icon: 'Gamepad2' },
-  { name: 'Eğitim Teknolojileri (BÖTE)', color: '#6366f1', icon: 'GraduationCap' },
+  { name: 'Eğitim Teknolojileri', color: '#6366f1', icon: 'BookOpen' },
+  { name: 'BÖTE & Akademi', color: '#0ea5e9', icon: 'GraduationCap' },
   { name: 'Robotik & Otomasyon', color: '#14b8a6', icon: 'Bot' },
   { name: 'Uzay & Bilim', color: '#8b5cf6', icon: 'Rocket' },
 ];
@@ -66,8 +67,12 @@ export const DEFAULT_NEWS_IMAGES_BY_CATEGORY: Record<string, string> = {
     'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80',
   'Oyun & Simülasyon':
     'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80',
+  'Eğitim Teknolojileri':
+    'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1200&q=80',
   'Eğitim Teknolojileri (BÖTE)':
     'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1200&q=80',
+  'BÖTE & Akademi':
+    'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1200&q=80',
   'Robotik & Otomasyon':
     'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=1200&q=80',
 };
@@ -333,11 +338,11 @@ Kurumlar için artık en güçlü savunma stratejisi, **Sıfır Güven (Zero Tru
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 1).toISOString(),
   },
   {
-    title: 'Eğitim Teknolojilerinde (BÖTE) Kişiselleştirilmiş Yapay Zeka Öğretmenler ve XR Sanal Laboratuvarlar',
+    title: 'Eğitim Teknolojilerinde Kişiselleştirilmiş Yapay Zeka Öğretmenler ve XR Sanal Laboratuvarlar',
     slug: 'egitim-teknolojilerinde-bote-kisisellestirilmis-yapay-zeka-ogretmenler-ve-xr-laboratuvarlar',
     summary:
       'Her öğrencinin bilişsel öğrenme hızına göre gerçek zamanlı uyarlanan Sokratik yapay zeka asistanları ve WebXR tabanlı 3B sanal laboratuvarlar, eğitimde fırsat eşitliğini ve kalıcılığı üst seviyeye taşıyor.',
-    content: `### BÖTE ve Öğretim Tasarımında Birebir Uyarlanabilir Öğrenme Çağı
+    content: `### Öğretim Tasarımında Birebir Uyarlanabilir Öğrenme Çağı
 
 Eğitim bilimlerinde Benjamin Bloom'un ünlü **"2 Sigma Problemi"** (birebir özel ders alan öğrencilerin standart sınıf ortamına göre %98 daha başarılı olması), yeni nesil **pedagojik yapay zeka ajanları ve uzamsal bilişim (WebXR)** araçlarıyla ilk kez kitlesel ölçekte çözüme kavuşuyor.
 
@@ -345,9 +350,9 @@ Eğitim bilimlerinde Benjamin Bloom'un ünlü **"2 Sigma Problemi"** (birebir ö
 - **Sokratik Kodlama ve Bilim Rehberleri:** Öğrenciye doğrudan hazır cevabı vermek yerine, hatanın nedenini bulduran ipuçları ve kademeli sorular (Scaffolding) yönelten pedagojik dil modelleri.
 - **Tarayıcı İçi WebXR Laboratuvarları:** Pahalı donanım gerektirmeden standart web tarayıcısı üzerinden ağ topolojisi kurma, mikrodenetleyici simülasyonu ve siber güvenlik CTF laboratuvarlarını 3 boyutlu deneyimleme imkanı.
 - **Öğrenme Analitiği ve Bilişsel Yük Takibi:** Öğrencinin zorlandığı kavramları erken tespit ederek materyali görsel, işitsel veya etkileşimli kod bloklarıyla dinamik olarak yeniden yapılandıran akıllı öğretim yönetim sistemleri (LMS).`,
-    category: 'Eğitim Teknolojileri (BÖTE)',
+    category: 'Eğitim Teknolojileri',
     badgeColor: '#6366f1',
-    source: 'BÖTE & EdTech Akademi',
+    source: 'EdTech & Öğretim Tasarımı',
     readTime: '4 dk okuma',
     isFeatured: 1,
     views: 468,

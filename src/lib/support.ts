@@ -69,7 +69,7 @@ export const SUPPORT_CATEGORIES: Array<{
   },
   {
     id: 'OTHER',
-    label: 'İş Birliği & Akademik / BÖTE',
+    label: 'İş Birliği, Akademik & Etkinlik',
     desc: 'Etkinlik, proje, akademik duyuru veya diğer talepler',
     color: '#06b6d4',
     icon: 'GraduationCap',
