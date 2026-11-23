@@ -167,6 +167,77 @@ export function SupportCenterClient({
         </div>
       </div>
 
+      {/* Nasıl Kullanılır? (Adım Adım Kullanım Rehberi) */}
+      <div className="rounded-3xl border border-slate-200/85 dark:border-slate-800/90 bg-white dark:bg-slate-900/90 p-5 sm:p-6 space-y-4 shadow-2xs">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+              <Shield className="w-4 h-4 text-indigo-500" />
+              Destek, Talep ve Şikayet Sistemi Nasıl Kullanılır?
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Gönderdiğiniz tüm bildirimler gizlidir; diğer üyeler tarafından görülmez, yalnızca site yönetimine (Admin) düşer.
+            </p>
+          </div>
+          <Link
+            href="/kurallar#sikayet-ve-destek"
+            className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
+          >
+            Topluluk Kuralları & İlkeler →
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-800 space-y-1.5">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-indigo-500/15 text-indigo-600 dark:text-indigo-400">
+              1. ADIM • TÜR SEÇİMİ
+            </span>
+            <p className="font-bold text-slate-900 dark:text-white">
+              Doğru Kategoriyi Seçin
+            </p>
+            <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
+              Kural ihlali veya üye şikayeti için <strong>Moderasyon, Şikayet & İtiraz</strong>; yeni bölüm/özellik için <strong>Yeni Kategori & Özellik Talebi</strong>; hata bildirimi için <strong>Teknik Destek</strong> seçin.
+            </p>
+          </div>
+
+          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-800 space-y-1.5">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-rose-500/15 text-rose-600 dark:text-rose-400">
+              2. ADIM • KANIT & DETAY
+            </span>
+            <p className="font-bold text-slate-900 dark:text-white">
+              Bağlantı veya Kullanıcı Adı Ekleyin
+            </p>
+            <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
+              Şikayetlerinizde ilgili konunun/yorumun bağlantısını (URL) veya <code>@kullaniciadi</code> bilgisini açıklamaya yazın. Acil durumlarda <strong>⚡ Acil / Yüksek Öncelik</strong> işaretleyin.
+            </p>
+          </div>
+
+          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-800 space-y-1.5">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-amber-500/15 text-amber-600 dark:text-amber-400">
+              3. ADIM • HIZLI RAPORLAMA
+            </span>
+            <p className="font-bold text-slate-900 dark:text-white">
+              Konu İçi &ldquo;Rapor Et&rdquo; Seçeneği
+            </p>
+            <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
+              Bir konu veya yorumdaki anlık kural ihlalini doğrudan ilgili paylaşımın altındaki <strong>Rapor Et (Bayrak)</strong> butonuyla da tek tıkla yönetime bildirebilirsiniz.
+            </p>
+          </div>
+
+          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-800 space-y-1.5">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+              4. ADIM • YANIT TAKİBİ
+            </span>
+            <p className="font-bold text-slate-900 dark:text-white">
+              Bildirim & Canlı Durum Takibi
+            </p>
+            <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
+              Yönetici talebinizi yanıtladığında üst menüdeki <strong>Bildirim Zili</strong> üzerinden haberdar edilirsiniz ve sağdaki listeden resmi yanıtı okuyabilirsiniz.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {!currentUser ? (
         <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/90 p-8 sm:p-12 text-center space-y-4">
           <div className="w-12 h-12 rounded-2xl bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto">

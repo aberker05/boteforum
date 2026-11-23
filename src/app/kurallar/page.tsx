@@ -8,6 +8,8 @@ import {
   ArrowLeft,
   CheckCircle2,
   AlertOctagon,
+  MessageSquarePlus,
+  Flag,
 } from 'lucide-react';
 import { getSiteSettings } from '@/lib/siteSettings';
 import { LEVEL_TIERS } from '@/lib/badges';
@@ -84,21 +86,101 @@ export default async function RulesPage() {
 
           <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 space-y-1.5">
             <h3 className="font-bold text-slate-900 dark:text-white">
-              Raporlama ve Çözüm İşaretleme
+              Şikayet, Raporlama ve Çözüm İşaretleme
             </h3>
             <p>
-              Kurallara aykırı gördüğünüz içerikleri <strong>Rapor Et</strong> butonuyla yönetime bildirebilir, çözülen konularınızda doğru yanıtı <strong>Çözüm Seç</strong> ile işaretleyebilirsiniz.
+              Kurallara aykırı gördüğünüz içerikleri konu içindeki <strong>Rapor Et</strong> butonuyla veya <Link href="/destek" className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline">Destek & Şikayet Merkezi</Link> üzerinden yönetime bildirebilir, çözülen konularınızda doğru yanıtı <strong>Çözüm Seç</strong> ile işaretleyebilirsiniz.
             </p>
           </div>
         </div>
       </section>
 
-      {/* 2. İtibar Puanı ve Seviye Sistemi */}
+      {/* 2. Şikayet, Raporlama ve Destek Merkezi Nasıl Kullanılır? */}
+      <section
+        id="sikayet-ve-destek"
+        className="scroll-mt-24 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900/90 p-6 sm:p-8 space-y-5"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="space-y-1">
+            <h2 className="text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+              <MessageSquarePlus className="w-5 h-5 text-indigo-500" />
+              2. Şikayet, Raporlama ve Destek Merkezi Nasıl Kullanılır?
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+              Topluluk huzurunu korumak veya yönetime doğrudan ulaşmak için <strong>iki farklı bildirim kanalını</strong> kullanabilirsiniz:
+            </p>
+          </div>
+          <Link
+            href="/destek"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-extrabold bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-500/20 transition-all"
+          >
+            <MessageSquarePlus className="w-3.5 h-3.5" />
+            Destek & Şikayet Merkezine Git →
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm">
+          {/* Yöntem A: Destek, Talep & Şikayet Merkezi */}
+          <div className="p-5 rounded-2xl border border-indigo-500/25 bg-indigo-500/5 space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-indigo-600 text-white">
+                YÖNTEM 1
+              </span>
+              <h3 className="font-extrabold text-slate-900 dark:text-white">
+                Destek, Talep & Şikayet Merkezi (/destek)
+              </h3>
+            </div>
+            <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
+              Üst menüdeki veya ana sayfadaki <strong>Destek & Talep</strong> bağlantısına tıklayarak doğrudan site yönetimine özel bilet (ticket) oluşturabilirsiniz:
+            </p>
+            <ol className="space-y-1.5 text-xs text-slate-600 dark:text-slate-300 list-decimal pl-4">
+              <li>
+                <strong>Bildirim Türünü Seçin:</strong> Kural ihlali veya kullanıcı şikayeti için <em>Moderasyon, Şikayet & İtiraz</em>; yeni bölüm/özellik önerisi için <em>Yeni Kategori & Özellik Talebi</em>; hesap/site hatası için <em>Teknik Destek</em> kategorisini seçin.
+              </li>
+              <li>
+                <strong>Öncelik ve Detay Girin:</strong> Şikayet edilen konu/yorum bağlantısını (URL) veya <code>@kullaniciadi</code> bilgisini açıklamaya ekleyin. Acil ihlallerde <strong>⚡ Acil / Yüksek Öncelik</strong> seçeneğini işaretleyin.
+              </li>
+              <li>
+                <strong>Yanıtı Takip Edin:</strong> Talebiniz yalnızca yöneticilere görünür. Yönetici yanıt verdiğinde <strong>Bildirim Zili</strong> üzerinden anında bildirim alır ve yanıtı <code>/destek</code> sayfasındaki <em>Gönderdiğim Talepler ve Yanıtlar</em> listesinden okuyabilirsiniz.
+              </li>
+            </ol>
+          </div>
+
+          {/* Yöntem B: Konu ve Yorum İçi Hızlı Rapor Et Butonu */}
+          <div className="p-5 rounded-2xl border border-rose-500/25 bg-rose-500/5 space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-rose-600 text-white">
+                YÖNTEM 2
+              </span>
+              <h3 className="font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5">
+                Konu & Yorum İçi &ldquo;Rapor Et&rdquo; Butonu
+                <Flag className="w-3.5 h-3.5 text-rose-500" />
+              </h3>
+            </div>
+            <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
+              Forumda okuduğunuz bir konuda veya yorumda spam, hakaret, zararlı bağlantı ya da kategori dışı paylaşım gördüğünüzde sayfadan ayrılmadan bildirebilirsiniz:
+            </p>
+            <ol className="space-y-1.5 text-xs text-slate-600 dark:text-slate-300 list-decimal pl-4">
+              <li>
+                İlgili konunun veya yorumun altındaki <strong>Rapor Et (Bayrak)</strong> butonuna tıklayın.
+              </li>
+              <li>
+                Açılan pencerede ihlal nedenini (Spam, Hakaret/Küfür, Yanlış Kategori, Zararlı İçerik vb.) kısaca yazıp gönderin.
+              </li>
+              <li>
+                Raporunuz doğrudan Yönetim Paneli&apos;ndeki <strong>Raporlar</strong> ekranına düşer ve moderasyon ekibi tarafından incelenerek gerekli işlem (içerik silme, kilitleme veya hesap uzaklaştırma) uygulanır.
+              </li>
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. İtibar Puanı ve Seviye Sistemi */}
       <section className="rounded-3xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900/90 p-6 sm:p-8 space-y-6">
         <div className="space-y-1">
           <h2 className="text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
             <Award className="w-5 h-5 text-amber-500" />
-            2. İtibar Puanı, Seviyeler ve Rozet Sistemi Nasıl Çalışır?
+            3. İtibar Puanı, Seviyeler ve Rozet Sistemi Nasıl Çalışır?
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
             Her yeni üye <strong>0 Puan (Seviye 1)</strong> ile başlar. Tüm puanlamalar kolay takip edilebilmesi için <strong>5 ve 10&apos;un katları</strong> şeklinde hesaplanır.
@@ -200,7 +282,7 @@ export default async function RulesPage() {
         </div>
       </section>
 
-      {/* 3. Güvenlik ve Gizlilik */}
+      {/* 4. Güvenlik ve Gizlilik */}
       <section
         id="gizlilik"
         className="scroll-mt-24 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900/90 p-6 sm:p-8 space-y-4"
@@ -208,7 +290,7 @@ export default async function RulesPage() {
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
             <Lock className="w-5 h-5 text-emerald-500" />
-            3. Veri Güvenliği, Şeffaflık ve Gizlilik İlkeleri
+            4. Veri Güvenliği, Şeffaflık ve Gizlilik İlkeleri
           </h2>
           <Link
             href="/gizlilik"

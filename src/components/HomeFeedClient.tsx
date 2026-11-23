@@ -1344,6 +1344,16 @@ export function HomeFeedClient({
             <li>Konu açarken açıklayıcı bir başlık ve doğru kategori seçin.</li>
             <li>Kod örneklerini Markdown kod blokları içine yerleştirin.</li>
             <li>Sorunuz çözüldüğünde yardımcı olan yanıtı <strong>Çözüm Seç</strong> ile işaretleyin.</li>
+            <li>
+              Şikayet, yeni kategori önerisi veya teknik destek için{' '}
+              <Link
+                href="/destek"
+                className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
+              >
+                Destek & Şikayet Merkezi
+              </Link>
+              &apos;ni kullanın.
+            </li>
           </ul>
         </div>
       </aside>
