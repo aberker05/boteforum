@@ -39,6 +39,11 @@ import {
 } from './AdminContentManager';
 import { DEFAULT_SITE_SETTINGS, type SiteSettings } from '@/lib/siteSettings';
 import type { ContentReportItem } from '@/lib/reports';
+import {
+  SUPPORT_CATEGORIES,
+  type SupportTicketItem,
+  type SupportTicketStatus,
+} from '@/lib/support';
 import type {
   TechNewsItem,
   AdminTechNewsCommentItem,
@@ -93,6 +98,7 @@ interface AdminDashboardProps {
   techNews?: TechNewsItem[];
   techNewsComments?: AdminTechNewsCommentItem[];
   reports: ContentReportItem[];
+  supportTickets?: SupportTicketItem[];
   initialSiteSettings?: SiteSettings;
 }
 
@@ -106,16 +112,20 @@ export function AdminDashboard({
   techNews = [],
   techNewsComments = [],
   reports: initialReports,
+  supportTickets: initialSupportTickets = [],
   initialSiteSettings = DEFAULT_SITE_SETTINGS,
 }: AdminDashboardProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<
-    'branding' | 'content' | 'users' | 'categories' | 'reports'
+    'branding' | 'content' | 'users' | 'categories' | 'reports' | 'support'
   >('content');
   const [users, setUsers] = useState<AdminUserItem[]>(initialUsers);
   const [categories, setCategories] = useState<AdminCategoryItem[]>(initialCategories);
   const [reports, setReports] = useState<ContentReportItem[]>(initialReports);
+  const [tickets, setTickets] = useState<SupportTicketItem[]>(initialSupportTickets);
+  const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
   const pendingReportsCount = reports.filter((r) => r.status === 'PENDING').length;
+  const openTicketsCount = tickets.filter((t) => t.status === 'OPEN').length;
   const [userSearch, setUserSearch] = useState('');
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [error, setError] = useState('');
@@ -450,6 +460,70 @@ export function AdminDashboard({
     }
   };
 
+  const handleUpdateTicket = async (
+    ticketId: string,
+    status?: SupportTicketStatus,
+    adminReply?: string
+  ) => {
+    setError('');
+    const prevTickets = tickets;
+    const nowIso = new Date().toISOString();
+
+    // 0ms Anlık (Optimistic) UI Güncellemesi
+    setTickets((prev) =>
+      prev.map((t) => {
+        if (t.id !== ticketId) return t;
+        const nextReply =
+          adminReply !== undefined ? adminReply.trim() : t.adminReply;
+        const nextStatus =
+          status || (nextReply && t.status === 'OPEN' ? 'ANSWERED' : t.status);
+        return {
+          ...t,
+          status: nextStatus,
+          adminReply: nextReply,
+          repliedAt: adminReply !== undefined ? nowIso : t.repliedAt,
+        };
+      })
+    );
+    setSuccessMsg('Destek/talep kaydı güncellendi ve kullanıcıya bildirim gönderildi.');
+    setTimeout(() => setSuccessMsg(''), 3000);
+
+    try {
+      const res = await fetch('/api/support', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ticketId, status, adminReply }),
+      });
+      if (!res.ok) {
+        setTickets(prevTickets);
+        setError('Talep güncellenemedi.');
+      }
+    } catch {
+      setTickets(prevTickets);
+      setError('Bağlantı hatası oluştu.');
+    }
+  };
+
+  const handleDeleteTicketRecord = async (ticketId: string) => {
+    if (!confirm('Bu destek/talep kaydını kalıcı olarak silmek istediğinize emin misiniz?')) {
+      return;
+    }
+    setError('');
+    const prevTickets = tickets;
+    setTickets((prev) => prev.filter((t) => t.id !== ticketId));
+    try {
+      const res = await fetch(`/api/support?id=${ticketId}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) {
+        setTickets(prevTickets);
+      }
+    } catch {
+      setTickets(prevTickets);
+      setError('Bağlantı hatası oluştu.');
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Üst Başlık */}
@@ -610,6 +684,24 @@ export function AdminDashboard({
           {pendingReportsCount > 0 && (
             <span className="px-2 py-0.5 text-[11px] font-extrabold rounded-full bg-rose-500 text-white">
               {pendingReportsCount} Yeni
+            </span>
+          )}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('support')}
+          className={`shrink-0 inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-colors cursor-pointer ${
+            activeTab === 'support'
+              ? 'bg-emerald-600 text-white shadow-sm'
+              : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+          }`}
+        >
+          <MessageSquare className="w-4 h-4" />
+          Destek & Talepler ({tickets.length})
+          {openTicketsCount > 0 && (
+            <span className="px-2 py-0.5 text-[11px] font-extrabold rounded-full bg-amber-500 text-slate-950">
+              {openTicketsCount} Açık
             </span>
           )}
         </button>
@@ -1583,6 +1675,214 @@ export function AdminDashboard({
                         >
                           <X className="w-4 h-4" />
                         </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* DESTEK, TALEP & ŞİKAYET MERKEZİ SEKMESİ */}
+      {activeTab === 'support' && (
+        <div className="rounded-3xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900/90 p-5 sm:p-6 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <MessageSquare className="w-5 h-5 text-emerald-500" />
+                Kullanıcı Destek, Talep ve Şikayet Bildirimleri
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Üyelerin `/destek` sayfasından gönderdiği teknik destek, özellik/kategori önerisi ve şikayetleri yanıtlayıp durumunu güncelleyebilirsiniz.
+              </p>
+            </div>
+            <Link
+              href="/destek"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20 transition-colors"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              Destek Sayfasını Gör
+            </Link>
+          </div>
+
+          {tickets.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 p-10 text-center space-y-2">
+              <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto" />
+              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                Şu anda gönderilmiş herhangi bir destek veya talep bildirimi bulunmuyor.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {tickets.map((t) => {
+                const catInfo =
+                  SUPPORT_CATEGORIES.find((c) => c.id === t.category) ||
+                  SUPPORT_CATEGORIES[0];
+                const draftVal =
+                  replyDrafts[t.id] !== undefined
+                    ? replyDrafts[t.id]
+                    : t.adminReply || '';
+                return (
+                  <div
+                    key={t.id}
+                    className={`rounded-2xl border p-4 sm:p-5 space-y-3.5 transition-all ${
+                      t.status === 'OPEN'
+                        ? 'border-amber-400/60 dark:border-amber-500/40 bg-amber-50/20 dark:bg-amber-950/10'
+                        : 'border-slate-200/80 dark:border-slate-800/80 bg-slate-50/40 dark:bg-slate-900/50'
+                    }`}
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span
+                          className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold"
+                          style={{
+                            backgroundColor: `${catInfo.color}20`,
+                            color: catInfo.color,
+                          }}
+                        >
+                          <CategoryIcon
+                            name={catInfo.icon}
+                            className="w-3.5 h-3.5"
+                            color={catInfo.color}
+                          />
+                          {catInfo.label}
+                        </span>
+
+                        {t.priority === 'HIGH' && (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-500 text-white">
+                            ⚡ ACİL
+                          </span>
+                        )}
+
+                        <span
+                          className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                            t.status === 'OPEN'
+                              ? 'bg-amber-500 text-slate-950'
+                              : t.status === 'ANSWERED'
+                              ? 'bg-indigo-500/15 text-indigo-600 dark:text-indigo-400'
+                              : t.status === 'RESOLVED'
+                              ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+                              : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                          }`}
+                        >
+                          {t.status === 'OPEN'
+                            ? 'İnceleme Bekliyor'
+                            : t.status === 'ANSWERED'
+                            ? 'Yanıtlandı'
+                            : t.status === 'RESOLVED'
+                            ? 'Çözüldü'
+                            : 'Kapatıldı'}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2 text-xs text-slate-400">
+                        <span>{formatRelativeTime(t.createdAt)}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteTicketRecord(t.id)}
+                          title="Talebi Kalıcı Olarak Sil"
+                          className="p-1.5 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Gönderen Üye Bilgisi */}
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                      <span>Gönderen:</span>
+                      <Link
+                        href={`/kullanici/${t.userUsername}`}
+                        className="inline-flex items-center gap-1.5 font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
+                      >
+                        <UserAvatar
+                          name={t.userDisplayName || 'Üye'}
+                          avatar={t.userAvatarColor || '#6366f1'}
+                          className="w-5 h-5 rounded-md text-[10px]"
+                        />
+                        {t.userDisplayName} (@{t.userUsername})
+                      </Link>
+                      {t.userEmail && (
+                        <span className="text-slate-400">• {t.userEmail}</span>
+                      )}
+                    </div>
+
+                    {/* Talep Başlığı ve Mesajı */}
+                    <div className="rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-3.5 space-y-1.5">
+                      <h4 className="text-sm font-extrabold text-slate-900 dark:text-white">
+                        {t.subject}
+                      </h4>
+                      <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
+                        {t.message}
+                      </p>
+                    </div>
+
+                    {/* Yönetici Yanıtı ve Hızlı Durum Aksiyonları */}
+                    <div className="space-y-2.5 pt-1">
+                      <textarea
+                        rows={2}
+                        value={draftVal}
+                        onChange={(e) =>
+                          setReplyDrafts((prev) => ({
+                            ...prev,
+                            [t.id]: e.target.value,
+                          }))
+                        }
+                        placeholder="Kullanıcıya iletilecek resmi yönetim yanıtınızı buraya yazın..."
+                        className="w-full px-3.5 py-2 rounded-xl text-xs sm:text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                      />
+
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleUpdateTicket(t.id, 'ANSWERED', draftVal)
+                            }
+                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors cursor-pointer"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                            Yanıtı Kaydet & Bildir
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleUpdateTicket(
+                                t.id,
+                                'RESOLVED',
+                                draftVal || t.adminReply
+                              )
+                            }
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition-colors cursor-pointer"
+                          >
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            Çözüldü İşaretle
+                          </button>
+                        </div>
+
+                        <div className="flex items-center gap-1.5">
+                          {t.status !== 'OPEN' && (
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateTicket(t.id, 'OPEN')}
+                              className="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 hover:bg-amber-500/25 transition-colors cursor-pointer"
+                            >
+                              Tekrar Aç
+                            </button>
+                          )}
+                          {t.status !== 'CLOSED' && (
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateTicket(t.id, 'CLOSED')}
+                              className="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                            >
+                              Kapat
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>

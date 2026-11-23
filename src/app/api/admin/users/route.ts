@@ -194,6 +194,7 @@ export async function DELETE(request: Request) {
       prisma.$executeRaw`DELETE FROM "ThreadPollVote" WHERE "userId" = ${userId}`.catch(() => {}),
       prisma.$executeRaw`DELETE FROM "Notification" WHERE "userId" = ${userId}`.catch(() => {}),
       prisma.$executeRaw`DELETE FROM "PasswordReset" WHERE "userId" = ${userId}`.catch(() => {}),
+      prisma.$executeRaw`DELETE FROM "SupportTicket" WHERE "userId" = ${userId}`.catch(() => {}),
     ]);
 
     await prisma.user.delete({ where: { id: userId } });

@@ -188,6 +188,11 @@ export default async function RootLayout({
                       </Link>
                     </li>
                     <li>
+                      <Link href="/destek" className="font-semibold text-emerald-600 dark:text-emerald-400 hover:underline transition-colors">
+                        Destek, Talep & Şikayet
+                      </Link>
+                    </li>
+                    <li>
                       <Link href="/gizlilik#veri-tablosu" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
                         Veriler Neden İsteniyor?
                       </Link>

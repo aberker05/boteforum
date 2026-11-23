@@ -210,6 +210,20 @@ ALTER TABLE "ContentReport" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "PasswordReset" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "SiteSettings" ENABLE ROW LEVEL SECURITY;
 
+CREATE TABLE IF NOT EXISTS "SupportTicket" (
+  "id" TEXT NOT NULL PRIMARY KEY,
+  "userId" TEXT NOT NULL,
+  "category" TEXT NOT NULL DEFAULT 'SUPPORT',
+  "priority" TEXT NOT NULL DEFAULT 'NORMAL',
+  "subject" TEXT NOT NULL,
+  "message" TEXT NOT NULL,
+  "status" TEXT NOT NULL DEFAULT 'OPEN',
+  "adminReply" TEXT NOT NULL DEFAULT '',
+  "repliedAt" TEXT NOT NULL DEFAULT '',
+  "createdAt" TEXT NOT NULL
+);
+ALTER TABLE "SupportTicket" ENABLE ROW LEVEL SECURITY;
+
 -- ============================================================================
 -- VARSAYILAN FORUM KATEGORİLERİ (İlk Kurulum İçin Otomatik Yüklenir)
 -- ============================================================================

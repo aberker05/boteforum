@@ -910,6 +910,15 @@ export function Navbar({
                           <Bookmark className="w-4 h-4 text-slate-400" />
                           Kaydedilen Konular
                         </Link>
+                        <Link
+                          href="/destek"
+                          prefetch={true}
+                          onClick={() => setMenuOpen(false)}
+                          className="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        >
+                          <HelpCircle className="w-4 h-4 text-emerald-500" />
+                          Destek & Talep Merkezi
+                        </Link>
                         <button
                           type="button"
                           onClick={() => {

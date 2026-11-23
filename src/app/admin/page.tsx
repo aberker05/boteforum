@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
 import { getAllReports } from '@/lib/reports';
+import { getAllSupportTickets } from '@/lib/support';
 import { getSiteSettings } from '@/lib/siteSettings';
 import {
   getAllTechNews,
@@ -25,6 +26,7 @@ export default async function AdminPage() {
     techNews,
     techNewsComments,
     reports,
+    supportTickets,
     siteSettings,
   ] = await Promise.all([
     prisma.user.findMany({
@@ -98,6 +100,7 @@ export default async function AdminPage() {
     getAllTechNews(),
     getAllTechNewsCommentsForAdmin(),
     getAllReports(),
+    getAllSupportTickets(),
     getSiteSettings(),
   ]);
 
@@ -122,6 +125,7 @@ export default async function AdminPage() {
       techNews={techNews}
       techNewsComments={techNewsComments}
       reports={reports}
+      supportTickets={supportTickets}
       initialSiteSettings={siteSettings}
     />
   );
