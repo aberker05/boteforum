@@ -202,9 +202,30 @@ export function AdminContentManager({
   const handleSaveThread = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingThread) return;
-    setLoadingId(editingThread.id);
+    const target = editingThread;
+    const matchedCat =
+      categories.find((c) => c.id === tCategoryId) || target.category;
+
+    // 0ms Optimistic UI güncellemesi
+    setThreads((prev) =>
+      prev.map((item) =>
+        item.id === target.id
+          ? {
+              ...item,
+              title: tTitle.trim(),
+              content: tContent.trim(),
+              tags: tTags,
+              categoryId: tCategoryId,
+              category: matchedCat,
+            }
+          : item
+      )
+    );
+    setEditingThread(null);
+    showNotice('success', 'Konu başarıyla güncellendi.');
+
     try {
-      const res = await fetch(`/api/threads/${editingThread.slug}`, {
+      const res = await fetch(`/api/threads/${target.slug}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -215,34 +236,18 @@ export function AdminContentManager({
           categoryId: tCategoryId,
         }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        showNotice('error', data.error || 'Konu güncellenemedi.');
-      } else {
-        const matchedCat =
-          categories.find((c) => c.id === tCategoryId) || editingThread.category;
         setThreads((prev) =>
-          prev.map((item) =>
-            item.id === editingThread.id
-              ? {
-                  ...item,
-                  title: tTitle.trim(),
-                  content: tContent.trim(),
-                  tags: tTags,
-                  categoryId: tCategoryId,
-                  category: matchedCat,
-                }
-              : item
-          )
+          prev.map((item) => (item.id === target.id ? target : item))
         );
-        setEditingThread(null);
-        showNotice('success', 'Konu başarıyla güncellendi.');
-        router.refresh();
+        showNotice('error', data.error || 'Konu güncellenemedi.');
       }
     } catch {
+      setThreads((prev) =>
+        prev.map((item) => (item.id === target.id ? target : item))
+      );
       showNotice('error', 'Bağlantı hatası oluştu.');
-    } finally {
-      setLoadingId(null);
     }
   };
 
@@ -250,28 +255,48 @@ export function AdminContentManager({
     t: AdminThreadRecord,
     action: 'togglePin' | 'toggleLock' | 'toggleSolved'
   ) => {
-    setLoadingId(t.id);
+    // 0ms Anlık (Optimistic) UI Güncellemesi
+    setThreads((prev) =>
+      prev.map((item) => {
+        if (item.id !== t.id) return item;
+        if (action === 'togglePin') return { ...item, isPinned: !item.isPinned };
+        if (action === 'toggleLock') return { ...item, isLocked: !item.isLocked };
+        return { ...item, isSolved: !item.isSolved };
+      })
+    );
+    showNotice(
+      'success',
+      action === 'toggleSolved'
+        ? !t.isSolved
+          ? 'Konu çözüldü olarak işaretlendi.'
+          : 'Çözüldü işareti kaldırıldı.'
+        : action === 'togglePin'
+        ? !t.isPinned
+          ? 'Konu üst sıraya sabitlendi.'
+          : 'Sabitleme kaldırıldı.'
+        : !t.isLocked
+        ? 'Konu yorumlara kilitlendi.'
+        : 'Konu kilidi açıldı.'
+    );
+
     try {
       const res = await fetch(`/api/threads/${t.slug}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action }),
       });
-      if (res.ok) {
+      if (!res.ok) {
+        // Hata olursa eski duruma geri al
         setThreads((prev) =>
-          prev.map((item) => {
-            if (item.id !== t.id) return item;
-            if (action === 'togglePin')
-              return { ...item, isPinned: !item.isPinned };
-            if (action === 'toggleLock')
-              return { ...item, isLocked: !item.isLocked };
-            return { ...item, isSolved: !item.isSolved };
-          })
+          prev.map((item) => (item.id === t.id ? t : item))
         );
-        router.refresh();
+        showNotice('error', 'İşlem kaydedilemedi.');
       }
-    } finally {
-      setLoadingId(null);
+    } catch {
+      setThreads((prev) =>
+        prev.map((item) => (item.id === t.id ? t : item))
+      );
+      showNotice('error', 'Bağlantı hatası oluştu.');
     }
   };
 
@@ -283,21 +308,24 @@ export function AdminContentManager({
     ) {
       return;
     }
-    setLoadingId(t.id);
+    // 0ms Anlık listeden kaldır
+    const prevThreads = threads;
+    const prevComments = comments;
+    setThreads((prev) => prev.filter((item) => item.id !== t.id));
+    setComments((prev) => prev.filter((c) => c.thread.id !== t.id));
+    showNotice('success', 'Konu kalıcı olarak silindi.');
+
     try {
       const res = await fetch(`/api/threads/${t.slug}`, { method: 'DELETE' });
-      if (res.ok) {
-        setThreads((prev) => prev.filter((item) => item.id !== t.id));
-        setComments((prev) =>
-          prev.filter((c) => c.thread.id !== t.id)
-        );
-        showNotice('success', 'Konu kalıcı olarak silindi.');
-        router.refresh();
-      } else {
+      if (!res.ok) {
+        setThreads(prevThreads);
+        setComments(prevComments);
         showNotice('error', 'Konu silinemedi.');
       }
-    } finally {
-      setLoadingId(null);
+    } catch {
+      setThreads(prevThreads);
+      setComments(prevComments);
+      showNotice('error', 'Bağlantı hatası oluştu.');
     }
   };
 
@@ -305,62 +333,50 @@ export function AdminContentManager({
   const handleSaveComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingComment || !cContent.trim()) return;
-    setLoadingId(editingComment.id);
-    try {
-      if (editingComment.kind === 'forum') {
-        const res = await fetch('/api/comments', {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            commentId: editingComment.id,
-            action: 'edit',
-            content: cContent.trim(),
-          }),
-        });
+    const target = editingComment;
+    const nextText = cContent.trim();
+
+    if (target.kind === 'forum') {
+      setComments((prev) =>
+        prev.map((c) => (c.id === target.id ? { ...c, content: nextText } : c))
+      );
+      setEditingComment(null);
+      showNotice('success', 'Forum yorumu başarıyla güncellendi.');
+
+      const res = await fetch('/api/comments', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          commentId: target.id,
+          action: 'edit',
+          content: nextText,
+        }),
+      });
+      if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          showNotice('error', data.error || 'Yorum güncellenemedi.');
-        } else {
-          setComments((prev) =>
-            prev.map((c) =>
-              c.id === editingComment.id
-                ? { ...c, content: cContent.trim() }
-                : c
-            )
-          );
-          setEditingComment(null);
-          showNotice('success', 'Forum yorumu başarıyla güncellendi.');
-          router.refresh();
-        }
-      } else {
-        const res = await fetch('/api/news/comments', {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            commentId: editingComment.id,
-            content: cContent.trim(),
-          }),
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          showNotice('error', data.error || 'Haber yorumu güncellenemedi.');
-        } else {
-          setTechNewsComments((prev) =>
-            prev.map((nc) =>
-              nc.id === editingComment.id
-                ? { ...nc, content: cContent.trim() }
-                : nc
-            )
-          );
-          setEditingComment(null);
-          showNotice('success', 'Haber yorumu başarıyla güncellendi.');
-          router.refresh();
-        }
+        showNotice('error', data.error || 'Yorum güncellenemedi.');
       }
-    } catch {
-      showNotice('error', 'Bağlantı hatası oluştu.');
-    } finally {
-      setLoadingId(null);
+    } else {
+      setTechNewsComments((prev) =>
+        prev.map((nc) =>
+          nc.id === target.id ? { ...nc, content: nextText } : nc
+        )
+      );
+      setEditingComment(null);
+      showNotice('success', 'Haber yorumu başarıyla güncellendi.');
+
+      const res = await fetch('/api/news/comments', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          commentId: target.id,
+          content: nextText,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        showNotice('error', data.error || 'Haber yorumu güncellenemedi.');
+      }
     }
   };
 
@@ -368,18 +384,19 @@ export function AdminContentManager({
     if (!confirm('Bu yorumu kalıcı olarak silmek istediğinize emin misiniz?')) {
       return;
     }
-    setLoadingId(id);
+    const prevComments = comments;
+    setComments((prev) => prev.filter((c) => c.id !== id));
+    showNotice('success', 'Yorum silindi.');
+
     try {
       const res = await fetch(`/api/comments?id=${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        setComments((prev) => prev.filter((c) => c.id !== id));
-        showNotice('success', 'Yorum silindi.');
-        router.refresh();
-      } else {
+      if (!res.ok) {
+        setComments(prevComments);
         showNotice('error', 'Yorum silinemedi.');
       }
-    } finally {
-      setLoadingId(null);
+    } catch {
+      setComments(prevComments);
+      showNotice('error', 'Bağlantı hatası oluştu.');
     }
   };
 
@@ -387,20 +404,21 @@ export function AdminContentManager({
     if (!confirm('Bu haber yorumunu kalıcı olarak silmek istediğinize emin misiniz?')) {
       return;
     }
-    setLoadingId(id);
+    const prevNewsComments = techNewsComments;
+    setTechNewsComments((prev) => prev.filter((nc) => nc.id !== id));
+    showNotice('success', 'Haber yorumu silindi.');
+
     try {
       const res = await fetch(`/api/news/comments?id=${id}`, {
         method: 'DELETE',
       });
-      if (res.ok) {
-        setTechNewsComments((prev) => prev.filter((nc) => nc.id !== id));
-        showNotice('success', 'Haber yorumu silindi.');
-        router.refresh();
-      } else {
+      if (!res.ok) {
+        setTechNewsComments(prevNewsComments);
         showNotice('error', 'Haber yorumu silinemedi.');
       }
-    } finally {
-      setLoadingId(null);
+    } catch {
+      setTechNewsComments(prevNewsComments);
+      showNotice('error', 'Bağlantı hatası oluştu.');
     }
   };
 
@@ -474,7 +492,6 @@ export function AdminContentManager({
           showNotice('success', 'Yeni teknoloji haberi yayınlandı.');
         }
         setNewsModalOpen(false);
-        router.refresh();
       }
     } catch {
       showNotice('error', 'Bağlantı hatası oluştu.');
@@ -491,21 +508,23 @@ export function AdminContentManager({
     ) {
       return;
     }
-    setLoadingId(n.id);
+    const prevNews = techNews;
+    const prevNewsComments = techNewsComments;
+    setTechNews((prev) => prev.filter((item) => item.id !== n.id));
+    setTechNewsComments((prev) => prev.filter((nc) => nc.newsId !== n.id));
+    showNotice('success', 'Teknoloji haberi silindi.');
+
     try {
       const res = await fetch(`/api/news?id=${n.id}`, { method: 'DELETE' });
-      if (res.ok) {
-        setTechNews((prev) => prev.filter((item) => item.id !== n.id));
-        setTechNewsComments((prev) =>
-          prev.filter((nc) => nc.newsId !== n.id)
-        );
-        showNotice('success', 'Teknoloji haberi silindi.');
-        router.refresh();
-      } else {
+      if (!res.ok) {
+        setTechNews(prevNews);
+        setTechNewsComments(prevNewsComments);
         showNotice('error', 'Haber silinemedi.');
       }
-    } finally {
-      setLoadingId(null);
+    } catch {
+      setTechNews(prevNews);
+      setTechNewsComments(prevNewsComments);
+      showNotice('error', 'Bağlantı hatası oluştu.');
     }
   };
 

@@ -57,8 +57,17 @@ export function ThreadActions({
 }: ThreadActionsProps) {
   const router = useRouter();
   const [bookmarked, setBookmarked] = useState(initialBookmarked);
+  const [pinned, setPinned] = useState(isPinned);
+  const [locked, setLocked] = useState(isLocked);
+  const [solved, setSolved] = useState(isSolved);
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setPinned(isPinned);
+    setLocked(isLocked);
+    setSolved(isSolved);
+  }, [isPinned, isLocked, isSolved]);
 
   const [editOpen, setEditOpen] = useState(false);
   const [editTitle, setEditTitle] = useState(initialTitle);
@@ -91,14 +100,29 @@ export function ThreadActions({
   };
 
   const handleAction = async (action: 'togglePin' | 'toggleLock' | 'toggleSolved') => {
-    setLoading(true);
-    await fetch(`/api/threads/${slug}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action }),
-    });
-    setLoading(false);
-    router.refresh();
+    // 0ms Anlık (Optimistic) buton güncellemesi
+    if (action === 'toggleSolved') setSolved((prev) => !prev);
+    if (action === 'togglePin') setPinned((prev) => !prev);
+    if (action === 'toggleLock') setLocked((prev) => !prev);
+
+    try {
+      const res = await fetch(`/api/threads/${slug}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action }),
+      });
+      if (!res.ok) {
+        if (action === 'toggleSolved') setSolved((prev) => !prev);
+        if (action === 'togglePin') setPinned((prev) => !prev);
+        if (action === 'toggleLock') setLocked((prev) => !prev);
+      } else {
+        router.refresh();
+      }
+    } catch {
+      if (action === 'toggleSolved') setSolved((prev) => !prev);
+      if (action === 'togglePin') setPinned((prev) => !prev);
+      if (action === 'toggleLock') setLocked((prev) => !prev);
+    }
   };
 
   const handleEditSubmit = async (e: React.FormEvent) => {
@@ -220,16 +244,15 @@ export function ThreadActions({
 
             <button
               type="button"
-              disabled={loading}
               onClick={() => handleAction('toggleSolved')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition-colors ${
-                isSolved
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition-colors cursor-pointer ${
+                solved
                   ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-600 dark:text-emerald-400'
                   : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >
               <CheckCircle2 className="w-3.5 h-3.5" />
-              {isSolved ? 'Çözüldü İşaretini Kaldır' : 'Çözüldü İşaretle'}
+              {solved ? 'Çözüldü İşaretini Kaldır' : 'Çözüldü İşaretle'}
             </button>
           </>
         )}
@@ -238,30 +261,28 @@ export function ThreadActions({
           <>
             <button
               type="button"
-              disabled={loading}
               onClick={() => handleAction('togglePin')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition-colors ${
-                isPinned
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition-colors cursor-pointer ${
+                pinned
                   ? 'bg-indigo-500/15 border-indigo-500/40 text-indigo-600 dark:text-indigo-400'
                   : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >
               <Pin className="w-3.5 h-3.5" />
-              {isPinned ? 'Sabitlemeyi Kaldır' : 'Sabitle'}
+              {pinned ? 'Sabitlemeyi Kaldır' : 'Sabitle'}
             </button>
 
             <button
               type="button"
-              disabled={loading}
               onClick={() => handleAction('toggleLock')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition-colors ${
-                isLocked
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition-colors cursor-pointer ${
+                locked
                   ? 'bg-rose-500/15 border-rose-500/40 text-rose-600 dark:text-rose-400'
                   : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >
               <Lock className="w-3.5 h-3.5" />
-              {isLocked ? 'Kilidi Aç' : 'Kilitle'}
+              {locked ? 'Kilidi Aç' : 'Kilitle'}
             </button>
           </>
         )}

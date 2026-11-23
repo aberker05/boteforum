@@ -99,19 +99,22 @@ interface AdminDashboardProps {
 export function AdminDashboard({
   currentAdminId,
   stats,
-  users,
-  categories,
+  users: initialUsers,
+  categories: initialCategories,
   threads = [],
   comments = [],
   techNews = [],
   techNewsComments = [],
-  reports,
+  reports: initialReports,
   initialSiteSettings = DEFAULT_SITE_SETTINGS,
 }: AdminDashboardProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<
     'branding' | 'content' | 'users' | 'categories' | 'reports'
   >('content');
+  const [users, setUsers] = useState<AdminUserItem[]>(initialUsers);
+  const [categories, setCategories] = useState<AdminCategoryItem[]>(initialCategories);
+  const [reports, setReports] = useState<ContentReportItem[]>(initialReports);
   const pendingReportsCount = reports.filter((r) => r.status === 'PENDING').length;
   const [userSearch, setUserSearch] = useState('');
   const [loadingId, setLoadingId] = useState<string | null>(null);
@@ -214,13 +217,23 @@ export function AdminDashboard({
       if (!res.ok) {
         setError(data.error || 'Kullanıcı oluşturulamadı.');
       } else {
+        if (data.user) {
+          setUsers((prev) => [
+            {
+              ...data.user,
+              avatarColor: '#6366f1',
+              createdAt: new Date().toISOString(),
+              _count: { threads: 0, comments: 0 },
+            },
+            ...prev,
+          ]);
+        }
         setNewUserOpen(false);
         setNewDisplayName('');
         setNewUsername('');
         setNewEmail('');
         setNewPassword('');
         setNewRole('MEMBER');
-        router.refresh();
       }
     } catch {
       setError('Bağlantı hatası oluştu.');
@@ -231,7 +244,11 @@ export function AdminDashboard({
 
   const handleRoleChange = async (userId: string, newRole: string) => {
     setError('');
-    setLoadingId(userId);
+    const prevUsers = users;
+    // 0ms Anlık (Optimistic) rol değişimi
+    setUsers((prev) =>
+      prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u))
+    );
     try {
       const res = await fetch('/api/admin/users', {
         method: 'PATCH',
@@ -240,14 +257,12 @@ export function AdminDashboard({
       });
       const data = await res.json();
       if (!res.ok) {
+        setUsers(prevUsers);
         setError(data.error || 'Rol güncellenemedi.');
-      } else {
-        router.refresh();
       }
     } catch {
+      setUsers(prevUsers);
       setError('Bağlantı hatası oluştu.');
-    } finally {
-      setLoadingId(null);
     }
   };
 
@@ -260,21 +275,21 @@ export function AdminDashboard({
       return;
 
     setError('');
-    setLoadingId(userId);
+    const prevUsers = users;
+    // 0ms Anlık listeden kaldır
+    setUsers((prev) => prev.filter((u) => u.id !== userId));
     try {
       const res = await fetch(`/api/admin/users?id=${userId}`, {
         method: 'DELETE',
       });
       const data = await res.json();
       if (!res.ok) {
+        setUsers(prevUsers);
         setError(data.error || 'Kullanıcı silinemedi.');
-      } else {
-        router.refresh();
       }
     } catch {
+      setUsers(prevUsers);
       setError('Bağlantı hatası oluştu.');
-    } finally {
-      setLoadingId(null);
     }
   };
 
@@ -330,8 +345,21 @@ export function AdminDashboard({
       if (!res.ok) {
         setError(data.error || 'Kategori kaydedilemedi.');
       } else {
+        if (editingCategory && data.category) {
+          setCategories((prev) =>
+            prev.map((c) =>
+              c.id === editingCategory.id
+                ? { ...c, ...data.category, _count: c._count }
+                : c
+            )
+          );
+        } else if (data.category) {
+          setCategories((prev) => [
+            ...prev,
+            { ...data.category, _count: { threads: 0 } },
+          ]);
+        }
         resetCategoryForm();
-        router.refresh();
       }
     } catch {
       setError('Bağlantı hatası oluştu.');
@@ -349,21 +377,20 @@ export function AdminDashboard({
       return;
 
     setError('');
-    setLoadingId(cat.id);
+    const prevCategories = categories;
+    setCategories((prev) => prev.filter((c) => c.id !== cat.id));
     try {
       const res = await fetch(`/api/admin/categories?id=${cat.id}`, {
         method: 'DELETE',
       });
       const data = await res.json();
       if (!res.ok) {
+        setCategories(prevCategories);
         setError(data.error || 'Kategori silinemedi.');
-      } else {
-        router.refresh();
       }
     } catch {
+      setCategories(prevCategories);
       setError('Bağlantı hatası oluştu.');
-    } finally {
-      setLoadingId(null);
     }
   };
 
@@ -381,7 +408,14 @@ export function AdminDashboard({
     }
 
     setError('');
-    setLoadingId(reportId);
+    const prevReports = reports;
+    setReports((prev) =>
+      prev.map((r) =>
+        r.id === reportId
+          ? { ...r, status: action === 'dismiss' ? 'DISMISSED' : 'RESOLVED' }
+          : r
+      )
+    );
     try {
       const res = await fetch('/api/reports', {
         method: 'PATCH',
@@ -390,31 +424,29 @@ export function AdminDashboard({
       });
       const data = await res.json();
       if (!res.ok) {
+        setReports(prevReports);
         setError(data.error || 'İşlem başarısız.');
-      } else {
-        router.refresh();
       }
     } catch {
+      setReports(prevReports);
       setError('Bağlantı hatası oluştu.');
-    } finally {
-      setLoadingId(null);
     }
   };
 
   const handleDeleteReportRecord = async (reportId: string) => {
     setError('');
-    setLoadingId(reportId);
+    const prevReports = reports;
+    setReports((prev) => prev.filter((r) => r.id !== reportId));
     try {
       const res = await fetch(`/api/reports?id=${reportId}`, {
         method: 'DELETE',
       });
-      if (res.ok) {
-        router.refresh();
+      if (!res.ok) {
+        setReports(prevReports);
       }
     } catch {
+      setReports(prevReports);
       setError('Bağlantı hatası oluştu.');
-    } finally {
-      setLoadingId(null);
     }
   };
 
