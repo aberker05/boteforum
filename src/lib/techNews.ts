@@ -448,7 +448,7 @@ const globalForTechNews = globalThis as unknown as {
   techNewsListCache?: { data: TechNewsItem[]; expiresAt: number };
 };
 
-const TECH_NEWS_TTL_MS = 120_000;
+const TECH_NEWS_TTL_MS = 300_000;
 
 export function invalidateTechNewsCache() {
   globalForTechNews.techNewsListCache = undefined;
@@ -564,9 +564,6 @@ export async function getAllTechNews(category?: string, search?: string): Promis
     let commentCounts: { newsId: string; count: bigint | number }[];
 
     try {
-      if (!globalForTechNews.techNewsInitialized) {
-        await ensureTechNewsTable();
-      }
       [items, commentCounts] = await Promise.all([
         prisma.$queryRaw<TechNewsItem[]>`
           SELECT * FROM "TechNews" ORDER BY "isFeatured" DESC, "createdAt" DESC
@@ -575,6 +572,19 @@ export async function getAllTechNews(category?: string, search?: string): Promis
           SELECT "newsId", COUNT(*) as count FROM "TechNewsComment" GROUP BY "newsId"
         `,
       ]);
+
+      // Tablo boşsa yalnızca ilk kurulumda senkron oluştur; yeni eklenen (6->12) dosyalar eksikse yanıtı hiç bekletmeden arka planda tamamla
+      if (items.length === 0 && !globalForTechNews.techNewsInitialized) {
+        await ensureTechNewsTable();
+        items = await prisma.$queryRaw<TechNewsItem[]>`
+          SELECT * FROM "TechNews" ORDER BY "isFeatured" DESC, "createdAt" DESC
+        `;
+      } else if (
+        items.length < INITIAL_NEWS.length &&
+        !globalForTechNews.techNewsInitialized
+      ) {
+        void ensureTechNewsTable().catch(() => {});
+      }
     } catch {
       await ensureTechNewsTable();
       [items, commentCounts] = await Promise.all([

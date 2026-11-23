@@ -1,5 +1,6 @@
+import { cache } from 'react';
 import { prisma } from './prisma';
-import { invalidateHomeCache } from './homeCache';
+import { invalidateHomeCache, getHomeSidebarData } from './homeCache';
 
 export interface SiteSettings {
   siteNamePrimary: string;
@@ -51,7 +52,7 @@ export function invalidateCategoryCache() {
   invalidateHomeCache();
 }
 
-export async function getFooterCategories(): Promise<
+export const getFooterCategories = cache(async function getFooterCategoriesImpl(): Promise<
   Array<{ id: string; name: string; slug: string }>
 > {
   const now = Date.now();
@@ -63,11 +64,12 @@ export async function getFooterCategories(): Promise<
   }
 
   try {
-    const data = await prisma.category.findMany({
-      orderBy: { order: 'asc' },
-      take: 3,
-      select: { id: true, name: true, slug: true },
-    });
+    const sidebar = await getHomeSidebarData();
+    const data = sidebar.categories.slice(0, 3).map((c) => ({
+      id: c.id,
+      name: c.name,
+      slug: c.slug,
+    }));
     globalForSiteSettings.footerCategoriesCache = {
       data,
       expiresAt: now + FOOTER_CATEGORIES_TTL_MS,
@@ -76,7 +78,7 @@ export async function getFooterCategories(): Promise<
   } catch {
     return [];
   }
-}
+});
 
 export function isSafeLogoUrl(url?: string): boolean {
   if (!url) return true;
@@ -126,7 +128,7 @@ export async function ensureSiteSettingsTable() {
   globalForSiteSettings.siteSettingsTableReady = true;
 }
 
-export const getSiteSettings = async function getSiteSettingsImpl(): Promise<SiteSettings> {
+export const getSiteSettings = cache(async function getSiteSettingsImpl(): Promise<SiteSettings> {
   const now = Date.now();
   if (
     globalForSiteSettings.siteSettingsCache &&
@@ -198,7 +200,7 @@ export const getSiteSettings = async function getSiteSettingsImpl(): Promise<Sit
   } catch {
     return DEFAULT_SITE_SETTINGS;
   }
-}
+});
 
 export async function updateSiteSettings(
   input: Partial<SiteSettings>

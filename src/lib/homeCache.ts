@@ -47,16 +47,20 @@ export interface CachedHomeThread {
   } | null;
 }
 
-const HOME_CACHE_TTL_MS = 60_000;
+const HOME_CACHE_TTL_MS = 300_000;
 
 const globalForHomeCache = globalThis as unknown as {
   homeSidebarCache?: { data: HomeSidebarData; expiresAt: number };
+  homeSidebarInFlight?: Promise<HomeSidebarData>;
   homeThreadsCache?: { data: CachedHomeThread[]; expiresAt: number };
+  homeThreadsInFlight?: Promise<CachedHomeThread[]>;
 };
 
 export function invalidateHomeCache() {
   globalForHomeCache.homeSidebarCache = undefined;
+  globalForHomeCache.homeSidebarInFlight = undefined;
   globalForHomeCache.homeThreadsCache = undefined;
+  globalForHomeCache.homeThreadsInFlight = undefined;
 }
 
 export async function getHomeSidebarData(): Promise<HomeSidebarData> {
@@ -68,43 +72,59 @@ export async function getHomeSidebarData(): Promise<HomeSidebarData> {
     return globalForHomeCache.homeSidebarCache.data;
   }
 
-  const [categories, topUsers, totalUsers, totalComments] = await Promise.all([
-    prisma.category.findMany({
-      orderBy: { order: 'asc' },
-      include: {
-        _count: { select: { threads: true } },
-      },
-    }),
-    prisma.user.findMany({
-      where: { role: { not: 'BANNED' } },
-      orderBy: { reputation: 'desc' },
-      take: 5,
-      select: {
-        id: true,
-        username: true,
-        displayName: true,
-        avatarColor: true,
-        role: true,
-        reputation: true,
-      },
-    }),
-    prisma.user.count(),
-    prisma.comment.count(),
-  ]);
+  if (globalForHomeCache.homeSidebarInFlight) {
+    return globalForHomeCache.homeSidebarInFlight;
+  }
 
-  const data: HomeSidebarData = {
-    categories,
-    topUsers,
-    totalUsers,
-    totalComments,
-  };
+  const promise = (async () => {
+    const [categories, topUsers, countsRow] = await Promise.all([
+      prisma.category.findMany({
+        orderBy: { order: 'asc' },
+        include: {
+          _count: { select: { threads: true } },
+        },
+      }),
+      prisma.user.findMany({
+        where: { role: { not: 'BANNED' } },
+        orderBy: { reputation: 'desc' },
+        take: 5,
+        select: {
+          id: true,
+          username: true,
+          displayName: true,
+          avatarColor: true,
+          role: true,
+          reputation: true,
+        },
+      }),
+      prisma.$queryRaw<Array<{ userCount: bigint | number; commentCount: bigint | number }>>`
+        SELECT
+          (SELECT COUNT(*) FROM "User") AS "userCount",
+          (SELECT COUNT(*) FROM "Comment") AS "commentCount"
+      `,
+    ]);
 
-  globalForHomeCache.homeSidebarCache = {
-    data,
-    expiresAt: now + HOME_CACHE_TTL_MS,
-  };
+    const totalUsers = Number(countsRow[0]?.userCount || 0);
+    const totalComments = Number(countsRow[0]?.commentCount || 0);
 
-  return data;
+    const data: HomeSidebarData = {
+      categories,
+      topUsers,
+      totalUsers,
+      totalComments,
+    };
+
+    globalForHomeCache.homeSidebarCache = {
+      data,
+      expiresAt: Date.now() + HOME_CACHE_TTL_MS,
+    };
+    return data;
+  })().finally(() => {
+    globalForHomeCache.homeSidebarInFlight = undefined;
+  });
+
+  globalForHomeCache.homeSidebarInFlight = promise;
+  return promise;
 }
 
 export async function getCachedHomeThreads(): Promise<CachedHomeThread[]> {
@@ -116,96 +136,88 @@ export async function getCachedHomeThreads(): Promise<CachedHomeThread[]> {
     return globalForHomeCache.homeThreadsCache.data;
   }
 
-  const allThreads = await prisma.thread.findMany({
-    include: {
-      author: {
-        select: {
-          username: true,
-          displayName: true,
-          avatarColor: true,
-          role: true,
-          reputation: true,
-        },
-      },
-      category: {
-        select: {
-          name: true,
-          slug: true,
-          color: true,
-          icon: true,
-        },
-      },
-      comments: {
-        orderBy: { createdAt: 'desc' },
-        take: 1,
-        select: {
-          createdAt: true,
-          author: {
-            select: {
-              username: true,
-              displayName: true,
-              avatarColor: true,
-            },
+  if (globalForHomeCache.homeThreadsInFlight) {
+    return globalForHomeCache.homeThreadsInFlight;
+  }
+
+  const promise = (async () => {
+    const allThreads = await prisma.thread.findMany({
+      take: 80,
+      include: {
+        author: {
+          select: {
+            username: true,
+            displayName: true,
+            avatarColor: true,
+            role: true,
+            reputation: true,
           },
         },
-      },
-      votes: {
-        select: {
-          userId: true,
-          value: true,
+        category: {
+          select: {
+            name: true,
+            slug: true,
+            color: true,
+            icon: true,
+          },
+        },
+        votes: {
+          select: {
+            userId: true,
+            value: true,
+          },
+        },
+        bookmarks: {
+          select: {
+            userId: true,
+          },
+        },
+        _count: {
+          select: { comments: true },
         },
       },
-      bookmarks: {
-        select: {
-          userId: true,
-        },
-      },
-      _count: {
-        select: { comments: true },
-      },
-    },
-    orderBy: [{ isPinned: 'desc' }, { updatedAt: 'desc' }],
-  });
+      orderBy: [{ isPinned: 'desc' }, { updatedAt: 'desc' }],
+    });
 
-  const cached: CachedHomeThread[] = allThreads.map((t) => {
-    const upvoters = t.votes.filter((v) => v.value === 1).map((v) => v.userId);
-    const bookmarkers = t.bookmarks.map((b) => b.userId);
-    const latestComment = t.comments[0] || null;
-    const lightContent = t.content
-      .replace(/!\[([^\]]*)\]\([^)]+\)/g, '[$1 Görsel]')
-      .slice(0, 500);
+    const cached: CachedHomeThread[] = allThreads.map((t) => {
+      const upvoters = t.votes.filter((v) => v.value === 1).map((v) => v.userId);
+      const bookmarkers = t.bookmarks.map((b) => b.userId);
+      const lightContent = t.content
+        .replace(/!\[([^\]]*)\]\([^)]+\)/g, '[$1 Görsel]')
+        .slice(0, 500);
 
-    return {
-      id: t.id,
-      title: t.title,
-      slug: t.slug,
-      content: lightContent,
-      views: t.views,
-      isPinned: t.isPinned,
-      isLocked: t.isLocked,
-      isSolved: t.isSolved,
-      tags: t.tags,
-      createdAt: t.createdAt,
-      updatedAt: t.updatedAt,
-      score: upvoters.length,
-      voteUserIds: upvoters,
-      bookmarkedUserIds: bookmarkers,
-      commentCount: t._count.comments,
-      author: t.author,
-      category: t.category,
-      lastReply: latestComment
-        ? {
-            createdAt: latestComment.createdAt,
-            author: latestComment.author,
-          }
-        : null,
+      return {
+        id: t.id,
+        title: t.title,
+        slug: t.slug,
+        content: lightContent,
+        views: t.views,
+        isPinned: t.isPinned,
+        isLocked: t.isLocked,
+        isSolved: t.isSolved,
+        tags: t.tags,
+        createdAt: t.createdAt,
+        updatedAt: t.updatedAt,
+        score: upvoters.length,
+        voteUserIds: upvoters,
+        bookmarkedUserIds: bookmarkers,
+        commentCount: t._count.comments,
+        author: t.author,
+        category: t.category,
+        lastReply: null,
+      };
+    });
+
+    globalForHomeCache.homeThreadsCache = {
+      data: cached,
+      expiresAt: Date.now() + HOME_CACHE_TTL_MS,
     };
+
+    return cached;
+  })().finally(() => {
+    globalForHomeCache.homeThreadsInFlight = undefined;
   });
 
-  globalForHomeCache.homeThreadsCache = {
-    data: cached,
-    expiresAt: now + HOME_CACHE_TTL_MS,
-  };
-
-  return cached;
+  globalForHomeCache.homeThreadsInFlight = promise;
+  return promise;
 }
