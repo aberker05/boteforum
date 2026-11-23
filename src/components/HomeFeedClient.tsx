@@ -23,6 +23,10 @@ import {
   LayoutGrid,
   List,
   Activity,
+  Search,
+  Zap,
+  Shield,
+  TrendingUp,
 } from 'lucide-react';
 import { ThreadCard, type ThreadCardData } from './ThreadCard';
 import { CategoryIcon } from './CategoryIcon';
@@ -296,9 +300,281 @@ export function HomeFeedClient({
   }, [threads]);
 
   const selectedCategoryObj = categories.find((c) => c.slug === activeCategory);
+  const solveRate =
+    stats.totalThreads > 0
+      ? Math.round((solvedCount / stats.totalThreads) * 100)
+      : 0;
+  const leadNews = techNews[0] || null;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    <div className="space-y-6">
+      {/* İLK GİRİŞ: ÖZGÜN KOMUTA MERKEZİ & BENTO KARŞILAMA VİTRİNİ */}
+      {!selectedCategoryObj && !filterBy && !activeTag && (
+        <section className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-stretch">
+            {/* Sol Ana Hero Kartı (7 Sütun) */}
+            <div className="lg:col-span-7 relative rounded-3xl overflow-hidden border border-indigo-500/25 bg-gradient-to-br from-[#070b14] via-[#0e1528] to-[#090d16] p-6 sm:p-8 text-white shadow-2xl flex flex-col justify-between">
+              {/* Arka Plan Siber Atmosfer & Geometrik Izgara */}
+              <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-indigo-500/25 blur-3xl pointer-events-none" />
+              <div className="absolute -bottom-24 -left-24 w-72 h-72 rounded-full bg-emerald-500/20 blur-3xl pointer-events-none" />
+              <div
+                className="absolute inset-0 opacity-[0.14] pointer-events-none"
+                style={{
+                  backgroundImage:
+                    'linear-gradient(to right, rgba(99,102,241,0.22) 1px, transparent 1px), linear-gradient(to bottom, rgba(99,102,241,0.22) 1px, transparent 1px)',
+                  backgroundSize: '32px 32px',
+                }}
+              />
+
+              <div className="relative z-10 space-y-4">
+                {/* Üst Canlı Sistem Durum Rozetleri */}
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 backdrop-blur-md">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                    BÖTE & Teknoloji Ekosistemi Aktif
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-white/10 border border-white/10 text-indigo-200 backdrop-blur-md">
+                    <Shield className="w-3.5 h-3.5 text-indigo-400" />
+                    Doğrulanmış Bilgi & Kod Paylaşımı
+                  </span>
+                </div>
+
+                {/* Ana Başlık & Slogan */}
+                <div className="space-y-2.5">
+                  <h1 className="text-2xl sm:text-3xl xl:text-4xl font-black tracking-tight leading-[1.15]">
+                    Geleceğin Teknolojisini ve{' '}
+                    <span className="bg-gradient-to-r from-indigo-400 via-emerald-300 to-cyan-300 bg-clip-text text-transparent">
+                      Bilişim Topluluğunu
+                    </span>{' '}
+                    Keşfedin
+                  </h1>
+                  <p className="text-xs sm:text-sm text-slate-300/90 leading-relaxed max-w-2xl">
+                    Yazılım mimarileri, siber güvenlik, yapay zeka, donanım ve BÖTE eğitim teknolojileri üzerine sorular sorun, çalışan kod blokları paylaşın ve çözüm üreterek itibar kazanın.
+                  </p>
+                </div>
+
+                {/* Hero İçi Hızlı Arama & Filtreleme Çubuğu */}
+                <div className="relative max-w-xl pt-1">
+                  <Search className="w-4 h-4 text-indigo-300 absolute left-4 top-1/2 -translate-y-1/2 mt-0.5 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setCurrentPage(1);
+                      syncUrl({ q: e.target.value });
+                    }}
+                    placeholder="Forum konularında, kodlarda veya #etiketlerde anında filtrele..."
+                    className="w-full pl-11 pr-24 py-3 rounded-2xl text-xs sm:text-sm bg-slate-950/75 border border-white/15 text-white placeholder-slate-400 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/30 backdrop-blur-md transition-all"
+                  />
+                  {searchQuery ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSearchQuery('');
+                        syncUrl({ q: '' });
+                      }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 mt-0.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 cursor-pointer"
+                    >
+                      Temizle
+                    </button>
+                  ) : (
+                    <span className="hidden sm:inline-flex items-center gap-1 absolute right-3 top-1/2 -translate-y-1/2 mt-0.5 px-2 py-1 rounded-lg text-[10px] font-semibold bg-white/10 text-slate-300 border border-white/10">
+                      <Zap className="w-3 h-3 text-amber-400" /> 0ms Arama
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Alt Aksiyon Butonları ve Canlı Metrik Şeridi */}
+              <div className="relative z-10 pt-5 mt-5 border-t border-white/10 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <Link
+                    href={isLoggedIn ? '/yeni-konu' : '/giris'}
+                    className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-600/30 transition-all"
+                  >
+                    <PlusCircle className="w-4 h-4" />
+                    Yeni Konu Başlat
+                  </Link>
+                  <Link
+                    href="/haberler"
+                    className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 transition-all"
+                  >
+                    <Newspaper className="w-4 h-4" />
+                    Teknoloji Gündemi
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => selectFilter('cevapsiz')}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-white/5 hover:bg-white/15 text-slate-200 border border-white/10 transition-all cursor-pointer"
+                  >
+                    <HelpCircle className="w-3.5 h-3.5 text-amber-400" />
+                    Cevapsız Sorular ({unansweredCount})
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Sağ Bento Vitrini: Günün Teknoloji Manşeti + Canlı Telemetri (5 Sütun) */}
+            <div className="lg:col-span-5 flex flex-col justify-between gap-4">
+              {/* Üst: Günün Öne Çıkan Teknoloji Dosyası */}
+              {leadNews && (
+                <Link
+                  href={`/haberler/${leadNews.slug}`}
+                  className="group relative flex-1 rounded-3xl overflow-hidden border border-slate-200/80 dark:border-slate-800/90 bg-slate-950 shadow-xl hover:border-emerald-500/50 transition-all duration-300 flex flex-col justify-end min-h-[210px]"
+                >
+                  <TechNewsCover
+                    title={leadNews.title}
+                    category={leadNews.category}
+                    badgeColor={leadNews.badgeColor}
+                    imageUrl={leadNews.imageUrl}
+                    slug={leadNews.slug}
+                    className="absolute inset-0 w-full h-full"
+                    overlayVariant="hero"
+                  />
+
+                  <div className="absolute top-3.5 left-3.5 right-3.5 z-10 flex items-center justify-between gap-2">
+                    <span
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold backdrop-blur-md border"
+                      style={{
+                        backgroundColor: 'rgba(9, 13, 22, 0.82)',
+                        borderColor: `${leadNews.badgeColor}70`,
+                        color: leadNews.badgeColor,
+                      }}
+                    >
+                      <span
+                        className="w-1.5 h-1.5 rounded-full"
+                        style={{ backgroundColor: leadNews.badgeColor }}
+                      />
+                      {leadNews.category}
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500 text-slate-950 shadow-xs">
+                      <Flame className="w-3 h-3 fill-slate-950" />
+                      GÜNÜN DOSYASI
+                    </span>
+                  </div>
+
+                  <div className="relative z-10 p-5 pt-16 bg-gradient-to-t from-[#060911] via-[#060911]/90 to-transparent">
+                    <h2 className="text-base sm:text-lg font-extrabold text-white group-hover:text-emerald-300 transition-colors leading-snug line-clamp-2">
+                      {leadNews.title}
+                    </h2>
+                    <div className="mt-2.5 flex items-center justify-between text-xs text-slate-300">
+                      <span className="text-[11px] text-emerald-300 font-semibold">
+                        {leadNews.source} • {leadNews.readTime}
+                      </span>
+                      <span className="inline-flex items-center gap-1 font-bold text-white group-hover:translate-x-0.5 transition-transform">
+                        İncele <ArrowRight className="w-3.5 h-3.5 text-emerald-400" />
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              )}
+
+              {/* Alt: 4'lü Bento Canlı Topluluk Telemetrisi */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-3">
+                <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/90 bg-white dark:bg-slate-900/90 p-3.5 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                    <MessageSquare className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-lg font-black text-slate-900 dark:text-white leading-none tabular-nums">
+                      {stats.totalThreads}
+                    </p>
+                    <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-1">
+                      Aktif Tartışma
+                    </p>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/90 bg-white dark:bg-slate-900/90 p-3.5 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                    <CheckCircle2 className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-lg font-black text-slate-900 dark:text-white leading-none tabular-nums">
+                      %{solveRate}
+                    </p>
+                    <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-1">
+                      Çözüm Oranı ({solvedCount})
+                    </p>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/90 bg-white dark:bg-slate-900/90 p-3.5 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                    <TrendingUp className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-lg font-black text-slate-900 dark:text-white leading-none tabular-nums">
+                      {stats.totalComments}
+                    </p>
+                    <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-1">
+                      Toplam Yanıt
+                    </p>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/90 bg-white dark:bg-slate-900/90 p-3.5 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-violet-500/15 text-violet-600 dark:text-violet-400 flex items-center justify-center shrink-0">
+                    <Users className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-lg font-black text-slate-900 dark:text-white leading-none tabular-nums">
+                      {stats.totalUsers}
+                    </p>
+                    <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-1">
+                      Topluluk Üyesi
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* İnteraktif Kategori Vitrin Şeridi (Tek Tıkla Alan Keşfi) */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+            {categories.slice(0, 6).map((cat) => {
+              const isActive = activeCategory === cat.slug;
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => selectCategory(cat.slug)}
+                  className={`group p-3 rounded-2xl border text-left transition-all cursor-pointer flex items-center gap-3 ${
+                    isActive
+                      ? 'border-indigo-500 bg-indigo-50/80 dark:bg-indigo-950/50 ring-2 ring-indigo-500/20'
+                      : 'border-slate-200/80 dark:border-slate-800/90 bg-white dark:bg-slate-900/90 hover:border-indigo-500/40 hover:-translate-y-0.5 hover:shadow-md'
+                  }`}
+                >
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110"
+                    style={{
+                      backgroundColor: `${cat.color}18`,
+                      color: cat.color,
+                    }}
+                  >
+                    <CategoryIcon
+                      name={cat.icon}
+                      className="w-5 h-5"
+                      color={cat.color}
+                    />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-extrabold text-slate-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                      {cat.name}
+                    </p>
+                    <p className="text-[11px] text-slate-400 font-medium">
+                      {cat._count.threads} konu
+                    </p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
       {/* SOL KENAR ÇUBUĞU: Forum Navigasyonu & Kategoriler */}
       <aside className="order-2 lg:order-1 lg:col-span-3 space-y-5 lg:sticky lg:top-22">
         {/* Forum Görünümleri (Masaüstünde görünür, mobil/tablette üst şeritte yer alır) */}
@@ -592,8 +868,8 @@ export function HomeFeedClient({
           </div>
         </div>
 
-        {/* Kategori Başlık Kartı veya Profesyonel Forum Üst Barı */}
-        {selectedCategoryObj ? (
+        {/* Kategori Başlık Kartı (Kategori seçildiğinde gösterilir) */}
+        {selectedCategoryObj && (
           <div
             className="rounded-2xl border p-5 flex items-start justify-between gap-4"
             style={{
@@ -634,30 +910,6 @@ export function HomeFeedClient({
             >
               <X className="w-4 h-4" />
             </button>
-          </div>
-        ) : (
-          <div className="rounded-2xl border border-indigo-500/20 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 p-5 text-white shadow-md">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="space-y-1.5">
-                <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-500/20 border border-indigo-400/30 text-indigo-200">
-                  <Sparkles className="w-3 h-3 text-indigo-400" />
-                  Teknik Tartışma & Bilgi Bankası
-                </div>
-                <h1 className="text-lg sm:text-xl font-extrabold tracking-tight">
-                  Geliştirici & Teknoloji Forumu
-                </h1>
-                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                  Sorularınızı paylaşın, kod blokları ve anketlerle teknik tartışmalar başlatın, doğru çözümlerle itibar puanı kazanın.
-                </p>
-              </div>
-              <Link
-                href={isLoggedIn ? '/yeni-konu' : '/giris'}
-                className="shrink-0 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm shadow-indigo-500/30 transition-all"
-              >
-                <PlusCircle className="w-4 h-4" />
-                Yeni Konu Aç
-              </Link>
-            </div>
           </div>
         )}
 
@@ -1082,6 +1334,7 @@ export function HomeFeedClient({
           </ul>
         </div>
       </aside>
+      </div>
     </div>
   );
 }

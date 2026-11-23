@@ -102,6 +102,11 @@ export function ThreadCard({
     ? thread.tags.split(',').map((t) => t.trim()).filter(Boolean)
     : [];
 
+  const hasCodeBlock =
+    thread.content.includes('```') || thread.content.includes('[Kod Bloğu]');
+  const hasImage =
+    thread.content.includes('![') || thread.content.includes('Görsel]');
+
   // Markdown karakterlerini ve gömülü görselleri temizleyip kısa özet çıkarma
   const plainExcerpt = thread.content
     .replace(/!\[[^\]]*\]\([^)]+\)/g, '[Görsel]')
@@ -295,14 +300,25 @@ export function ThreadCard({
 
   return (
     <article
-      className={`group relative rounded-2xl border transition-all duration-200 p-4 sm:p-5 flex gap-3.5 sm:gap-4 ${
+      className={`group relative overflow-hidden rounded-2xl border transition-all duration-200 p-4 sm:p-5 pl-5 sm:pl-6 flex gap-3.5 sm:gap-4 ${
         thread.isPinned
-          ? 'bg-indigo-50/40 dark:bg-indigo-950/15 border-indigo-200/90 dark:border-indigo-800/60 hover:border-indigo-400/80'
+          ? 'bg-gradient-to-r from-amber-500/[0.06] via-indigo-50/40 to-white dark:from-amber-500/[0.08] dark:via-indigo-950/20 dark:to-slate-900/95 border-amber-500/40 dark:border-amber-500/30 hover:border-amber-400 shadow-sm hover:shadow-lg'
           : thread.isSolved
-          ? 'bg-white dark:bg-slate-900/90 border-emerald-500/30 dark:border-emerald-500/25 hover:border-emerald-500/50 shadow-2xs hover:shadow-md'
-          : 'bg-white dark:bg-slate-900/90 border-slate-200/80 dark:border-slate-800/80 hover:border-indigo-500/40 dark:hover:border-indigo-500/40 shadow-2xs hover:shadow-md'
+          ? 'bg-white dark:bg-slate-900/95 border-emerald-500/35 dark:border-emerald-500/30 hover:border-emerald-500/60 shadow-2xs hover:shadow-lg hover:-translate-y-0.5'
+          : 'bg-white dark:bg-slate-900/95 border-slate-200/85 dark:border-slate-800/90 hover:border-indigo-500/50 dark:hover:border-indigo-500/50 shadow-2xs hover:shadow-lg hover:-translate-y-0.5'
       }`}
     >
+      {/* Sol Kenar Kategori Rengi Neon Vurgu Şeridi */}
+      <div
+        className="absolute left-0 top-0 bottom-0 w-1.5 transition-all group-hover:w-2"
+        style={{
+          backgroundColor: thread.isPinned
+            ? '#f59e0b'
+            : thread.isSolved
+            ? '#10b981'
+            : thread.category.color,
+        }}
+      />
       {/* Sol: Yazar Avatarı & Durum Rozeti */}
       <Link
         href={`/kullanici/${thread.author.username}`}
@@ -363,6 +379,18 @@ export function ThreadCard({
             {thread.isLocked && (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-bold bg-rose-500/15 text-rose-600 dark:text-rose-400">
                 <Lock className="w-3 h-3" /> Kilitli
+              </span>
+            )}
+
+            {hasCodeBlock && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 border border-indigo-500/20 font-mono">
+                &lt;/&gt; Kod
+              </span>
+            )}
+
+            {hasImage && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold bg-sky-500/10 text-sky-600 dark:text-sky-300 border border-sky-500/20">
+                Görsel
               </span>
             )}
           </div>
