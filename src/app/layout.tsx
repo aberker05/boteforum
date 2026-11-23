@@ -68,13 +68,11 @@ export async function generateMetadata(): Promise<Metadata> {
       title: `${fullName} — ${tagline}`,
       description: settings.footerDescription,
     },
-    ...(process.env.GOOGLE_SITE_VERIFICATION
-      ? {
-          verification: {
-            google: process.env.GOOGLE_SITE_VERIFICATION,
-          },
-        }
-      : {}),
+    verification: {
+      google:
+        process.env.GOOGLE_SITE_VERIFICATION ||
+        'Bs8mfIItxaUWHoWZGH28aPJX-xPvwEeV3jXtLVZlwIU',
+    },
   };
 }
 
