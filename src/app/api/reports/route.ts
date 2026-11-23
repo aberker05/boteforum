@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
+import { invalidateHomeCache } from '@/lib/homeCache';
 import {
   checkActionCooldown,
   validateContentLength,
@@ -165,6 +166,7 @@ export async function PATCH(request: Request) {
         }
       }
       await updateReportStatus(reportId, 'RESOLVED');
+      invalidateHomeCache();
       return NextResponse.json({ success: true });
     }
 

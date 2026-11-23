@@ -2,7 +2,9 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser, invalidateUserCache } from '@/lib/auth';
-import { verifyRequestOrigin } from '@/lib/security';
+import { invalidateHomeCache } from '@/lib/homeCache';
+import { invalidateTechNewsCache } from '@/lib/techNews';
+import { validatePasswordStrength, verifyRequestOrigin } from '@/lib/security';
 
 const VALID_ROLES = ['MEMBER', 'MODERATOR', 'ADMIN', 'BANNED'];
 const AVATAR_COLORS = [
@@ -52,9 +54,10 @@ export async function POST(request: Request) {
       );
     }
 
-    if (password.length < 6) {
+    const pwCheck = validatePasswordStrength(String(password));
+    if (!pwCheck.valid) {
       return NextResponse.json(
-        { error: 'Şifre en az 6 karakter olmalıdır.' },
+        { error: pwCheck.error },
         { status: 400 }
       );
     }
@@ -85,7 +88,7 @@ export async function POST(request: Request) {
         displayName: (displayName || cleanUsername).trim(),
         avatarColor: randomColor,
         role: userRole,
-        reputation: 10,
+        reputation: 0,
       },
       select: {
         id: true,
@@ -153,6 +156,7 @@ export async function PATCH(request: Request) {
     });
 
     invalidateUserCache(userId);
+    invalidateHomeCache();
     return NextResponse.json({ user: updated });
   } catch (error) {
     console.error('Admin update user error:', error);
@@ -184,8 +188,18 @@ export async function DELETE(request: Request) {
       );
     }
 
+    // İlişkili raw-SQL tablo kayıtlarını da güvenli şekilde temizle
+    await Promise.all([
+      prisma.$executeRaw`DELETE FROM "TechNewsComment" WHERE "authorId" = ${userId}`.catch(() => {}),
+      prisma.$executeRaw`DELETE FROM "ThreadPollVote" WHERE "userId" = ${userId}`.catch(() => {}),
+      prisma.$executeRaw`DELETE FROM "Notification" WHERE "userId" = ${userId}`.catch(() => {}),
+      prisma.$executeRaw`DELETE FROM "PasswordReset" WHERE "userId" = ${userId}`.catch(() => {}),
+    ]);
+
     await prisma.user.delete({ where: { id: userId } });
     invalidateUserCache(userId);
+    invalidateHomeCache();
+    invalidateTechNewsCache();
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Admin delete user error:', error);

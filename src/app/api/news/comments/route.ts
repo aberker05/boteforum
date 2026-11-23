@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import { getCurrentUser } from '@/lib/auth';
+import { getCurrentUser, invalidateUserCache } from '@/lib/auth';
 import { checkContentModeration } from '@/lib/moderation';
 import {
   checkActionCooldown,
-  validateContentLength,
+  validateMarkdownContent,
   verifyRequestOrigin,
 } from '@/lib/security';
 import {
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const lenCheck = validateContentLength(content, 5000, 'Yorum');
+    const lenCheck = validateMarkdownContent(content, 5000, 2, 'Yorum');
     if (!lenCheck.valid) {
       return NextResponse.json({ error: lenCheck.error }, { status: 400 });
     }
@@ -63,6 +63,7 @@ export async function POST(request: Request) {
       content,
       parentId: parentId || null,
     });
+    invalidateUserCache(user.id);
 
     return NextResponse.json({
       comment: {
@@ -78,7 +79,7 @@ export async function POST(request: Request) {
           displayName: user.displayName,
           avatarColor: user.avatarColor,
           role: user.role,
-          reputation: user.reputation + 2,
+          reputation: user.reputation + 5,
         },
       },
     });
@@ -112,7 +113,7 @@ export async function PATCH(request: Request) {
       );
     }
 
-    const lenCheck = validateContentLength(content, 5000, 'Yorum');
+    const lenCheck = validateMarkdownContent(content, 5000, 2, 'Yorum');
     if (!lenCheck.valid) {
       return NextResponse.json({ error: lenCheck.error }, { status: 400 });
     }

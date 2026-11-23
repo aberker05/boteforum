@@ -84,7 +84,9 @@ export default async function TechNewsDetailPage({ params }: NewsDetailProps) {
     <div className="max-w-4xl mx-auto space-y-6">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(articleJsonLd).replace(/</g, '\\u003c'),
+        }}
       />
       <div className="flex flex-wrap items-center justify-between gap-2">
         <Link

@@ -244,7 +244,9 @@ export default async function ThreadDetailPage({ params }: ThreadDetailProps) {
     <div className="space-y-5">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(forumPostingJsonLd) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(forumPostingJsonLd).replace(/</g, '\\u003c'),
+        }}
       />
       {/* Profesyonel Forum Breadcrumb Navigasyonu */}
       <nav

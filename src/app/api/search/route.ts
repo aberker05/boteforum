@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getAllTechNews } from '@/lib/techNews';
+import { getCachedHomeThreads, getHomeSidebarData } from '@/lib/homeCache';
 import { matchesSearch, normalizeSearchText } from '@/lib/utils';
 
 export async function GET(request: Request) {
@@ -8,53 +9,11 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const q = (searchParams.get('q') || '').trim();
 
-    const [threads, categories, users, techNews] = await Promise.all([
-      prisma.thread.findMany({
-        orderBy: [{ isPinned: 'desc' }, { updatedAt: 'desc' }],
-        take: 100,
-        select: {
-          id: true,
-          title: true,
-          slug: true,
-          content: true,
-          tags: true,
-          isSolved: true,
-          views: true,
-          createdAt: true,
-          author: {
-            select: {
-              username: true,
-              displayName: true,
-              avatarColor: true,
-            },
-          },
-          category: {
-            select: {
-              name: true,
-              slug: true,
-              color: true,
-            },
-          },
-          _count: {
-            select: { comments: true },
-          },
-        },
-      }),
-      prisma.category.findMany({
-        orderBy: { order: 'asc' },
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-          description: true,
-          color: true,
-          icon: true,
-          _count: {
-            select: { threads: true },
-          },
-        },
-      }),
+    const [cachedThreads, sidebarData, users, techNews] = await Promise.all([
+      getCachedHomeThreads(),
+      getHomeSidebarData(),
       prisma.user.findMany({
+        where: { role: { not: 'BANNED' } },
         orderBy: { reputation: 'desc' },
         take: 30,
         select: {
@@ -68,6 +27,9 @@ export async function GET(request: Request) {
       }),
       getAllTechNews(),
     ]);
+
+    const categories = sidebarData.categories;
+    const threads = cachedThreads.slice(0, 100);
 
     // Tüm etiketleri ve kullanım sayılarını çıkar
     const tagCounts: Record<string, number> = {};
@@ -99,7 +61,7 @@ export async function GET(request: Request) {
       tags: t.tags,
       isSolved: t.isSolved,
       views: t.views,
-      commentCount: t._count.comments,
+      commentCount: t.commentCount,
       author: t.author,
       category: t.category,
     }));
