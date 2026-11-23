@@ -199,19 +199,6 @@ export function Navbar({
     sessionStorage.setItem('novaforum_active_tab', '1');
     localStorage.setItem('novaforum_last_active_ts', String(now));
 
-    // Eğer siteden çıkıp geri döndüyse ve mod 'ask' ise "daha önce soruldu" bayrağını sıfırla ki tekrar sorsun
-    if (leftSiteAndReturned && savedPref === 'ask') {
-      sessionStorage.removeItem('novaforum_prompt_dismissed');
-    }
-
-    // Kullanıcı 'ask' (Çıkarken Sor) modundaysa ve bu sekmede henüz pencereyi kapatmadıysa doğrudan tercih penceresini aç
-    if (
-      savedPref === 'ask' &&
-      sessionStorage.getItem('novaforum_prompt_dismissed') !== '1'
-    ) {
-      setExitPromptOpen(true);
-    }
-
     // Sekme açık olduğu sürece her 1.5 saniyede bir aktiflik zaman damgasını güncelle
     const heartbeatTimer = window.setInterval(() => {
       if (document.visibilityState === 'visible') {
@@ -229,19 +216,20 @@ export function Navbar({
       }
     };
 
-    // Fare sayfa içerisindeyken sekme kapatma çubuğuna / adres çubuğuna (üst sınıra) çıktığında 'ask' modundaysa anında sor
-    let armedForExit = true;
+    // Sadece kullanıcı siteden çıkmak üzere fareyi sayfa dışına (tarayıcı sekme kapatma çubuğuna) götürdüğünde sor
+    let armedForExit = false;
     let lastClientY = 200;
 
     const handleMouseMove = (e: MouseEvent) => {
       const currentPref = localStorage.getItem('novaforum_session_pref') || 'ask';
       if (currentPref !== 'ask') return;
+      if (sessionStorage.getItem('novaforum_prompt_dismissed') === '1') return;
 
-      if (e.clientY > 75) {
+      if (e.clientY > 100) {
         armedForExit = true;
       } else if (
         armedForExit &&
-        e.clientY <= 42 &&
+        e.clientY <= 6 &&
         e.clientY < lastClientY
       ) {
         armedForExit = false;
@@ -253,8 +241,9 @@ export function Navbar({
     const handleMouseLeaveDocument = (e: MouseEvent) => {
       const currentPref = localStorage.getItem('novaforum_session_pref') || 'ask';
       if (currentPref !== 'ask') return;
+      if (sessionStorage.getItem('novaforum_prompt_dismissed') === '1') return;
 
-      if (e.clientY <= 80) {
+      if (armedForExit && e.clientY <= 12) {
         armedForExit = false;
         setExitPromptOpen(true);
       }
