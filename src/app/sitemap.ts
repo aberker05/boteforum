@@ -4,15 +4,27 @@ import { getAllTechNews } from '@/lib/techNews';
 
 export const dynamic = 'force-dynamic';
 
+function getProductionBaseUrl(): string {
+  const explicit =
+    process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL;
+  if (explicit && !explicit.includes('localhost')) {
+    return explicit.replace(/\/$/, '');
+  }
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  }
+  return 'https://boteforum.vercel.app';
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const baseUrl = getProductionBaseUrl();
 
   const [threads, news] = await Promise.all([
     prisma.thread
       .findMany({
         select: { slug: true, updatedAt: true },
         orderBy: { updatedAt: 'desc' },
-        take: 200,
+        take: 500,
       })
       .catch(() => []),
     getAllTechNews().catch(() => []),
@@ -49,16 +61,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: `${baseUrl}/konu/${t.slug}`,
     lastModified: t.updatedAt,
     changeFrequency: 'daily',
-    priority: 0.8,
+    priority: 0.85,
   }));
 
   const newsRoutes: MetadataRoute.Sitemap = news.map((n) => ({
     url: `${baseUrl}/haberler/${n.slug}`,
     lastModified: new Date(n.createdAt),
     changeFrequency: 'weekly',
-    priority: 0.75,
+    priority: 0.8,
   }));
 
   return [...staticRoutes, ...threadRoutes, ...newsRoutes];
 }
-

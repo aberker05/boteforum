@@ -15,9 +15,66 @@ export const dynamic = 'force-dynamic';
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
   const fullName = `${settings.siteNamePrimary}${settings.siteNameAccent}`;
+  const tagline = settings.siteTagline || 'Teknoloji, Yazılım ve BÖTE Topluluk Forumu';
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : 'https://boteforum.vercel.app');
+
   return {
-    title: `${fullName} — ${settings.siteTagline || 'Topluluk Forumu'}`,
+    metadataBase: new URL(siteUrl),
+    title: {
+      default: `${fullName} — ${tagline}`,
+      template: `%s | ${fullName}`,
+    },
     description: settings.footerDescription,
+    keywords: [
+      fullName,
+      'BÖTE',
+      'BÖTE Forum',
+      'Bilgisayar ve Öğretim Teknolojileri Eğitimi',
+      'Teknoloji Forumu',
+      'Yazılım Forumu',
+      'Siber Güvenlik',
+      'Yapay Zeka',
+      'Eğitim Teknolojileri',
+      'Geliştirici Topluluğu',
+    ],
+    alternates: {
+      canonical: '/',
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
+    openGraph: {
+      type: 'website',
+      locale: 'tr_TR',
+      url: siteUrl,
+      siteName: fullName,
+      title: `${fullName} — ${tagline}`,
+      description: settings.footerDescription,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${fullName} — ${tagline}`,
+      description: settings.footerDescription,
+    },
+    ...(process.env.GOOGLE_SITE_VERIFICATION
+      ? {
+          verification: {
+            google: process.env.GOOGLE_SITE_VERIFICATION,
+          },
+        }
+      : {}),
   };
 }
 

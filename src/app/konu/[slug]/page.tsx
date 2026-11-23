@@ -213,9 +213,39 @@ export default async function ThreadDetailPage({ params }: ThreadDetailProps) {
     }
   }
   const participants = Array.from(participantMap.values());
+  const forumPostingJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'DiscussionForumPosting',
+    headline: thread.title,
+    text: thread.content
+      .replace(/!\[[^\]]*\]\([^)]+\)/g, '[Görsel]')
+      .slice(0, 500),
+    datePublished: thread.createdAt,
+    dateModified: thread.updatedAt,
+    author: {
+      '@type': 'Person',
+      name: thread.author.displayName,
+    },
+    interactionStatistic: [
+      {
+        '@type': 'InteractionCounter',
+        interactionType: 'https://schema.org/CommentAction',
+        userInteractionCount: formattedComments.length,
+      },
+      {
+        '@type': 'InteractionCounter',
+        interactionType: 'https://schema.org/LikeAction',
+        userInteractionCount: score,
+      },
+    ],
+  };
 
   return (
     <div className="space-y-5">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(forumPostingJsonLd) }}
+      />
       {/* Profesyonel Forum Breadcrumb Navigasyonu */}
       <nav
         aria-label="Breadcrumb"

@@ -60,9 +60,32 @@ export default async function TechNewsDetailPage({ params }: NewsDetailProps) {
     getAllTechNews(),
   ]);
   const relatedNews = allNews.filter((n) => n.id !== item.id).slice(0, 3);
+  const articleJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
+    headline: item.title,
+    description: item.summary,
+    image: item.imageUrl && item.imageUrl !== 'none' ? [item.imageUrl] : undefined,
+    datePublished: item.createdAt,
+    dateModified: item.createdAt,
+    articleSection: item.category,
+    author: {
+      '@type': 'Organization',
+      name: item.source || 'BÖTEForum Teknoloji Radarı',
+    },
+    interactionStatistic: {
+      '@type': 'InteractionCounter',
+      interactionType: 'https://schema.org/CommentAction',
+      userInteractionCount: comments.length,
+    },
+  };
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
       <div className="flex flex-wrap items-center justify-between gap-2">
         <Link
           href="/haberler"
