@@ -148,7 +148,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
     score: t.votes.filter((v) => v.value === 1).length,
     userVote:
       currentUser &&
-      t.votes.some((v) => v.userId === currentUser.id && v.value === 1)
+        t.votes.some((v) => v.userId === currentUser.id && v.value === 1)
         ? 1
         : 0,
     commentCount: t._count.comments,
@@ -167,13 +167,13 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
       </Link>
 
       {/* Üst Profil Kartı */}
-      <div className="rounded-3xl border border-slate-200/90 dark:border-slate-800/90 bg-white dark:bg-slate-900/95 p-6 sm:p-8 shadow-sm">
+      <div className="rounded-md border border-[#232730] bg-[#15181E] p-5 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div className="flex items-start sm:items-center gap-4">
             <UserAvatar
               name={profileUser.displayName}
               avatar={profileUser.avatarColor}
-              className="w-20 h-20 rounded-3xl text-3xl font-extrabold shadow-lg"
+              className="w-16 h-16 rounded-md text-2xl font-bold border border-[#232730]"
             />
             <div>
               <div className="flex flex-wrap items-center gap-2">

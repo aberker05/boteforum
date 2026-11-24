@@ -613,40 +613,40 @@ export function Navbar({
     const { flatList } = filteredResults;
 
     return (
-      <div className="absolute left-0 right-0 sm:min-w-[440px] top-full mt-2 rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-[#111827] shadow-2xl shadow-black/40 overflow-hidden z-50">
+      <div className="absolute left-0 right-0 sm:min-w-[440px] top-full mt-1.5 rounded-md border border-[#232730] bg-[#15181E] overflow-hidden z-50">
         {/* Varsa Kelime Tamamlama Önerisi */}
         {autoCompleteHint && (
-          <div className="px-4 py-2 bg-indigo-500/10 border-b border-indigo-500/20 flex items-center justify-between gap-2 text-xs">
-            <span className="text-slate-600 dark:text-slate-300">
-              Bunu mu demek istediniz?
+          <div className="px-3.5 py-2 bg-[#10B981]/10 border-b border-[#232730] flex items-center justify-between gap-2 text-xs font-mono">
+            <span className="text-[#8B949E]">
+              Tamamla:
             </span>
             <button
               type="button"
               onClick={() => handleInputChange(autoCompleteHint)}
-              className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-indigo-600 text-white font-semibold hover:bg-indigo-500 transition-colors"
+              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm bg-[#10B981] text-[#0D0F12] font-semibold hover:bg-[#059669] transition-colors cursor-pointer"
             >
               {autoCompleteHint}
-              <span className="text-[10px] opacity-80 font-normal">(Tab)</span>
+              <span className="text-[10px] opacity-80 font-normal">[Tab]</span>
             </button>
           </div>
         )}
 
         {/* Öneri Listesi */}
         {loadingIndex && !searchIndex ? (
-          <div className="p-5 text-center text-xs text-slate-400">
-            Aranıyor...
+          <div className="p-4 text-center text-xs font-mono text-[#8B949E]">
+            İndeks taranıyor...
           </div>
         ) : flatList.length === 0 ? (
-          <div className="p-5 text-center space-y-1">
-            <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-              &ldquo;{trimmed}&rdquo; için eşleşen sonuç bulunamadı
+          <div className="p-4 text-center space-y-1">
+            <p className="text-xs font-mono font-semibold text-[#E6EDF3]">
+              &ldquo;{trimmed}&rdquo; için eşleşen kayıt bulunamadı
             </p>
-            <p className="text-[11px] text-slate-400">
-              Farklı bir kelime deneyebilir veya Enter tuşuna basabilirsiniz.
+            <p className="text-[11px] text-[#8B949E]">
+              Farklı bir anahtar kelime deneyin veya Enter tuşuna basın.
             </p>
           </div>
         ) : (
-          <div className="divide-y divide-slate-100 dark:divide-slate-800/70 max-h-[360px] overflow-y-auto custom-scrollbar">
+          <div className="divide-y divide-[#232730] max-h-[360px] overflow-y-auto custom-scrollbar">
             {flatList.slice(0, 7).map((item, idx) => {
               const isSelected = idx === activeIndex;
               return (
@@ -655,34 +655,34 @@ export function Navbar({
                   type="button"
                   onMouseEnter={() => setActiveIndex(idx)}
                   onClick={() => handleSelectSuggestion(item)}
-                  className={`w-full px-4 py-2.5 text-left flex items-center justify-between gap-3 transition-colors ${
+                  className={`w-full px-3.5 py-2.5 text-left flex items-center justify-between gap-3 transition-colors cursor-pointer ${
                     isSelected
-                      ? 'bg-indigo-50/90 dark:bg-indigo-950/60'
-                      : 'hover:bg-slate-50 dark:hover:bg-slate-800/60'
+                      ? 'bg-[#10B981]/15'
+                      : 'hover:bg-[#0D0F12]'
                   }`}
                 >
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                    <div className="w-7 h-7 rounded-md bg-[#0D0F12] border border-[#232730] flex items-center justify-center shrink-0">
                       {item.type === 'thread' && (
-                        <MessageSquare className="w-3.5 h-3.5 text-indigo-500" />
+                        <MessageSquare className="w-3.5 h-3.5 text-[#10B981]" />
                       )}
                       {item.type === 'category' && (
                         <Layers
                           className="w-3.5 h-3.5"
-                          style={{ color: item.badgeColor || '#6366f1' }}
+                          style={{ color: item.badgeColor || '#10B981' }}
                         />
                       )}
                       {item.type === 'tag' && (
-                        <Tag className="w-3.5 h-3.5 text-emerald-500" />
+                        <Tag className="w-3.5 h-3.5 text-[#10B981]" />
                       )}
                       {item.type === 'news' && (
-                        <Newspaper className="w-3.5 h-3.5 text-amber-500" />
+                        <Newspaper className="w-3.5 h-3.5 text-[#F59E0B]" />
                       )}
                       {item.type === 'user' && (
                         <div
-                          className="w-5 h-5 rounded-md flex items-center justify-center text-white text-[10px] font-bold"
+                          className="w-5 h-5 rounded-sm flex items-center justify-center text-[#0D0F12] text-[10px] font-mono font-bold"
                           style={{
-                            backgroundColor: item.badgeColor || '#6366f1',
+                            backgroundColor: item.badgeColor || '#10B981',
                           }}
                         >
                           {item.title.charAt(0).toUpperCase()}
@@ -692,22 +692,22 @@ export function Navbar({
 
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
+                        <span className="text-xs sm:text-sm font-semibold text-[#E6EDF3] truncate">
                           {item.title}
                         </span>
                         {item.isSolved && (
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                          <CheckCircle2 className="w-3.5 h-3.5 text-[#10B981] shrink-0" />
                         )}
                       </div>
                       {item.subtitle && (
-                        <p className="text-[11px] text-slate-400 truncate">
+                        <p className="text-[11px] font-mono text-[#8B949E] truncate">
                           {item.subtitle}
                         </p>
                       )}
                     </div>
                   </div>
 
-                  <ArrowRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <ArrowRight className="w-3.5 h-3.5 text-[#8B949E] shrink-0" />
                 </button>
               );
             })}
@@ -718,7 +718,7 @@ export function Navbar({
         <button
           type="button"
           onClick={handleSearch}
-          className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/70 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 border-t border-slate-200/80 dark:border-slate-800 flex items-center justify-between text-xs font-semibold text-indigo-600 dark:text-indigo-400 transition-colors"
+          className="w-full px-3.5 py-2 bg-[#0D0F12] hover:bg-[#10B981]/10 border-t border-[#232730] flex items-center justify-between text-xs font-mono font-semibold text-[#10B981] transition-colors cursor-pointer"
         >
           <span className="flex items-center gap-1.5 truncate">
             <Search className="w-3.5 h-3.5 shrink-0" />
@@ -732,21 +732,21 @@ export function Navbar({
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full border-b border-slate-200/90 dark:border-slate-800/90 bg-white/95 dark:bg-[#0b0f19]/95 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-2 sm:gap-4">
+      <header className="sticky top-0 z-40 w-full border-b border-[#232730] bg-[#0D0F12]/95 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-2 sm:gap-4">
           {/* Sol: Dinamik Site Logosu & Başlığı */}
           <Link href="/" prefetch={true} className="shrink-0">
             <BrandLogo settings={siteSettings} size="md" showTagline={true} />
           </Link>
 
-          {/* Orta: Geniş ve Ferah Arama Çubuğu */}
+          {/* Orta: Arama Çubuğu */}
           <div
             ref={searchContainerRef}
             className="flex-1 max-w-lg hidden sm:block relative"
           >
             <form onSubmit={handleSearch}>
               <div className="relative">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <Search className="w-3.5 h-3.5 text-[#8B949E] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   ref={searchInputRef}
                   type="text"
@@ -758,22 +758,21 @@ export function Navbar({
                   }}
                   onChange={(e) => handleInputChange(e.target.value)}
                   onKeyDown={handleSearchKeyDown}
-                  placeholder="Konu, etiket veya içerik ara..."
-                  className="w-full pl-10 pr-9 py-2 rounded-xl text-sm bg-slate-100/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all"
+                  placeholder="Konu, #etiket veya içerik ara... [ / ]"
+                  className="w-full pl-9 pr-8 py-1.5 rounded-md text-xs sm:text-sm font-mono bg-[#15181E] border border-[#232730] text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:border-[#10B981] transition-colors"
                 />
                 {searchQuery && (
                   <button
                     type="button"
                     onClick={clearSearch}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8B949E] hover:text-[#E6EDF3]"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-3.5 h-3.5" />
                   </button>
                 )}
               </div>
             </form>
 
-            {/* Canlı Öneri Açılır Menüsü */}
             {renderSuggestionsDropdown()}
           </div>
 
@@ -790,7 +789,7 @@ export function Navbar({
                 }
               }}
               title="Ara"
-              className="sm:hidden p-2 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors cursor-pointer"
+              className="sm:hidden p-2 rounded-md border border-[#232730] bg-[#15181E] text-[#8B949E] hover:text-[#E6EDF3] transition-colors cursor-pointer"
             >
               <Search className="w-4 h-4" />
             </button>
@@ -798,19 +797,11 @@ export function Navbar({
             <Link
               href="/haberler"
               prefetch={true}
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20 transition-colors"
+              className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-mono font-medium border border-[#232730] bg-[#15181E] text-[#E6EDF3] hover:border-[#10B981]/60 hover:text-[#10B981] transition-colors"
             >
-              <Newspaper className="w-3.5 h-3.5" />
-              <span className="hidden md:inline">Teknoloji Gündemi</span>
+              <Newspaper className="w-3.5 h-3.5 text-[#10B981]" />
+              <span className="hidden md:inline">Gündem</span>
             </Link>
-
-            <button
-              onClick={toggleTheme}
-              title={theme === 'dark' ? 'Aydınlık Moda Geç' : 'Karanlık Moda Geç'}
-              className="p-2 sm:p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors cursor-pointer"
-            >
-              {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
-            </button>
 
             {user ? (
               <>
@@ -818,16 +809,16 @@ export function Navbar({
                   type="button"
                   onClick={() => setExitPromptOpen(true)}
                   title="Siteden Çıkarken Oturum Tercihi"
-                  className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold border transition-colors cursor-pointer ${
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] font-mono font-medium border transition-colors cursor-pointer ${
                     sessionPref === 'close'
-                      ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20'
+                      ? 'border-[#10B981]/40 bg-[#10B981]/10 text-[#10B981] hover:bg-[#10B981]/20'
                       : sessionPref === 'keep'
-                      ? 'border-indigo-500/40 bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-500/20'
-                      : 'border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300 hover:bg-amber-500/20'
+                      ? 'border-[#232730] bg-[#15181E] text-[#E6EDF3] hover:border-[#10B981]/50'
+                      : 'border-[#F59E0B]/40 bg-[#F59E0B]/10 text-[#F59E0B] hover:bg-[#F59E0B]/20'
                   }`}
                 >
-                  <Lock className="w-3.5 h-3.5 shrink-0" />
-                  <span>
+                  <Lock className="w-3 h-3 shrink-0" />
+                  <span className="hidden md:inline">
                     {sessionPref === 'close'
                       ? 'Çıkınca Kapat'
                       : sessionPref === 'keep'
@@ -841,27 +832,27 @@ export function Navbar({
                 <Link
                   href="/yeni-konu"
                   prefetch={true}
-                  className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm shadow-indigo-500/20 transition-all"
+                  className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold bg-[#10B981] hover:bg-[#059669] text-[#0D0F12] transition-colors"
                 >
-                  <PlusCircle className="w-4 h-4" />
+                  <PlusCircle className="w-3.5 h-3.5" />
                   <span className="hidden md:inline">Yeni Konu</span>
                 </Link>
 
                 <div className="relative">
                   <button
                     onClick={() => setMenuOpen(!menuOpen)}
-                    className="flex items-center gap-2 p-1 sm:pr-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800/70 transition-colors cursor-pointer"
+                    className="flex items-center gap-2 p-1 sm:pr-2.5 rounded-md border border-[#232730] bg-[#15181E] hover:border-[#10B981]/50 transition-colors cursor-pointer"
                   >
                     <UserAvatar
                       name={user.displayName}
                       avatar={user.avatarColor}
-                      className="w-7 h-7 rounded-lg text-xs font-semibold"
+                      className="w-6 h-6 rounded-sm text-xs font-semibold"
                     />
                     <div className="hidden lg:flex flex-col items-start text-left">
-                      <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 leading-none">
+                      <span className="text-xs font-semibold text-[#E6EDF3] leading-none">
                         {user.displayName}
                       </span>
-                      <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-medium flex items-center gap-0.5 mt-0.5">
+                      <span className="text-[10px] font-mono text-[#F59E0B] font-medium flex items-center gap-0.5 mt-0.5">
                         <Award className="w-2.5 h-2.5" /> {user.reputation}p
                       </span>
                     </div>
@@ -873,12 +864,12 @@ export function Navbar({
                         className="fixed inset-0 z-10"
                         onClick={() => setMenuOpen(false)}
                       />
-                      <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl py-2 z-20">
-                        <div className="px-4 py-2.5 border-b border-slate-100 dark:border-slate-800">
-                          <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">
+                      <div className="absolute right-0 mt-1.5 w-56 rounded-md border border-[#232730] bg-[#15181E] py-1.5 z-20">
+                        <div className="px-3.5 py-2 border-b border-[#232730]">
+                          <p className="text-xs font-bold text-[#E6EDF3] truncate">
                             {user.displayName}
                           </p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                          <p className="text-[11px] font-mono text-[#8B949E] truncate">
                             @{user.username}
                           </p>
                         </div>
@@ -886,9 +877,9 @@ export function Navbar({
                           href={`/kullanici/${user.username}`}
                           prefetch={true}
                           onClick={() => setMenuOpen(false)}
-                          className="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                          className="flex items-center gap-2.5 px-3.5 py-2 text-xs text-[#E6EDF3] hover:bg-[#0D0F12] transition-colors"
                         >
-                          <UserIcon className="w-4 h-4 text-slate-400" />
+                          <UserIcon className="w-3.5 h-3.5 text-[#8B949E]" />
                           Profilim & Rozetler
                         </Link>
                         {user.role === 'ADMIN' && (
@@ -896,27 +887,27 @@ export function Navbar({
                             href="/admin"
                             prefetch={true}
                             onClick={() => setMenuOpen(false)}
-                            className="flex items-center gap-2.5 px-4 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-colors"
+                            className="flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-[#10B981] hover:bg-[#0D0F12] transition-colors"
                           >
-                            <Shield className="w-4 h-4" />
+                            <Shield className="w-3.5 h-3.5" />
                             Yönetim Paneli
                           </Link>
                         )}
                         <Link
                           href="/?filtre=kaydedilenler"
                           onClick={() => setMenuOpen(false)}
-                          className="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                          className="flex items-center gap-2.5 px-3.5 py-2 text-xs text-[#E6EDF3] hover:bg-[#0D0F12] transition-colors"
                         >
-                          <Bookmark className="w-4 h-4 text-slate-400" />
+                          <Bookmark className="w-3.5 h-3.5 text-[#8B949E]" />
                           Kaydedilen Konular
                         </Link>
                         <Link
                           href="/destek"
                           prefetch={true}
                           onClick={() => setMenuOpen(false)}
-                          className="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                          className="flex items-center gap-2.5 px-3.5 py-2 text-xs text-[#E6EDF3] hover:bg-[#0D0F12] transition-colors"
                         >
-                          <HelpCircle className="w-4 h-4 text-emerald-500" />
+                          <HelpCircle className="w-3.5 h-3.5 text-[#10B981]" />
                           Destek & Talep Merkezi
                         </Link>
                         <button
@@ -925,13 +916,13 @@ export function Navbar({
                             setMenuOpen(false);
                             setExitPromptOpen(true);
                           }}
-                          className="w-full flex items-center justify-between gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                          className="w-full flex items-center justify-between gap-2 px-3.5 py-2 text-xs text-[#E6EDF3] hover:bg-[#0D0F12] transition-colors cursor-pointer"
                         >
                           <span className="flex items-center gap-2.5">
-                            <Lock className="w-4 h-4 text-slate-400" />
+                            <Lock className="w-3.5 h-3.5 text-[#8B949E]" />
                             Oturum Tercihi
                           </span>
-                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400">
+                          <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded-sm bg-[#0D0F12] border border-[#232730] text-[#10B981]">
                             {sessionPref === 'keep'
                               ? 'Açık Tut'
                               : sessionPref === 'close'
@@ -941,9 +932,9 @@ export function Navbar({
                         </button>
                         <button
                           onClick={handleLogout}
-                          className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
+                          className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs text-rose-400 hover:bg-[#0D0F12] transition-colors cursor-pointer"
                         >
-                          <LogOut className="w-4 h-4" />
+                          <LogOut className="w-3.5 h-3.5" />
                           Çıkış Yap
                         </button>
                       </div>
@@ -952,16 +943,16 @@ export function Navbar({
                 </div>
               </>
             ) : (
-              <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="flex items-center gap-1.5">
                 <Link
                   href="/giris"
-                  className="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  className="px-3 py-1.5 rounded-md text-xs font-medium text-[#E6EDF3] border border-[#232730] bg-[#15181E] hover:border-[#10B981]/50 transition-colors"
                 >
                   Giriş
                 </Link>
                 <Link
                   href="/kayit"
-                  className="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm shadow-indigo-500/20 transition-all"
+                  className="px-3 py-1.5 rounded-md text-xs font-semibold bg-[#10B981] hover:bg-[#059669] text-[#0D0F12] transition-colors"
                 >
                   Kayıt Ol
                 </Link>
@@ -974,10 +965,10 @@ export function Navbar({
         {mobileSearchOpen && (
           <div
             ref={mobileSearchContainerRef}
-            className="sm:hidden px-3 pb-3 pt-1.5 border-t border-slate-100 dark:border-slate-800/80 bg-white dark:bg-[#0b0f19] relative"
+            className="sm:hidden px-3 pb-2.5 pt-1.5 border-t border-[#232730] bg-[#0D0F12] relative"
           >
             <form onSubmit={handleSearch} className="relative">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <Search className="w-3.5 h-3.5 text-[#8B949E] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
                 autoFocus
@@ -989,16 +980,16 @@ export function Navbar({
                 }}
                 onChange={(e) => handleInputChange(e.target.value)}
                 onKeyDown={handleSearchKeyDown}
-                placeholder="Konu, etiket veya içerik ara..."
-                className="w-full pl-10 pr-8 py-2 rounded-xl text-sm bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                placeholder="Konu, #etiket veya içerik ara..."
+                className="w-full pl-9 pr-8 py-1.5 rounded-md text-xs font-mono bg-[#15181E] border border-[#232730] text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:border-[#10B981]"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={clearSearch}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8B949E] hover:text-[#E6EDF3]"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-3.5 h-3.5" />
                 </button>
               )}
             </form>
@@ -1007,17 +998,15 @@ export function Navbar({
         )}
       </header>
 
-      {/* Mobil Alt Navigasyon Çubuğu (Uygulama Deneyimi) */}
+      {/* Mobil Alt Navigasyon Çubuğu */}
       <nav
         aria-label="Mobil Alt Menü"
-        className="sm:hidden fixed bottom-0 inset-x-0 z-40 h-15 bg-white/95 dark:bg-[#0b0f19]/95 backdrop-blur-lg border-t border-slate-200/90 dark:border-slate-800/90 px-2 flex items-center justify-around shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
+        className="sm:hidden fixed bottom-0 inset-x-0 z-40 h-14 bg-[#0D0F12]/95 backdrop-blur-md border-t border-[#232730] px-2 flex items-center justify-around font-mono"
       >
         <Link
           href="/"
-          className={`flex flex-col items-center justify-center gap-0.5 py-1 px-2.5 rounded-xl text-[10px] font-semibold transition-colors ${
-            pathname === '/'
-              ? 'text-indigo-600 dark:text-indigo-400'
-              : 'text-slate-500 dark:text-slate-400'
+          className={`flex flex-col items-center justify-center gap-0.5 py-1 px-2.5 rounded-md text-[10px] font-semibold transition-colors ${
+            pathname === '/' ? 'text-[#10B981]' : 'text-[#8B949E]'
           }`}
         >
           <Layers className="w-4 h-4" />
@@ -1026,10 +1015,10 @@ export function Navbar({
 
         <Link
           href="/haberler"
-          className={`flex flex-col items-center justify-center gap-0.5 py-1 px-2.5 rounded-xl text-[10px] font-semibold transition-colors ${
+          className={`flex flex-col items-center justify-center gap-0.5 py-1 px-2.5 rounded-md text-[10px] font-semibold transition-colors ${
             pathname.startsWith('/haberler')
-              ? 'text-emerald-600 dark:text-emerald-400'
-              : 'text-slate-500 dark:text-slate-400'
+              ? 'text-[#10B981]'
+              : 'text-[#8B949E]'
           }`}
         >
           <Newspaper className="w-4 h-4" />
@@ -1038,22 +1027,22 @@ export function Navbar({
 
         <Link
           href={user ? '/yeni-konu' : '/giris'}
-          className="flex flex-col items-center justify-center -mt-4"
+          className="flex flex-col items-center justify-center -mt-3"
         >
-          <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 text-white flex items-center justify-center shadow-lg shadow-indigo-500/30 border-2 border-white dark:border-[#0b0f19]">
+          <div className="w-10 h-10 rounded-md bg-[#10B981] text-[#0D0F12] flex items-center justify-center border border-[#232730]">
             <PlusCircle className="w-5 h-5" />
           </div>
-          <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 mt-0.5">
+          <span className="text-[10px] font-semibold text-[#10B981] mt-0.5">
             Yeni Konu
           </span>
         </Link>
 
         <Link
           href="/kurallar"
-          className={`flex flex-col items-center justify-center gap-0.5 py-1 px-2.5 rounded-xl text-[10px] font-semibold transition-colors ${
+          className={`flex flex-col items-center justify-center gap-0.5 py-1 px-2.5 rounded-md text-[10px] font-semibold transition-colors ${
             pathname.startsWith('/kurallar') || pathname.startsWith('/gizlilik')
-              ? 'text-indigo-600 dark:text-indigo-400'
-              : 'text-slate-500 dark:text-slate-400'
+              ? 'text-[#10B981]'
+              : 'text-[#8B949E]'
           }`}
         >
           <BookOpen className="w-4 h-4" />
@@ -1063,10 +1052,10 @@ export function Navbar({
         {user ? (
           <Link
             href={user.role === 'ADMIN' ? '/admin' : `/kullanici/${user.username}`}
-            className={`flex flex-col items-center justify-center gap-0.5 py-1 px-2.5 rounded-xl text-[10px] font-semibold transition-colors ${
+            className={`flex flex-col items-center justify-center gap-0.5 py-1 px-2.5 rounded-md text-[10px] font-semibold transition-colors ${
               pathname.startsWith('/kullanici') || pathname.startsWith('/admin')
-                ? 'text-indigo-600 dark:text-indigo-400'
-                : 'text-slate-500 dark:text-slate-400'
+                ? 'text-[#10B981]'
+                : 'text-[#8B949E]'
             }`}
           >
             {user.role === 'ADMIN' ? (
@@ -1084,10 +1073,10 @@ export function Navbar({
         ) : (
           <Link
             href="/giris"
-            className={`flex flex-col items-center justify-center gap-0.5 py-1 px-2.5 rounded-xl text-[10px] font-semibold transition-colors ${
+            className={`flex flex-col items-center justify-center gap-0.5 py-1 px-2.5 rounded-md text-[10px] font-semibold transition-colors ${
               pathname.startsWith('/giris')
-                ? 'text-indigo-600 dark:text-indigo-400'
-                : 'text-slate-500 dark:text-slate-400'
+                ? 'text-[#10B981]'
+                : 'text-[#8B949E]'
             }`}
           >
             <UserIcon className="w-4 h-4" />
@@ -1096,12 +1085,12 @@ export function Navbar({
         )}
       </nav>
 
-      {/* Otomatik Güvenli Çıkış Ekranı ('close' modunda sekme kapatılıp tekrar girildiğinde) */}
+      {/* Otomatik Güvenli Çıkış Ekranı */}
       {autoLoggingOut && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md">
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 px-6 py-5 text-center space-y-2 shadow-2xl">
-            <Shield className="w-8 h-8 text-emerald-400 mx-auto animate-pulse" />
-            <p className="text-sm font-bold text-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0D0F12]/90 backdrop-blur-md">
+          <div className="rounded-md border border-[#232730] bg-[#15181E] px-6 py-5 text-center space-y-2">
+            <Shield className="w-8 h-8 text-[#10B981] mx-auto animate-pulse" />
+            <p className="text-sm font-bold text-[#E6EDF3]">
               Tercihiniz doğrultusunda önceki açık oturumunuz güvenli şekilde kapatılıyor...
             </p>
           </div>
@@ -1110,18 +1099,18 @@ export function Navbar({
 
       {/* Siteden Ayrılırken Oturum Tercihi Modalı */}
       {user && exitPromptOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="w-full max-w-md rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111827] p-5 sm:p-6 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs">
+          <div className="w-full max-w-md rounded-md border border-[#232730] bg-[#15181E] p-5 space-y-4">
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
-                  <Lock className="w-5 h-5" />
+                <div className="w-9 h-9 rounded-md bg-[#0D0F12] border border-[#232730] flex items-center justify-center text-[#10B981] shrink-0">
+                  <Lock className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                  <h3 className="text-sm sm:text-base font-bold text-[#E6EDF3]">
                     Siteden Ayrılırken Oturum Tercihiniz
                   </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                  <p className="text-xs text-[#8B949E]">
                     Sekmeyi veya tarayıcıyı kapattığınızda hesabınız nasıl davransın?
                   </p>
                 </div>
@@ -1129,37 +1118,37 @@ export function Navbar({
               <button
                 type="button"
                 onClick={handleDismissExitPrompt}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                className="p-1.5 rounded-md text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#0D0F12] transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               <button
                 type="button"
                 onClick={() => handleSaveSessionPref('close')}
-                className={`w-full p-3.5 rounded-xl border text-left transition-all cursor-pointer flex items-start gap-3 ${
+                className={`w-full p-3 rounded-md border text-left transition-colors cursor-pointer flex items-start gap-3 ${
                   sessionPref === 'close'
-                    ? 'border-emerald-500 bg-emerald-500/10'
-                    : 'border-slate-200 dark:border-slate-800 hover:border-emerald-500/50 hover:bg-slate-50 dark:hover:bg-slate-800/60'
+                    ? 'border-[#10B981] bg-[#10B981]/10'
+                    : 'border-[#232730] bg-[#0D0F12] hover:border-[#10B981]/50'
                 }`}
               >
-                <div className="w-8 h-8 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
-                  <Shield className="w-4 h-4" />
+                <div className="w-7 h-7 rounded-md bg-[#15181E] border border-[#232730] text-[#10B981] flex items-center justify-center shrink-0 mt-0.5">
+                  <Shield className="w-3.5 h-3.5" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                    <span className="text-xs font-bold text-[#E6EDF3]">
                       Siteden Çıktığımda Oturumu Otomatik Kapat
                     </span>
                     {sessionPref === 'close' && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500 text-white shrink-0">
-                        Aktif
+                      <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-sm bg-[#10B981] text-[#0D0F12] shrink-0">
+                        AKTİF
                       </span>
                     )}
                   </div>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                  <p className="text-[11px] text-[#8B949E] mt-0.5 leading-relaxed">
                     Sekmeyi kapattığınızda oturumunuz otomatik sonlandırılır. Ortak veya okul bilgisayarları için en güvenli seçenektir.
                   </p>
                 </div>
@@ -1168,27 +1157,27 @@ export function Navbar({
               <button
                 type="button"
                 onClick={() => handleSaveSessionPref('keep')}
-                className={`w-full p-3.5 rounded-xl border text-left transition-all cursor-pointer flex items-start gap-3 ${
+                className={`w-full p-3 rounded-md border text-left transition-colors cursor-pointer flex items-start gap-3 ${
                   sessionPref === 'keep'
-                    ? 'border-indigo-500 bg-indigo-500/10'
-                    : 'border-slate-200 dark:border-slate-800 hover:border-indigo-500/50 hover:bg-slate-50 dark:hover:bg-slate-800/60'
+                    ? 'border-[#10B981] bg-[#10B981]/10'
+                    : 'border-[#232730] bg-[#0D0F12] hover:border-[#10B981]/50'
                 }`}
               >
-                <div className="w-8 h-8 rounded-lg bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 mt-0.5">
-                  <CheckCircle2 className="w-4 h-4" />
+                <div className="w-7 h-7 rounded-md bg-[#15181E] border border-[#232730] text-[#10B981] flex items-center justify-center shrink-0 mt-0.5">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                    <span className="text-xs font-bold text-[#E6EDF3]">
                       Bu Cihazda Oturumu Açık Tut (Beni Hatırla)
                     </span>
                     {sessionPref === 'keep' && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-600 text-white shrink-0">
-                        Aktif
+                      <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-sm bg-[#10B981] text-[#0D0F12] shrink-0">
+                        AKTİF
                       </span>
                     )}
                   </div>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                  <p className="text-[11px] text-[#8B949E] mt-0.5 leading-relaxed">
                     Kendi kişisel telefonunuz veya bilgisayarınızsa 30 gün boyunca tekrar şifre girmeden hesabınız açık kalır.
                   </p>
                 </div>
@@ -1197,28 +1186,28 @@ export function Navbar({
               <button
                 type="button"
                 onClick={() => handleSaveSessionPref('ask')}
-                className={`w-full px-3.5 py-2.5 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${
+                className={`w-full px-3 py-2 rounded-md border text-left transition-colors cursor-pointer flex items-center justify-between ${
                   sessionPref === 'ask'
-                    ? 'border-amber-500/60 bg-amber-500/10 text-amber-700 dark:text-amber-300'
-                    : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/60'
+                    ? 'border-[#F59E0B] bg-[#F59E0B]/10 text-[#F59E0B]'
+                    : 'border-[#232730] bg-[#0D0F12] text-[#8B949E] hover:text-[#E6EDF3]'
                 }`}
               >
                 <span className="text-xs font-semibold">
                   Siteden çıkarken bana sormaya devam et
                 </span>
                 {sessionPref === 'ask' && (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500 text-white">
-                    Varsayılan
+                  <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-sm bg-[#F59E0B] text-[#0D0F12]">
+                    VARSAYILAN
                   </span>
                 )}
               </button>
             </div>
 
-            <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+            <div className="pt-2 border-t border-[#232730] flex items-center justify-between gap-2">
               <button
                 type="button"
                 onClick={handleLogout}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold bg-rose-500/15 text-rose-400 border border-rose-500/30 hover:bg-rose-500/25 transition-colors cursor-pointer"
               >
                 <LogOut className="w-3.5 h-3.5" />
                 Şimdi Oturumu Kapat
@@ -1226,7 +1215,7 @@ export function Navbar({
               <button
                 type="button"
                 onClick={handleDismissExitPrompt}
-                className="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                className="px-3.5 py-1.5 rounded-md text-xs font-semibold bg-[#0D0F12] border border-[#232730] text-[#E6EDF3] hover:border-[#10B981]/50 transition-colors cursor-pointer"
               >
                 Gezinmeye Devam Et
               </button>

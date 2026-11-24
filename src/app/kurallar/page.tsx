@@ -38,14 +38,14 @@ export default async function RulesPage() {
       </Link>
 
       {/* Üst Başlık */}
-      <div className="rounded-3xl bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 p-6 sm:p-8 text-white shadow-lg">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white/20 mb-3">
-          <ShieldCheck className="w-4 h-4" /> Resmi Topluluk Rehberi
+      <div className="rounded-md bg-[#15181E] border border-[#232730] p-5 sm:p-6 text-[#E6EDF3]">
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-sm font-mono text-[11px] font-semibold bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/40 mb-2.5">
+          <ShieldCheck className="w-3.5 h-3.5" /> DOCS // RESMİ TOPLULUK PROTOKOLÜ
         </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold">
+        <h1 className="text-xl sm:text-2xl font-bold text-[#E6EDF3]">
           Topluluk Kuralları, Puan Sistemi ve Gizlilik
         </h1>
-        <p className="text-xs sm:text-sm text-indigo-100 mt-2 max-w-2xl">
+        <p className="text-xs sm:text-sm text-[#8B949E] mt-1.5 max-w-2xl">
           {fullName}&apos;un herkes için güvenli, üretken ve kaliteli bir bilgi paylaşım ortamı olarak kalması için uyguladığımız temel ilkeler.
         </p>
       </div>

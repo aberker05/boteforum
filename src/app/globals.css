@@ -1,36 +1,97 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));
-
 @layer base {
-  :root {
-    --bg-primary: #f8fafc;
-    --bg-secondary: #ffffff;
-    --text-primary: #0f172a;
-    --text-secondary: #475569;
-  }
-
+  :root,
   .dark {
-    --bg-primary: #0b0f19;
-    --bg-secondary: #111827;
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
+    color-scheme: dark;
+    --bg-primary: #0D0F12;
+    --bg-secondary: #15181E;
+    --bg-elevated: #1A1E26;
+    --border-primary: #232730;
+    --text-primary: #E6EDF3;
+    --text-secondary: #8B949E;
+    --accent-emerald: #10B981;
+    --accent-amber: #F59E0B;
   }
 
   html,
   body {
-    background-color: var(--bg-primary);
-    color: var(--text-primary);
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    background-color: #0D0F12;
+    color: #E6EDF3;
+    font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     overflow-x: hidden;
     -webkit-tap-highlight-color: transparent;
   }
+
+  code,
+  kbd,
+  samp,
+  pre {
+    font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  }
 }
 
-/* Markdown İçerik Stilleri */
+/* Tipografi Değişken Bağlantıları (--font-sans & --font-mono) */
+.font-sans {
+  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+}
+
+.font-mono {
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+}
+
+/* GitHub Discussions & Linear Estetiği: Keskin Hatlar (rounded-md), 1px solid #232730, Sıfır Gölge Klişesi */
+.rounded-3xl,
+.rounded-2xl,
+.rounded-xl {
+  border-radius: 0.375rem !important;
+}
+
+.shadow-lg,
+.shadow-xl,
+.shadow-2xl {
+  box-shadow: none !important;
+}
+
+/* Global Koyu Tema Yüzey, Metin ve İnce Sınır Çizgisi Standardizasyonu (#0D0F12 / #15181E / #232730) */
+.dark [class*="dark:bg-slate-900"],
+.dark .bg-white,
+.dark [class*="bg-white/"] {
+  background-color: #15181E !important;
+}
+
+.dark [class*="dark:bg-slate-950"],
+.dark [class*="dark:bg-slate-800"],
+.dark .bg-slate-50,
+.dark .bg-slate-100 {
+  background-color: #0D0F12 !important;
+}
+
+.dark [class*="dark:border-slate-800"],
+.dark [class*="dark:border-slate-700"],
+.dark [class*="border-slate-200"],
+.dark [class*="border-slate-100"],
+.dark [class*="border-slate-300"] {
+  border-color: #232730 !important;
+}
+
+.dark .text-slate-900,
+.dark .text-slate-800,
+.dark .text-slate-700 {
+  color: #E6EDF3 !important;
+}
+
+.dark .text-slate-600,
+.dark .text-slate-500,
+.dark .text-slate-400 {
+  color: #8B949E !important;
+}
+
+/* Markdown İçerik Stilleri (Linear & GitHub Discussions) */
 .markdown-body {
-  line-height: 1.75;
+  line-height: 1.7;
   word-wrap: break-word;
+  color: #E6EDF3;
 }
 
 .markdown-body h1,
@@ -40,23 +101,29 @@
   font-weight: 700;
   margin-top: 1.25rem;
   margin-bottom: 0.65rem;
-  line-height: 1.35;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+  color: #F0F6FC;
 }
 
 .markdown-body h1 {
-  font-size: 1.5rem;
+  font-size: 1.4rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid #232730;
 }
 
 .markdown-body h2 {
-  font-size: 1.25rem;
+  font-size: 1.2rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid #232730;
 }
 
 .markdown-body h3 {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
 }
 
 .markdown-body p {
-  margin-bottom: 0.9rem;
+  margin-bottom: 0.85rem;
 }
 
 .markdown-body p:last-child {
@@ -66,13 +133,13 @@
 .markdown-body ul {
   list-style-type: disc;
   padding-left: 1.5rem;
-  margin-bottom: 0.9rem;
+  margin-bottom: 0.85rem;
 }
 
 .markdown-body ol {
   list-style-type: decimal;
   padding-left: 1.5rem;
-  margin-bottom: 0.9rem;
+  margin-bottom: 0.85rem;
 }
 
 .markdown-body li {
@@ -80,49 +147,55 @@
 }
 
 .markdown-body blockquote {
-  border-left: 4px solid #6366f1;
-  padding: 0.5rem 1rem;
-  margin: 1rem 0;
-  background-color: rgba(99, 102, 241, 0.08);
-  border-radius: 0 0.5rem 0.5rem 0;
-  font-style: italic;
+  border-left: 3px solid #10B981;
+  padding: 0.5rem 0.9rem;
+  margin: 0.9rem 0;
+  background-color: #15181E;
+  border-top: 1px solid #232730;
+  border-right: 1px solid #232730;
+  border-bottom: 1px solid #232730;
+  border-radius: 0.375rem;
+  color: #8B949E;
 }
 
 .markdown-body pre {
-  background-color: #0f172a;
-  color: #e2e8f0;
-  padding: 1rem;
-  border-radius: 0.75rem;
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, monospace;
+  background-color: #0D0F12;
+  color: #E6EDF3;
+  padding: 0.9rem 1rem;
+  border-radius: 0.375rem;
   overflow-x: auto;
-  margin: 1rem 0;
-  font-size: 0.875rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 0.9rem 0;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  border: 1px solid #232730;
 }
 
 .markdown-body code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.875em;
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.84em;
   padding: 0.15rem 0.35rem;
-  border-radius: 0.35rem;
-  background-color: rgba(99, 102, 241, 0.12);
-  color: #4f46e5;
-}
-
-.dark .markdown-body code {
-  background-color: rgba(99, 102, 241, 0.2);
-  color: #a5b4fc;
+  border-radius: 0.25rem;
+  background-color: #15181E;
+  border: 1px solid #232730;
+  color: #10B981;
 }
 
 .markdown-body pre code {
   background-color: transparent;
+  border: none;
   color: inherit;
   padding: 0;
 }
 
 .markdown-body a {
-  color: #6366f1;
+  color: #10B981;
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+
+.markdown-body a:hover {
+  color: #34D399;
 }
 
 .markdown-body table {
@@ -130,43 +203,41 @@
   width: 100%;
   overflow-x: auto;
   border-collapse: collapse;
-  margin: 1rem 0;
-  font-size: 0.875rem;
+  margin: 0.9rem 0;
+  font-size: 0.8125rem;
+  font-family: var(--font-mono), ui-monospace, monospace;
 }
 
 .markdown-body th,
 .markdown-body td {
-  border: 1px solid rgba(148, 163, 184, 0.25);
+  border: 1px solid #232730;
   padding: 0.5rem 0.75rem;
   text-align: left;
 }
 
 .markdown-body th {
-  background-color: rgba(148, 163, 184, 0.1);
+  background-color: #15181E;
   font-weight: 600;
+  color: #E6EDF3;
 }
 
-/* İnce ve Modern Kaydırma Çubuğu */
+/* İnce Kaydırma Çubuğu */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
+  background: #0D0F12;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.35);
-  border-radius: 9999px;
-}
-
-.dark .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(71, 85, 105, 0.55);
+  background: #232730;
+  border-radius: 3px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(99, 102, 241, 0.6);
+  background: #10B981;
 }
 
 /* Mobil Yatay Kaydırma Çubuklarında Scrollbar Gizleme */

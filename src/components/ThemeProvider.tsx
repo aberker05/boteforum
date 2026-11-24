@@ -18,17 +18,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>('dark');
 
   useEffect(() => {
-    const saved = localStorage.getItem('novaforum_theme') as Theme | null;
-    const initial = saved || 'dark';
-    setTheme(initial);
-    document.documentElement.classList.toggle('dark', initial === 'dark');
+    setTheme('dark');
+    document.documentElement.classList.add('dark');
   }, []);
 
   const toggleTheme = () => {
-    const next: Theme = theme === 'dark' ? 'light' : 'dark';
-    setTheme(next);
-    localStorage.setItem('novaforum_theme', next);
-    document.documentElement.classList.toggle('dark', next === 'dark');
+    setTheme('dark');
+    document.documentElement.classList.add('dark');
   };
 
   return (

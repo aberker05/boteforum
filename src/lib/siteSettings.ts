@@ -25,10 +25,10 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   siteNameAccent: 'Forum',
   siteTagline: 'Geliştirici & Teknoloji Forumu',
   logoType: 'icon',
-  logoIcon: 'Sparkles',
+  logoIcon: 'Terminal',
   logoText: 'NF',
   logoImageUrl: '',
-  brandColor: '#6366f1',
+  brandColor: '#10B981',
   footerDescription:
     "Yazılım mühendisliği, yapay zeka araştırmaları, sistem mimarisi ve modern web teknolojileri üzerine Türkiye'nin yeni nesil teknik tartışma ve bilgi paylaşım forumu.",
   copyrightText:
@@ -185,7 +185,10 @@ export const getSiteSettings = cache(async function getSiteSettingsImpl(): Promi
       logoIcon: r.logoIcon || DEFAULT_SITE_SETTINGS.logoIcon,
       logoText: r.logoText || DEFAULT_SITE_SETTINGS.logoText,
       logoImageUrl: r.logoImageUrl || '',
-      brandColor: r.brandColor || DEFAULT_SITE_SETTINGS.brandColor,
+      brandColor:
+        r.brandColor && r.brandColor.toLowerCase() !== '#6366f1'
+          ? r.brandColor
+          : DEFAULT_SITE_SETTINGS.brandColor,
       footerDescription:
         r.footerDescription || DEFAULT_SITE_SETTINGS.footerDescription,
       copyrightText: resolvedCopyright,

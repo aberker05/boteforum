@@ -166,15 +166,15 @@ const NewCommentForm = React.memo(function NewCommentForm({
     <form
       id="yeni-yorum-formu"
       onSubmit={handleSubmit}
-      className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900/90 p-4 sm:p-5 space-y-3 shadow-2xs"
+      className="rounded-md border border-[#232730] bg-[#15181E] p-4 sm:p-5 space-y-3"
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <label className="block text-sm font-bold text-slate-800 dark:text-slate-200">
+        <label className="block text-sm font-bold text-[#E6EDF3]">
           Tartışmaya Yanıt Yazın
         </label>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 font-mono">
           {draftSaved && (
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#10B981]">
               <CheckCircle2 className="w-3.5 h-3.5" />
               Taslak kaydedildi
               <button
@@ -188,20 +188,20 @@ const NewCommentForm = React.memo(function NewCommentForm({
                     // yoksay
                   }
                 }}
-                className="text-rose-500 hover:underline ml-1"
+                className="text-rose-400 hover:underline ml-1"
               >
                 (Temizle)
               </button>
             </span>
           )}
-          <span className="text-[11px] text-slate-400">
-            Markdown, kod bloğu ve görsel yükleme desteklenir
+          <span className="text-[11px] text-[#8B949E]">
+            Markdown, kod bloğu ve görsel desteklenir
           </span>
         </div>
       </div>
 
-      <div className="flex items-start gap-2.5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 text-xs text-amber-800 dark:text-amber-300">
-        <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+      <div className="flex items-start gap-2.5 p-3 rounded-md bg-[#F59E0B]/10 border border-[#F59E0B]/30 text-xs text-[#F59E0B]">
+        <AlertTriangle className="w-4 h-4 text-[#F59E0B] shrink-0 mt-0.5" />
         <span>
           <strong>Topluluk Kuralları Uyarısı:</strong> Yorumlarda küfür, hakaret,
           aşağılayıcı ifadeler, nefret söylemi veya zararlı içerik paylaşılması
@@ -211,7 +211,7 @@ const NewCommentForm = React.memo(function NewCommentForm({
       </div>
 
       {error && (
-        <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-600 dark:text-rose-400">
+        <div className="p-3 rounded-md bg-rose-500/10 border border-rose-500/30 text-xs text-rose-400">
           {error}
         </div>
       )}
@@ -225,9 +225,9 @@ const NewCommentForm = React.memo(function NewCommentForm({
         <button
           type="submit"
           disabled={submitting || !newComment.trim()}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm shadow-indigo-500/20 disabled:opacity-50 transition-all"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-md text-xs sm:text-sm font-semibold bg-[#10B981] hover:bg-[#059669] text-[#0D0F12] disabled:opacity-50 transition-colors cursor-pointer"
         >
-          <Send className="w-4 h-4" />
+          <Send className="w-3.5 h-3.5" />
           {submitting ? 'Gönderiliyor...' : 'Yanıtı Gönder'}
         </button>
       </div>
@@ -433,29 +433,29 @@ export function CommentSection({
         className={isReply ? 'mt-3 ml-2.5 sm:ml-9 border-l-2 border-slate-200 dark:border-slate-800 pl-2.5 sm:pl-4' : 'scroll-mt-24'}
       >
         <div
-          className={`rounded-2xl border p-3.5 sm:p-5 transition-all ${
+          className={`rounded-md border p-3.5 sm:p-4 transition-colors ${
             comment.isAccepted
-              ? 'bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-500/60 dark:border-emerald-600/60 shadow-sm'
-              : 'bg-white dark:bg-slate-900/90 border-slate-200/80 dark:border-slate-800/80'
+              ? 'bg-[#10B981]/5 border-[#10B981]/50'
+              : 'bg-[#15181E] border-[#232730]'
           }`}
         >
           {comment.isAccepted && (
-            <div className="mb-3 flex items-center justify-between gap-2 pb-2.5 border-b border-emerald-500/20">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                Kabul Edilen Çözüm
+            <div className="mb-3 flex items-center justify-between gap-2 pb-2.5 border-b border-[#10B981]/25 font-mono">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-sm text-xs font-semibold bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/40">
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#10B981]" />
+                ACCEPTED SOLUTION
               </div>
-              <span className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+              <span className="text-[11px] font-medium text-[#10B981]">
                 Konu sahibi tarafından onaylandı
               </span>
             </div>
           )}
 
           {/* Yazar Başlığı & Forum Post Meta */}
-          <div className="flex items-start sm:items-center justify-between gap-2 mb-3.5 pb-2.5 border-b border-slate-100 dark:border-slate-800/70">
+          <div className="flex items-start sm:items-center justify-between gap-2 mb-3 pb-2.5 border-b border-[#232730]">
             <div className="flex items-center gap-2.5 flex-wrap">
               {isReply && (
-                <CornerDownRight className="w-4 h-4 text-slate-400 shrink-0" />
+                <CornerDownRight className="w-4 h-4 text-[#8B949E] shrink-0" />
               )}
               <Link
                 href={`/kullanici/${comment.author.username}`}
@@ -464,26 +464,26 @@ export function CommentSection({
                 <UserAvatar
                   name={comment.author.displayName}
                   avatar={comment.author.avatarColor}
-                  className="w-8 h-8 rounded-xl text-xs shadow-2xs"
+                  className="w-8 h-8 rounded-md text-xs border border-[#232730]"
                 />
                 <div>
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-sm font-bold text-slate-900 dark:text-slate-100 group-hover:text-indigo-500 transition-colors">
+                    <span className="text-sm font-bold text-[#E6EDF3] group-hover:text-[#10B981] transition-colors">
                       {comment.author.displayName}
                     </span>
-                    <span className="text-xs text-slate-400">
+                    <span className="text-xs font-mono text-[#8B949E]">
                       @{comment.author.username}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 mt-0.5">
+                  <div className="flex items-center gap-2 mt-0.5 font-mono">
                     <span
                       className="text-[10px] font-semibold"
                       style={{ color: authorLevel.color }}
                     >
-                      Sv.{authorLevel.level} {authorLevel.title}
+                      Lv.{authorLevel.level} {authorLevel.title}
                     </span>
-                    <span className="text-slate-300 dark:text-slate-700">•</span>
-                    <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-amber-600 dark:text-amber-400">
+                    <span className="text-[#232730]">•</span>
+                    <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-[#F59E0B]">
                       <Award className="w-2.5 h-2.5" />
                       {comment.author.reputation}p
                     </span>
@@ -492,33 +492,33 @@ export function CommentSection({
               </Link>
 
               {comment.author.id === threadAuthorId && (
-                <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-indigo-500/15 text-indigo-600 dark:text-indigo-400">
-                  KONU SAHİBİ
+                <span className="px-1.5 py-0.2 font-mono text-[10px] font-semibold rounded-sm bg-[#0D0F12] border border-[#232730] text-[#10B981]">
+                  AUTHOR
                 </span>
               )}
               {comment.author.role === 'ADMIN' && (
-                <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-amber-500/15 text-amber-600 dark:text-amber-400">
-                  YÖNETİCİ
+                <span className="px-1.5 py-0.2 font-mono text-[10px] font-semibold rounded-sm bg-[#F59E0B]/15 text-[#F59E0B] border border-[#F59E0B]/30">
+                  ADMIN
                 </span>
               )}
               {comment.author.role === 'MODERATOR' && (
-                <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-pink-500/15 text-pink-600 dark:text-pink-400">
+                <span className="px-1.5 py-0.2 font-mono text-[10px] font-semibold rounded-sm bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30">
                   MOD
                 </span>
               )}
               {comment.author.role === 'BANNED' && (
-                <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-rose-500/15 text-rose-600 dark:text-rose-400">
-                  ASKIYA ALINDI
+                <span className="px-1.5 py-0.2 font-mono text-[10px] font-semibold rounded-sm bg-rose-500/15 text-rose-400 border border-rose-500/30">
+                  BANNED
                 </span>
               )}
             </div>
 
-            <div className="flex items-center gap-2 shrink-0 text-xs text-slate-400">
+            <div className="flex items-center gap-2 shrink-0 text-xs font-mono text-[#8B949E]">
               <span>{formatRelativeTime(comment.createdAt)}</span>
               {!isReply && (
                 <a
                   href={`#yorum-${comment.id}`}
-                  className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[11px] font-mono font-bold text-slate-500 dark:text-slate-400 hover:text-indigo-500"
+                  className="px-1.5 py-0.5 rounded-sm bg-[#0D0F12] border border-[#232730] text-[11px] font-mono font-semibold text-[#8B949E] hover:text-[#10B981]"
                   title="Mesaj Bağlantısı"
                 >
                   #{postIndex}

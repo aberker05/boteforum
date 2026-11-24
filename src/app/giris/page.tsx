@@ -89,28 +89,28 @@ export default function LoginPage() {
 
   return (
     <div className="max-w-md mx-auto py-8">
-      <div className="rounded-3xl border border-slate-200/90 dark:border-slate-800/90 bg-white dark:bg-slate-900/95 p-6 sm:p-8 shadow-lg">
-        <div className="text-center mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 text-white flex items-center justify-center mx-auto mb-3 shadow-md shadow-indigo-500/20">
-            <Sparkles className="w-6 h-6" />
+      <div className="rounded-md border border-[#232730] bg-[#15181E] p-6 sm:p-7">
+        <div className="text-center mb-5">
+          <div className="w-10 h-10 rounded-md bg-[#0D0F12] border border-[#232730] text-[#10B981] flex items-center justify-center mx-auto mb-3">
+            <Sparkles className="w-5 h-5" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-            Tekrar Hoş Geldiniz
+          <h1 className="text-xl font-bold text-[#E6EDF3]">
+            Oturum Açın
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Topluluk hesabınıza giriş yaparak tartışmalara katılın
+          <p className="text-xs text-[#8B949E] mt-1">
+            Topluluk hesabınıza giriş yaparak teknik tartışmalara katılın
           </p>
         </div>
 
         {error && (
-          <div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs font-medium text-rose-600 dark:text-rose-400">
+          <div className="mb-4 p-3 rounded-md bg-rose-500/10 border border-rose-500/30 text-xs font-medium text-rose-400">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+            <label className="block text-xs font-mono font-semibold text-[#E6EDF3] mb-1.5">
               Kullanıcı Adı veya E-posta
             </label>
             <input
@@ -122,18 +122,18 @@ export default function LoginPage() {
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
               placeholder="kullanici_adi veya ornek@eposta.com"
-              className="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+              className="w-full px-3 py-2 rounded-md text-sm font-mono bg-[#0D0F12] border border-[#232730] text-[#E6EDF3] focus:outline-none focus:border-[#10B981]"
             />
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+              <label className="block text-xs font-mono font-semibold text-[#E6EDF3]">
                 Şifre
               </label>
               <Link
                 href="/sifremi-unuttum"
-                className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline"
+                className="text-xs font-mono font-semibold text-[#10B981] hover:underline"
               >
                 Şifremi Unuttum?
               </Link>
@@ -145,12 +145,12 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••"
-                className="w-full pl-3.5 pr-10 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                className="w-full pl-3 pr-10 py-2 rounded-md text-sm font-mono bg-[#0D0F12] border border-[#232730] text-[#E6EDF3] focus:outline-none focus:border-[#10B981]"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8B949E] hover:text-[#E6EDF3]"
                 title={showPassword ? 'Şifreyi Gizle' : 'Şifreyi Göster'}
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -158,18 +158,18 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <label className="flex items-start gap-2.5 pt-1 text-xs text-slate-600 dark:text-slate-300 cursor-pointer select-none">
+          <label className="flex items-start gap-2.5 pt-1 text-xs text-[#8B949E] cursor-pointer select-none">
             <input
               type="checkbox"
               checked={rememberMe}
               onChange={(e) => setRememberMe(e.target.checked)}
-              className="mt-0.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+              className="mt-0.5 rounded-sm border-[#232730] bg-[#0D0F12] text-[#10B981] focus:ring-[#10B981]"
             />
             <span className="leading-snug">
-              <strong className="text-slate-800 dark:text-slate-200">
+              <strong className="text-[#E6EDF3]">
                 Oturumu bu cihazda açık tut (Beni Hatırla)
               </strong>
-              <span className="block text-[11px] text-slate-400 mt-0.5">
+              <span className="block text-[11px] text-[#8B949E] mt-0.5">
                 İşaretlenmezse siteden çıkarken oturum tercihiniz sorulur veya sekme kapandığında oturum kapatılır.
               </span>
             </span>
@@ -178,7 +178,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-500/20 disabled:opacity-50 transition-all"
+            className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-md text-xs sm:text-sm font-semibold bg-[#10B981] hover:bg-[#059669] text-[#0D0F12] disabled:opacity-50 transition-colors cursor-pointer"
           >
             <LogIn className="w-4 h-4" />
             {loading ? 'Giriş Yapılıyor...' : 'Giriş Yap'}
@@ -187,21 +187,21 @@ export default function LoginPage() {
 
         <GoogleSignInButton label="Google ile Giriş Yap" />
 
-        <div className="mt-5 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed text-center">
+        <div className="mt-5 p-3 rounded-md bg-[#0D0F12] border border-[#232730] text-[11px] text-[#8B949E] leading-relaxed text-center">
           🔒 Oturumunuz <strong>HttpOnly</strong> güvenli çerezlerle korunur, reklam veya takip çerezi kullanılmaz.{' '}
           <Link
             href="/gizlilik"
-            className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
+            className="font-mono font-semibold text-[#10B981] hover:underline"
           >
-            Gizlilik & Veri Şeffaflığı Politikası
+            Gizlilik &amp; Veri Şeffaflığı Politikası
           </Link>
         </div>
 
-        <p className="mt-5 text-center text-xs text-slate-500">
+        <p className="mt-5 text-center text-xs text-[#8B949E]">
           Henüz hesabınız yok mu?{' '}
           <Link
             href="/kayit"
-            className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
+            className="font-mono font-semibold text-[#10B981] hover:underline"
           >
             Hemen Kayıt Olun
           </Link>

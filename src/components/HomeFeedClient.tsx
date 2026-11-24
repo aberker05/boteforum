@@ -308,54 +308,41 @@ export function HomeFeedClient({
 
   return (
     <div className="space-y-6">
-      {/* İLK GİRİŞ: ÖZGÜN KOMUTA MERKEZİ & BENTO KARŞILAMA VİTRİNİ */}
+      {/* İLK GİRİŞ: LINEAR & GITHUB DISCUSSIONS KOMUTA MERKEZİ & YÜKSEK YOĞUNLUKLU KARŞILAMA */}
       {!selectedCategoryObj && !filterBy && !activeTag && (
-        <section className="space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-stretch">
-            {/* Sol Ana Hero Kartı (7 Sütun) */}
-            <div className="lg:col-span-7 relative rounded-3xl overflow-hidden border border-indigo-500/25 bg-gradient-to-br from-[#070b14] via-[#0e1528] to-[#090d16] p-6 sm:p-8 text-white shadow-2xl flex flex-col justify-between">
-              {/* Arka Plan Siber Atmosfer & Geometrik Izgara */}
-              <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-indigo-500/25 blur-3xl pointer-events-none" />
-              <div className="absolute -bottom-24 -left-24 w-72 h-72 rounded-full bg-emerald-500/20 blur-3xl pointer-events-none" />
-              <div
-                className="absolute inset-0 opacity-[0.14] pointer-events-none"
-                style={{
-                  backgroundImage:
-                    'linear-gradient(to right, rgba(99,102,241,0.22) 1px, transparent 1px), linear-gradient(to bottom, rgba(99,102,241,0.22) 1px, transparent 1px)',
-                  backgroundSize: '32px 32px',
-                }}
-              />
-
-              <div className="relative z-10 space-y-4">
+        <section className="space-y-3">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-stretch">
+            {/* Sol Ana Komuta Paneli (7 Sütun) */}
+            <div className="lg:col-span-7 relative rounded-md overflow-hidden border border-[#232730] bg-[#15181E] p-5 sm:p-6 text-[#E6EDF3] flex flex-col justify-between">
+              <div className="relative z-10 space-y-3.5">
                 {/* Üst Canlı Sistem Durum Rozetleri */}
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 backdrop-blur-md">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                    BÖTE & Teknoloji Ekosistemi Aktif
+                <div className="flex flex-wrap items-center gap-2 font-mono">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-sm text-[11px] font-semibold bg-[#10B981]/15 border border-[#10B981]/40 text-[#10B981]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" />
+                    SYS:ACTIVE // BÖTE &amp; TECH DISCUSSIONS
                   </span>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-white/10 border border-white/10 text-indigo-200 backdrop-blur-md">
-                    <Shield className="w-3.5 h-3.5 text-indigo-400" />
-                    Doğrulanmış Bilgi & Kod Paylaşımı
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-sm text-[11px] font-medium bg-[#0D0F12] border border-[#232730] text-[#F59E0B]">
+                    <Shield className="w-3 h-3 text-[#F59E0B]" />
+                    VERIFIED CODE &amp; KNOWLEDGE BASE
                   </span>
                 </div>
 
                 {/* Ana Başlık & Slogan */}
-                <div className="space-y-2.5">
-                  <h1 className="text-2xl sm:text-3xl xl:text-4xl font-black tracking-tight leading-[1.15]">
-                    Geleceğin Teknolojisini ve{' '}
-                    <span className="bg-gradient-to-r from-indigo-400 via-emerald-300 to-cyan-300 bg-clip-text text-transparent">
-                      Bilişim Topluluğunu
-                    </span>{' '}
-                    Keşfedin
+                <div className="space-y-2">
+                  <h1 className="text-xl sm:text-2xl xl:text-[28px] font-bold tracking-tight leading-snug text-[#E6EDF3]">
+                    Mühendislik, Bilişim ve{' '}
+                    <span className="text-[#10B981] underline decoration-[#10B981]/40 underline-offset-4">
+                      BÖTE Tartışma Platformu
+                    </span>
                   </h1>
-                  <p className="text-xs sm:text-sm text-slate-300/90 leading-relaxed max-w-2xl">
-                    Yazılım mimarileri, siber güvenlik, yapay zeka, donanım ve BÖTE eğitim teknolojileri üzerine sorular sorun, çalışan kod blokları paylaşın ve çözüm üreterek itibar kazanın.
+                  <p className="text-xs sm:text-[13px] text-[#8B949E] leading-relaxed max-w-2xl">
+                    Yazılım mimarileri, siber güvenlik, yapay zeka, donanım, BÖTE ve eğitim teknolojileri üzerine yüksek bilgi yoğunluklu teknik tartışmalar başlatın, çalışan kod blokları paylaşın ve çözüm üreterek itibar kazanın.
                   </p>
                 </div>
 
                 {/* Hero İçi Hızlı Arama & Filtreleme Çubuğu */}
                 <div className="relative max-w-xl pt-1">
-                  <Search className="w-4 h-4 text-indigo-300 absolute left-4 top-1/2 -translate-y-1/2 mt-0.5 pointer-events-none" />
+                  <Search className="w-4 h-4 text-[#8B949E] absolute left-3.5 top-1/2 -translate-y-1/2 mt-0.5 pointer-events-none" />
                   <input
                     type="text"
                     value={searchQuery}
@@ -364,8 +351,8 @@ export function HomeFeedClient({
                       setCurrentPage(1);
                       syncUrl({ q: e.target.value });
                     }}
-                    placeholder="Forum konularında, kodlarda veya #etiketlerde anında filtrele..."
-                    className="w-full pl-11 pr-24 py-3 rounded-2xl text-xs sm:text-sm bg-slate-950/75 border border-white/15 text-white placeholder-slate-400 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/30 backdrop-blur-md transition-all"
+                    placeholder="Tartışmalarda, kod bloklarında veya #etiketlerde filtrele..."
+                    className="w-full pl-10 pr-24 py-2.5 rounded-md text-xs sm:text-sm bg-[#0D0F12] border border-[#232730] text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:border-[#10B981] transition-colors font-mono"
                   />
                   {searchQuery ? (
                     <button
@@ -374,54 +361,54 @@ export function HomeFeedClient({
                         setSearchQuery('');
                         syncUrl({ q: '' });
                       }}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 mt-0.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 cursor-pointer"
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 mt-0.5 px-2 py-0.5 rounded-sm font-mono text-[10px] font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30 hover:bg-rose-500/30 cursor-pointer"
                     >
-                      Temizle
+                      ESC / TEMİZLE
                     </button>
                   ) : (
-                    <span className="hidden sm:inline-flex items-center gap-1 absolute right-3 top-1/2 -translate-y-1/2 mt-0.5 px-2 py-1 rounded-lg text-[10px] font-semibold bg-white/10 text-slate-300 border border-white/10">
-                      <Zap className="w-3 h-3 text-amber-400" /> 0ms Arama
+                    <span className="hidden sm:inline-flex items-center gap-1 absolute right-2.5 top-1/2 -translate-y-1/2 mt-0.5 px-2 py-0.5 rounded-sm font-mono text-[10px] font-medium bg-[#15181E] text-[#F59E0B] border border-[#232730]">
+                      <Zap className="w-3 h-3 text-[#F59E0B]" /> 0ms FILTER
                     </span>
                   )}
                 </div>
               </div>
 
-              {/* Alt Aksiyon Butonları ve Canlı Metrik Şeridi */}
-              <div className="relative z-10 pt-5 mt-5 border-t border-white/10 flex flex-wrap items-center justify-between gap-3">
-                <div className="flex flex-wrap items-center gap-2.5">
+              {/* Alt Aksiyon Butonları */}
+              <div className="relative z-10 pt-4 mt-4 border-t border-[#232730] flex flex-wrap items-center justify-between gap-2.5">
+                <div className="flex flex-wrap items-center gap-2">
                   <Link
                     href={isLoggedIn ? '/yeni-konu' : '/giris'}
-                    className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-600/30 transition-all"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-semibold bg-[#10B981] hover:bg-[#059669] text-[#0D0F12] transition-colors"
                   >
-                    <PlusCircle className="w-4 h-4" />
+                    <PlusCircle className="w-3.5 h-3.5" />
                     Yeni Konu Başlat
                   </Link>
                   <Link
                     href="/haberler"
-                    className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 transition-all"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-medium bg-[#0D0F12] hover:border-[#10B981]/60 text-[#E6EDF3] border border-[#232730] transition-colors"
                   >
-                    <Newspaper className="w-4 h-4" />
+                    <Newspaper className="w-3.5 h-3.5 text-[#10B981]" />
                     Teknoloji Gündemi
                   </Link>
                   <button
                     type="button"
                     onClick={() => selectFilter('cevapsiz')}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-white/5 hover:bg-white/15 text-slate-200 border border-white/10 transition-all cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-mono font-medium bg-[#0D0F12] hover:border-[#F59E0B]/60 text-[#F59E0B] border border-[#232730] transition-colors cursor-pointer"
                   >
-                    <HelpCircle className="w-3.5 h-3.5 text-amber-400" />
-                    Cevapsız Sorular ({unansweredCount})
+                    <HelpCircle className="w-3.5 h-3.5 text-[#F59E0B]" />
+                    UNANSWERED [{unansweredCount}]
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* Sağ Bento Vitrini: Günün Teknoloji Manşeti + Canlı Telemetri (5 Sütun) */}
-            <div className="lg:col-span-5 flex flex-col justify-between gap-4">
+            {/* Sağ Panel: Günün Teknoloji Manşeti + Canlı Telemetri (5 Sütun) */}
+            <div className="lg:col-span-5 flex flex-col justify-between gap-3">
               {/* Üst: Günün Öne Çıkan Teknoloji Dosyası */}
               {leadNews && (
                 <Link
                   href={`/haberler/${leadNews.slug}`}
-                  className="group relative flex-1 rounded-3xl overflow-hidden border border-slate-200/80 dark:border-slate-800/90 bg-slate-950 shadow-xl hover:border-emerald-500/50 transition-all duration-300 flex flex-col justify-end min-h-[210px]"
+                  className="group relative flex-1 rounded-md overflow-hidden border border-[#232730] bg-[#15181E] hover:border-[#10B981]/60 transition-colors flex flex-col justify-end min-h-[190px]"
                 >
                   <TechNewsCover
                     title={leadNews.title}
@@ -433,97 +420,96 @@ export function HomeFeedClient({
                     overlayVariant="hero"
                   />
 
-                  <div className="absolute top-3.5 left-3.5 right-3.5 z-10 flex items-center justify-between gap-2">
+                  <div className="absolute top-3 left-3 right-3 z-10 flex items-center justify-between gap-2 font-mono">
                     <span
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold backdrop-blur-md border"
+                      className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm text-[10px] font-semibold border bg-[#0D0F12]/90"
                       style={{
-                        backgroundColor: 'rgba(9, 13, 22, 0.82)',
-                        borderColor: `${leadNews.badgeColor}70`,
+                        borderColor: '#232730',
                         color: leadNews.badgeColor,
                       }}
                     >
                       <span
-                        className="w-1.5 h-1.5 rounded-full"
+                        className="w-1.5 h-1.5 rounded-xs"
                         style={{ backgroundColor: leadNews.badgeColor }}
                       />
                       {leadNews.category}
                     </span>
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500 text-slate-950 shadow-xs">
-                      <Flame className="w-3 h-3 fill-slate-950" />
-                      GÜNÜN DOSYASI
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] font-semibold bg-[#F59E0B] text-[#0D0F12]">
+                      <Flame className="w-3 h-3 fill-[#0D0F12]" />
+                      FEATURED
                     </span>
                   </div>
 
-                  <div className="relative z-10 p-5 pt-16 bg-gradient-to-t from-[#060911] via-[#060911]/90 to-transparent">
-                    <h2 className="text-base sm:text-lg font-extrabold text-white group-hover:text-emerald-300 transition-colors leading-snug line-clamp-2">
+                  <div className="relative z-10 p-4 pt-12 bg-[#0D0F12]/90 border-t border-[#232730]">
+                    <h2 className="text-sm sm:text-base font-bold text-[#E6EDF3] group-hover:text-[#10B981] transition-colors leading-snug line-clamp-2">
                       {leadNews.title}
                     </h2>
-                    <div className="mt-2.5 flex items-center justify-between text-xs text-slate-300">
-                      <span className="text-[11px] text-emerald-300 font-semibold">
+                    <div className="mt-2 flex items-center justify-between text-[11px] font-mono text-[#8B949E]">
+                      <span className="text-[#10B981]">
                         {leadNews.source} • {leadNews.readTime}
                       </span>
-                      <span className="inline-flex items-center gap-1 font-bold text-white group-hover:translate-x-0.5 transition-transform">
-                        İncele <ArrowRight className="w-3.5 h-3.5 text-emerald-400" />
+                      <span className="inline-flex items-center gap-1 font-semibold text-[#E6EDF3] group-hover:text-[#10B981]">
+                        OKU <ArrowRight className="w-3 h-3 text-[#10B981]" />
                       </span>
                     </div>
                   </div>
                 </Link>
               )}
 
-              {/* Alt: 4'lü Bento Canlı Topluluk Telemetrisi */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-3">
-                <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/90 bg-white dark:bg-slate-900/90 p-3.5 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
-                    <MessageSquare className="w-5 h-5" />
+              {/* Alt: 4'lü Keskin Telemetri Izgarası */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-2.5">
+                <div className="rounded-md border border-[#232730] bg-[#15181E] p-3 flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-md bg-[#0D0F12] border border-[#232730] text-[#10B981] flex items-center justify-center shrink-0">
+                    <MessageSquare className="w-4 h-4" />
                   </div>
                   <div>
-                    <p className="text-lg font-black text-slate-900 dark:text-white leading-none tabular-nums">
+                    <p className="text-base font-mono font-bold text-[#E6EDF3] leading-none tabular-nums">
                       {stats.totalThreads}
                     </p>
-                    <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-1">
-                      Aktif Tartışma
+                    <p className="text-[10px] font-mono uppercase tracking-wider text-[#8B949E] mt-1">
+                      TARTIŞMA
                     </p>
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/90 bg-white dark:bg-slate-900/90 p-3.5 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                    <CheckCircle2 className="w-5 h-5" />
+                <div className="rounded-md border border-[#232730] bg-[#15181E] p-3 flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-md bg-[#0D0F12] border border-[#232730] text-[#10B981] flex items-center justify-center shrink-0">
+                    <CheckCircle2 className="w-4 h-4" />
                   </div>
                   <div>
-                    <p className="text-lg font-black text-slate-900 dark:text-white leading-none tabular-nums">
+                    <p className="text-base font-mono font-bold text-[#10B981] leading-none tabular-nums">
                       %{solveRate}
                     </p>
-                    <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-1">
-                      Çözüm Oranı ({solvedCount})
+                    <p className="text-[10px] font-mono uppercase tracking-wider text-[#8B949E] mt-1">
+                      ÇÖZÜM ({solvedCount})
                     </p>
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/90 bg-white dark:bg-slate-900/90 p-3.5 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-                    <TrendingUp className="w-5 h-5" />
+                <div className="rounded-md border border-[#232730] bg-[#15181E] p-3 flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-md bg-[#0D0F12] border border-[#232730] text-[#F59E0B] flex items-center justify-center shrink-0">
+                    <TrendingUp className="w-4 h-4" />
                   </div>
                   <div>
-                    <p className="text-lg font-black text-slate-900 dark:text-white leading-none tabular-nums">
+                    <p className="text-base font-mono font-bold text-[#E6EDF3] leading-none tabular-nums">
                       {stats.totalComments}
                     </p>
-                    <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-1">
-                      Toplam Yanıt
+                    <p className="text-[10px] font-mono uppercase tracking-wider text-[#8B949E] mt-1">
+                      YANIT
                     </p>
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/90 bg-white dark:bg-slate-900/90 p-3.5 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-violet-500/15 text-violet-600 dark:text-violet-400 flex items-center justify-center shrink-0">
-                    <Users className="w-5 h-5" />
+                <div className="rounded-md border border-[#232730] bg-[#15181E] p-3 flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-md bg-[#0D0F12] border border-[#232730] text-[#F59E0B] flex items-center justify-center shrink-0">
+                    <Users className="w-4 h-4" />
                   </div>
                   <div>
-                    <p className="text-lg font-black text-slate-900 dark:text-white leading-none tabular-nums">
+                    <p className="text-base font-mono font-bold text-[#E6EDF3] leading-none tabular-nums">
                       {stats.totalUsers}
                     </p>
-                    <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-1">
-                      Topluluk Üyesi
+                    <p className="text-[10px] font-mono uppercase tracking-wider text-[#8B949E] mt-1">
+                      ÜYE
                     </p>
                   </div>
                 </div>
@@ -531,8 +517,8 @@ export function HomeFeedClient({
             </div>
           </div>
 
-          {/* İnteraktif Kategori Vitrin Şeridi (Tek Tıkla Alan Keşfi) */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+          {/* İnteraktif Kategori Vitrin Şeridi */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
             {categories.slice(0, 6).map((cat) => {
               const isActive = activeCategory === cat.slug;
               return (
@@ -540,30 +526,27 @@ export function HomeFeedClient({
                   key={cat.id}
                   type="button"
                   onClick={() => selectCategory(cat.slug)}
-                  className={`group p-3 rounded-2xl border text-left transition-all cursor-pointer flex items-center gap-3 ${
+                  className={`group p-2.5 rounded-md border text-left transition-colors cursor-pointer flex items-center gap-2.5 ${
                     isActive
-                      ? 'border-indigo-500 bg-indigo-50/80 dark:bg-indigo-950/50 ring-2 ring-indigo-500/20'
-                      : 'border-slate-200/80 dark:border-slate-800/90 bg-white dark:bg-slate-900/90 hover:border-indigo-500/40 hover:-translate-y-0.5 hover:shadow-md'
+                      ? 'border-[#10B981] bg-[#10B981]/10'
+                      : 'border-[#232730] bg-[#15181E] hover:border-[#10B981]/50 hover:bg-[#1A1E26]'
                   }`}
                 >
                   <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110"
-                    style={{
-                      backgroundColor: `${cat.color}18`,
-                      color: cat.color,
-                    }}
+                    className="w-8 h-8 rounded-md flex items-center justify-center shrink-0 bg-[#0D0F12] border border-[#232730]"
+                    style={{ color: cat.color }}
                   >
                     <CategoryIcon
                       name={cat.icon}
-                      className="w-5 h-5"
+                      className="w-4 h-4"
                       color={cat.color}
                     />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-extrabold text-slate-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                    <p className="text-xs font-semibold text-[#E6EDF3] truncate group-hover:text-[#10B981] transition-colors">
                       {cat.name}
                     </p>
-                    <p className="text-[11px] text-slate-400 font-medium">
+                    <p className="text-[10px] font-mono text-[#8B949E]">
                       {cat._count.threads} konu
                     </p>
                   </div>
@@ -574,35 +557,29 @@ export function HomeFeedClient({
         </section>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
       {/* SOL KENAR ÇUBUĞU: Forum Navigasyonu & Kategoriler */}
-      <aside className="order-2 lg:order-1 lg:col-span-3 space-y-5 lg:sticky lg:top-22">
-        {/* Forum Görünümleri (Masaüstünde görünür, mobil/tablette üst şeritte yer alır) */}
-        <div className="hidden lg:block rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900/90 p-3.5">
-          <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-2.5 mb-2">
-            Forum Akışı
+      <aside className="order-2 lg:order-1 lg:col-span-3 space-y-3.5 lg:sticky lg:top-20">
+        {/* Forum Görünümleri */}
+        <div className="hidden lg:block rounded-md border border-[#232730] bg-[#15181E] p-3">
+          <h3 className="text-[10px] font-mono font-semibold uppercase tracking-wider text-[#8B949E] px-2 mb-2">
+            FORUM AKIŞI
           </h3>
           <div className="space-y-1">
             <button
               type="button"
               onClick={() => selectFilter('')}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs sm:text-sm font-medium transition-colors ${
+              className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
                 !activeCategory && !filterBy && !activeTag && !searchQuery
-                  ? 'bg-indigo-600 text-white shadow-xs'
-                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  ? 'bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/40'
+                  : 'text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#0D0F12] border border-transparent'
               }`}
             >
-              <span className="flex items-center gap-2.5">
-                <Layers className="w-4 h-4" />
+              <span className="flex items-center gap-2">
+                <Layers className="w-3.5 h-3.5" />
                 Tüm Konular
               </span>
-              <span
-                className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
-                  !activeCategory && !filterBy && !activeTag && !searchQuery
-                    ? 'bg-white/20 text-white'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
-                }`}
-              >
+              <span className="text-[11px] font-mono font-semibold px-1.5 py-0.2 rounded-sm bg-[#0D0F12] border border-[#232730] text-[#E6EDF3]">
                 {threads.length}
               </span>
             </button>
@@ -610,27 +587,17 @@ export function HomeFeedClient({
             <button
               type="button"
               onClick={() => selectFilter('cevapsiz')}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs sm:text-sm font-medium transition-colors ${
+              className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
                 filterBy === 'cevapsiz'
-                  ? 'bg-amber-600 text-white shadow-xs'
-                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  ? 'bg-[#F59E0B]/15 text-[#F59E0B] border border-[#F59E0B]/40'
+                  : 'text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#0D0F12] border border-transparent'
               }`}
             >
-              <span className="flex items-center gap-2.5">
-                <HelpCircle
-                  className={`w-4 h-4 ${
-                    filterBy === 'cevapsiz' ? 'text-white' : 'text-amber-500'
-                  }`}
-                />
+              <span className="flex items-center gap-2">
+                <HelpCircle className="w-3.5 h-3.5 text-[#F59E0B]" />
                 Cevapsız Sorular
               </span>
-              <span
-                className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
-                  filterBy === 'cevapsiz'
-                    ? 'bg-white/20 text-white'
-                    : 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
-                }`}
-              >
+              <span className="text-[11px] font-mono font-semibold px-1.5 py-0.2 rounded-sm bg-[#0D0F12] border border-[#232730] text-[#F59E0B]">
                 {unansweredCount}
               </span>
             </button>
@@ -638,54 +605,44 @@ export function HomeFeedClient({
             <button
               type="button"
               onClick={() => selectFilter('cozuldu')}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs sm:text-sm font-medium transition-colors ${
+              className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
                 filterBy === 'cozuldu'
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  ? 'bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/40'
+                  : 'text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#0D0F12] border border-transparent'
               }`}
             >
-              <span className="flex items-center gap-2.5">
-                <CheckCircle2
-                  className={`w-4 h-4 ${
-                    filterBy === 'cozuldu' ? 'text-white' : 'text-emerald-500'
-                  }`}
-                />
+              <span className="flex items-center gap-2">
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#10B981]" />
                 Çözülen Konular
               </span>
-              <span
-                className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
-                  filterBy === 'cozuldu'
-                    ? 'bg-white/20 text-white'
-                    : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
-                }`}
-              >
+              <span className="text-[11px] font-mono font-semibold px-1.5 py-0.2 rounded-sm bg-[#0D0F12] border border-[#232730] text-[#10B981]">
                 {solvedCount}
               </span>
             </button>
 
             <Link
               href="/haberler"
-              className="flex items-center justify-between px-3 py-2 rounded-xl text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="flex items-center justify-between px-2.5 py-1.5 rounded-md text-xs font-medium text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#0D0F12] transition-colors"
             >
-              <span className="flex items-center gap-2.5">
-                <Newspaper className="w-4 h-4 text-indigo-500" />
+              <span className="flex items-center gap-2">
+                <Newspaper className="w-3.5 h-3.5 text-[#10B981]" />
                 Teknoloji Gündemi
               </span>
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-indigo-500/15 text-indigo-600 dark:text-indigo-400">
+              <span className="text-[10px] font-mono font-semibold px-1.5 py-0.2 rounded-sm bg-[#0D0F12] border border-[#232730] text-[#10B981]">
                 RADAR
               </span>
             </Link>
 
             <Link
               href="/destek"
-              className="flex items-center justify-between px-3 py-2 rounded-xl text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="flex items-center justify-between px-2.5 py-1.5 rounded-md text-xs font-medium text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#0D0F12] transition-colors"
             >
-              <span className="flex items-center gap-2.5">
-                <Shield className="w-4 h-4 text-emerald-500" />
+              <span className="flex items-center gap-2">
+                <Shield className="w-3.5 h-3.5 text-[#F59E0B]" />
                 Destek & Talep
               </span>
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
-                İLETİŞİM
+              <span className="text-[10px] font-mono font-semibold px-1.5 py-0.2 rounded-sm bg-[#0D0F12] border border-[#232730] text-[#F59E0B]">
+                TICKET
               </span>
             </Link>
 
@@ -693,20 +650,14 @@ export function HomeFeedClient({
               <button
                 type="button"
                 onClick={() => selectFilter('kaydedilenler')}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs sm:text-sm font-medium transition-colors ${
+                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
                   filterBy === 'kaydedilenler'
-                    ? 'bg-indigo-600 text-white shadow-xs'
-                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    ? 'bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/40'
+                    : 'text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#0D0F12] border border-transparent'
                 }`}
               >
-                <span className="flex items-center gap-2.5">
-                  <Bookmark
-                    className={`w-4 h-4 ${
-                      filterBy === 'kaydedilenler'
-                        ? 'text-white'
-                        : 'text-indigo-500'
-                    }`}
-                  />
+                <span className="flex items-center gap-2">
+                  <Bookmark className="w-3.5 h-3.5 text-[#10B981]" />
                   Kaydedilenler
                 </span>
               </button>
@@ -714,10 +665,10 @@ export function HomeFeedClient({
           </div>
         </div>
 
-        {/* Forum Kategorileri (Masaüstünde görünür, mobil/tablette üst şeritte yer alır) */}
-        <div className="hidden lg:block rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900/90 p-4">
-          <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-2 mb-2.5">
-            Forum Kategorileri
+        {/* Forum Kategorileri */}
+        <div className="hidden lg:block rounded-md border border-[#232730] bg-[#15181E] p-3">
+          <h3 className="text-[10px] font-mono font-semibold uppercase tracking-wider text-[#8B949E] px-2 mb-2">
+            KATEGORİLER
           </h3>
           <div className="space-y-1">
             {categories.map((cat) => {
@@ -727,26 +678,23 @@ export function HomeFeedClient({
                   key={cat.id}
                   type="button"
                   onClick={() => selectCategory(cat.slug)}
-                  className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all ${
+                  className={`w-full flex items-center justify-between px-2 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
                     isActive
-                      ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-semibold ring-1 ring-indigo-500/30'
-                      : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/70'
+                      ? 'bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/40'
+                      : 'text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#0D0F12] border border-transparent'
                   }`}
                 >
-                  <span className="flex items-center gap-2.5 truncate">
-                    <span
-                      className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                      style={{ backgroundColor: `${cat.color}18` }}
-                    >
+                  <span className="flex items-center gap-2 truncate">
+                    <span className="w-6 h-6 rounded-sm bg-[#0D0F12] border border-[#232730] flex items-center justify-center shrink-0">
                       <CategoryIcon
                         name={cat.icon}
-                        className="w-4 h-4"
+                        className="w-3.5 h-3.5"
                         color={cat.color}
                       />
                     </span>
                     <span className="truncate">{cat.name}</span>
                   </span>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 tabular-nums">
+                  <span className="text-[11px] font-mono px-1.5 py-0.2 rounded-sm bg-[#0D0F12] border border-[#232730] text-[#8B949E] tabular-nums">
                     {cat._count.threads}
                   </span>
                 </button>
@@ -757,24 +705,24 @@ export function HomeFeedClient({
 
         {/* Popüler Etiketler */}
         {popularTags.length > 0 && (
-          <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900/90 p-4">
-            <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-3 flex items-center gap-1.5">
-              <Tag className="w-3.5 h-3.5" /> Popüler Etiketler
+          <div className="rounded-md border border-[#232730] bg-[#15181E] p-3">
+            <h3 className="text-[10px] font-mono font-semibold uppercase tracking-wider text-[#8B949E] mb-2.5 flex items-center gap-1.5">
+              <Tag className="w-3 h-3 text-[#10B981]" /> ETİKETLER
             </h3>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-1.5 font-mono">
               {popularTags.map(([tag, count]) => (
                 <button
                   key={tag}
                   type="button"
                   onClick={() => selectTag(tag)}
-                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[11px] font-medium border transition-colors cursor-pointer ${
                     activeTag === tag
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 hover:text-indigo-600 dark:hover:text-indigo-400'
+                      ? 'bg-[#10B981] text-[#0D0F12] border-[#10B981] font-semibold'
+                      : 'bg-[#0D0F12] border-[#232730] text-[#8B949E] hover:border-[#10B981]/50 hover:text-[#10B981]'
                   }`}
                 >
                   #{tag}
-                  <span className="text-[10px] opacity-60">({count})</span>
+                  <span className="text-[10px] opacity-65">({count})</span>
                 </button>
               ))}
             </div>
@@ -783,47 +731,46 @@ export function HomeFeedClient({
       </aside>
 
       {/* ORTA SÜTUN: Ana Forum Tartışma Akışı */}
-      <div className="order-1 lg:order-2 lg:col-span-6 space-y-3.5 sm:space-y-4 min-w-0">
+      <div className="order-1 lg:order-2 lg:col-span-6 space-y-3 min-w-0">
         {/* Mobil & Tablet Hızlı Filtre ve Kategori Şeridi */}
-        <div className="lg:hidden space-y-2">
-          {/* Satır 1: Hızlı Durum Filtreleri */}
+        <div className="lg:hidden space-y-2 font-mono">
           <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 no-scrollbar">
             <button
               type="button"
               onClick={() => selectFilter('')}
-              className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
+              className={`shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold border transition-colors cursor-pointer ${
                 !activeCategory && !filterBy && !activeTag && !searchQuery
-                  ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs'
-                  : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300'
+                  ? 'bg-[#10B981] border-[#10B981] text-[#0D0F12]'
+                  : 'bg-[#15181E] border-[#232730] text-[#8B949E]'
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
-              Tüm Konular ({threads.length})
+              Tümü ({threads.length})
             </button>
 
             <button
               type="button"
               onClick={() => selectFilter('cevapsiz')}
-              className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
+              className={`shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold border transition-colors cursor-pointer ${
                 filterBy === 'cevapsiz'
-                  ? 'bg-amber-600 border-amber-600 text-white shadow-xs'
-                  : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300'
+                  ? 'bg-[#F59E0B] border-[#F59E0B] text-[#0D0F12]'
+                  : 'bg-[#15181E] border-[#232730] text-[#8B949E]'
               }`}
             >
-              <HelpCircle className="w-3.5 h-3.5 text-amber-500" />
+              <HelpCircle className="w-3.5 h-3.5 text-[#F59E0B]" />
               Cevapsız ({unansweredCount})
             </button>
 
             <button
               type="button"
               onClick={() => selectFilter('cozuldu')}
-              className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
+              className={`shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold border transition-colors cursor-pointer ${
                 filterBy === 'cozuldu'
-                  ? 'bg-emerald-600 border-emerald-600 text-white shadow-xs'
-                  : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300'
+                  ? 'bg-[#10B981] border-[#10B981] text-[#0D0F12]'
+                  : 'bg-[#15181E] border-[#232730] text-[#8B949E]'
               }`}
             >
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#10B981]" />
               Çözülen ({solvedCount})
             </button>
 
@@ -831,27 +778,26 @@ export function HomeFeedClient({
               <button
                 type="button"
                 onClick={() => selectFilter('kaydedilenler')}
-                className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
+                className={`shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold border transition-colors cursor-pointer ${
                   filterBy === 'kaydedilenler'
-                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs'
-                    : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300'
+                    ? 'bg-[#10B981] border-[#10B981] text-[#0D0F12]'
+                    : 'bg-[#15181E] border-[#232730] text-[#8B949E]'
                 }`}
               >
-                <Bookmark className="w-3.5 h-3.5 text-indigo-500" />
+                <Bookmark className="w-3.5 h-3.5 text-[#10B981]" />
                 Kaydedilenler
               </button>
             )}
           </div>
 
-          {/* Satır 2: Yatay Kaydırılabilir Kategori Sekmeleri */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 no-scrollbar">
             <button
               type="button"
               onClick={() => selectCategory('')}
-              className={`shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors cursor-pointer ${
+              className={`shrink-0 px-2.5 py-1.5 rounded-md text-xs font-semibold border transition-colors cursor-pointer ${
                 !activeCategory
-                  ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white'
-                  : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300'
+                  ? 'bg-[#E6EDF3] text-[#0D0F12] border-[#E6EDF3]'
+                  : 'bg-[#15181E] border-[#232730] text-[#8B949E]'
               }`}
             >
               Tüm Kategoriler
@@ -863,15 +809,15 @@ export function HomeFeedClient({
                   key={cat.id}
                   type="button"
                   onClick={() => selectCategory(cat.slug)}
-                  className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors cursor-pointer ${
+                  className={`shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold border transition-colors cursor-pointer ${
                     isActive
-                      ? 'bg-indigo-600 border-indigo-600 text-white'
-                      : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300'
+                      ? 'bg-[#10B981] border-[#10B981] text-[#0D0F12]'
+                      : 'bg-[#15181E] border-[#232730] text-[#E6EDF3]'
                   }`}
                 >
                   <span
-                    className="w-2 h-2 rounded-full"
-                    style={{ backgroundColor: isActive ? '#ffffff' : cat.color }}
+                    className="w-2 h-2 rounded-xs"
+                    style={{ backgroundColor: isActive ? '#0D0F12' : cat.color }}
                   />
                   {cat.name}
                   <span className="text-[10px] opacity-65">({cat._count.threads})</span>
@@ -881,36 +827,27 @@ export function HomeFeedClient({
           </div>
         </div>
 
-        {/* Kategori Başlık Kartı (Kategori seçildiğinde gösterilir) */}
+        {/* Kategori Başlık Kartı */}
         {selectedCategoryObj && (
-          <div
-            className="rounded-2xl border p-5 flex items-start justify-between gap-4"
-            style={{
-              borderColor: `${selectedCategoryObj.color}40`,
-              backgroundColor: `${selectedCategoryObj.color}0c`,
-            }}
-          >
-            <div className="flex items-start gap-3.5">
-              <div
-                className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0"
-                style={{ backgroundColor: `${selectedCategoryObj.color}25` }}
-              >
+          <div className="rounded-md border border-[#232730] bg-[#15181E] p-4 flex items-start justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-md bg-[#0D0F12] border border-[#232730] flex items-center justify-center shrink-0">
                 <CategoryIcon
                   name={selectedCategoryObj.icon}
-                  className="w-6 h-6"
+                  className="w-5 h-5"
                   color={selectedCategoryObj.color}
                 />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-lg font-extrabold text-slate-900 dark:text-white">
+                  <h1 className="text-base font-bold text-[#E6EDF3]">
                     {selectedCategoryObj.name}
                   </h1>
-                  <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-white/70 dark:bg-slate-900/70 text-slate-600 dark:text-slate-300">
+                  <span className="px-2 py-0.5 rounded-sm font-mono text-[11px] font-semibold bg-[#0D0F12] border border-[#232730] text-[#10B981]">
                     {selectedCategoryObj._count.threads} konu
                   </span>
                 </div>
-                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-0.5">
+                <p className="text-xs text-[#8B949E] mt-0.5">
                   {selectedCategoryObj.description}
                 </p>
               </div>
@@ -918,7 +855,7 @@ export function HomeFeedClient({
             <button
               type="button"
               onClick={() => selectCategory(selectedCategoryObj.slug)}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white"
+              className="p-1.5 rounded-md text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#0D0F12]"
               title="Filtreyi Temizle"
             >
               <X className="w-4 h-4" />
@@ -928,32 +865,32 @@ export function HomeFeedClient({
 
         {/* Güncel Teknolojik Gelişmeler Vitrini */}
         {!selectedCategoryObj && !searchQuery && !activeTag && !filterBy && techNews.length > 0 && (
-          <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900/90 p-4 space-y-3">
-            <div className="flex items-center justify-between">
+          <div className="rounded-md border border-[#232730] bg-[#15181E] p-3.5 space-y-3">
+            <div className="flex items-center justify-between font-mono">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
-                  <Newspaper className="w-3.5 h-3.5 text-indigo-500" />
-                  Güncel Teknolojik Gelişmeler
+                <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" />
+                <h2 className="text-[11px] font-semibold uppercase tracking-wider text-[#E6EDF3] flex items-center gap-1.5">
+                  <Newspaper className="w-3.5 h-3.5 text-[#10B981]" />
+                  GÜNCEL TEKNOLOJİ RADARI
                 </h2>
               </div>
               <Link
                 href="/haberler"
-                className="inline-flex items-center gap-1 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
+                className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#10B981] hover:underline"
               >
-                Tümünü Gör ({techNews.length}) <ArrowRight className="w-3.5 h-3.5" />
+                TÜMÜ [{techNews.length}] <ArrowRight className="w-3 h-3" />
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {techNews.slice(0, 2).map((news) => (
                 <Link
                   key={news.id}
                   href={`/haberler/${news.slug}`}
-                  className="group rounded-2xl overflow-hidden border border-slate-200/70 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 hover:border-indigo-500/40 hover:shadow-md transition-all flex flex-col justify-between"
+                  className="group rounded-md overflow-hidden border border-[#232730] bg-[#0D0F12] hover:border-[#10B981]/50 transition-colors flex flex-col justify-between"
                 >
                   <div>
-                    <div className="relative h-32 w-full overflow-hidden">
+                    <div className="relative h-28 w-full overflow-hidden border-b border-[#232730]">
                       <TechNewsCover
                         title={news.title}
                         category={news.category}
@@ -964,26 +901,22 @@ export function HomeFeedClient({
                         overlayVariant="card"
                       />
                       <span
-                        className="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold backdrop-blur-md border"
-                        style={{
-                          backgroundColor: 'rgba(9, 13, 22, 0.78)',
-                          borderColor: `${news.badgeColor}60`,
-                          color: news.badgeColor,
-                        }}
+                        className="absolute top-2 left-2 px-2 py-0.5 rounded-sm font-mono text-[10px] font-semibold bg-[#0D0F12]/90 border border-[#232730]"
+                        style={{ color: news.badgeColor }}
                       >
                         {news.category}
                       </span>
-                      <span className="absolute bottom-2 right-2.5 px-2 py-0.5 rounded-md text-[10px] font-medium bg-slate-950/75 text-slate-200 backdrop-blur-md">
+                      <span className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded-sm font-mono text-[10px] font-medium bg-[#0D0F12]/90 text-[#8B949E] border border-[#232730]">
                         {news.readTime}
                       </span>
                     </div>
-                    <div className="p-3.5 pb-2">
-                      <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2 leading-snug">
+                    <div className="p-3 pb-1.5">
+                      <h3 className="text-xs sm:text-[13px] font-bold text-[#E6EDF3] group-hover:text-[#10B981] transition-colors line-clamp-2 leading-snug">
                         {news.title}
                       </h3>
                     </div>
                   </div>
-                  <p className="px-3.5 pb-3.5 text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2">
+                  <p className="px-3 pb-3 text-[11px] text-[#8B949E] line-clamp-2">
                     {news.summary}
                   </p>
                 </Link>
@@ -994,54 +927,54 @@ export function HomeFeedClient({
 
         {/* Aktif Arama veya Filtre Bilgisi */}
         {(searchQuery || activeTag || filterBy) && (
-          <div className="flex items-center justify-between px-4 py-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/60 text-xs text-indigo-800 dark:text-indigo-200">
+          <div className="flex items-center justify-between px-3.5 py-2 rounded-md bg-[#15181E] border border-[#10B981]/40 text-xs font-mono text-[#E6EDF3]">
             <div className="flex items-center gap-2 flex-wrap">
-              <span>Aktif Görünüm:</span>
+              <span className="text-[#8B949E]">FILTER:</span>
               {searchQuery && (
-                <span className="font-bold">&ldquo;{searchQuery}&rdquo; araması</span>
+                <span className="font-semibold text-[#10B981]">q=&ldquo;{searchQuery}&rdquo;</span>
               )}
-              {activeTag && <span className="font-bold">#{activeTag} etiketi</span>}
-              {filterBy === 'cozuldu' && <span className="font-bold">Çözülen Konular</span>}
+              {activeTag && <span className="font-semibold text-[#10B981]">#{activeTag}</span>}
+              {filterBy === 'cozuldu' && <span className="font-semibold text-[#10B981]">status:solved</span>}
               {filterBy === 'cevapsiz' && (
-                <span className="font-bold">Cevapsız Sorular (0 Yanıt)</span>
+                <span className="font-semibold text-[#F59E0B]">status:unanswered</span>
               )}
               {filterBy === 'kaydedilenler' && (
-                <span className="font-bold">Kaydedilen Konular</span>
+                <span className="font-semibold text-[#10B981]">saved:true</span>
               )}
             </div>
             <button
               type="button"
               onClick={clearAllFilters}
-              className="inline-flex items-center gap-1 font-semibold hover:underline"
+              className="inline-flex items-center gap-1 font-semibold text-[#F59E0B] hover:underline cursor-pointer"
             >
-              <X className="w-3.5 h-3.5" /> Temizle
+              <X className="w-3.5 h-3.5" /> SIFIRLA
             </button>
           </div>
         )}
 
-        {/* Profesyonel Forum Araç Çubuğu: Sıralama Sekmeleri + Görünüm Modu (Kart / Tablo) */}
-        <div className="flex flex-wrap items-center justify-between gap-2 bg-white dark:bg-slate-900/90 p-2 rounded-2xl border border-slate-200/80 dark:border-slate-800/80">
-          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
+        {/* Forum Araç Çubuğu: Sıralama Sekmeleri + Görünüm Modu */}
+        <div className="flex flex-wrap items-center justify-between gap-2 bg-[#15181E] p-1.5 rounded-md border border-[#232730]">
+          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar font-mono">
             <button
               type="button"
               onClick={() => selectSort('aktivite')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors shrink-0 ${
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors shrink-0 cursor-pointer ${
                 sortBy === 'aktivite'
-                  ? 'bg-indigo-600 text-white'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  ? 'bg-[#0D0F12] text-[#10B981] border border-[#232730]'
+                  : 'text-[#8B949E] hover:text-[#E6EDF3]'
               }`}
             >
               <Activity className="w-3.5 h-3.5" />
-              Son Aktivite
+              Aktivite
             </button>
 
             <button
               type="button"
               onClick={() => selectSort('yeni')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors shrink-0 ${
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors shrink-0 cursor-pointer ${
                 sortBy === 'yeni'
-                  ? 'bg-indigo-600 text-white'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  ? 'bg-[#0D0F12] text-[#10B981] border border-[#232730]'
+                  : 'text-[#8B949E] hover:text-[#E6EDF3]'
               }`}
             >
               <Clock className="w-3.5 h-3.5" />
@@ -1051,45 +984,44 @@ export function HomeFeedClient({
             <button
               type="button"
               onClick={() => selectSort('populer')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors shrink-0 ${
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors shrink-0 cursor-pointer ${
                 sortBy === 'populer'
-                  ? 'bg-indigo-600 text-white'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  ? 'bg-[#0D0F12] text-[#F59E0B] border border-[#232730]'
+                  : 'text-[#8B949E] hover:text-[#E6EDF3]'
               }`}
             >
               <Flame className="w-3.5 h-3.5" />
-              En Çok Beğenilen
+              En Çok Oy
             </button>
 
             <button
               type="button"
               onClick={() => selectSort('goruntulenme')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors shrink-0 ${
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors shrink-0 cursor-pointer ${
                 sortBy === 'goruntulenme'
-                  ? 'bg-indigo-600 text-white'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  ? 'bg-[#0D0F12] text-[#10B981] border border-[#232730]'
+                  : 'text-[#8B949E] hover:text-[#E6EDF3]'
               }`}
             >
               <Eye className="w-3.5 h-3.5" />
-              Popüler
+              Okunma
             </button>
           </div>
 
-          <div className="flex items-center gap-2 ml-auto">
-            <span className="text-xs text-slate-400 hidden sm:inline tabular-nums">
-              {filteredAndSortedThreads.length} konu
+          <div className="flex items-center gap-2 ml-auto font-mono">
+            <span className="text-[11px] text-[#8B949E] hidden sm:inline tabular-nums">
+              {filteredAndSortedThreads.length} kayıt
             </span>
 
-            {/* Görünüm Seçici: Kart / Kompakt Tablo */}
-            <div className="inline-flex items-center rounded-xl bg-slate-100 dark:bg-slate-800 p-0.5 border border-slate-200/70 dark:border-slate-700/70">
+            <div className="inline-flex items-center rounded-md bg-[#0D0F12] p-0.5 border border-[#232730]">
               <button
                 type="button"
                 onClick={() => setViewMode('card')}
                 title="Detaylı Kart Görünümü"
-                className={`p-1.5 rounded-lg transition-colors ${
+                className={`p-1.5 rounded-sm transition-colors cursor-pointer ${
                   viewMode === 'card'
-                    ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-2xs'
-                    : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                    ? 'bg-[#15181E] text-[#10B981]'
+                    : 'text-[#8B949E] hover:text-[#E6EDF3]'
                 }`}
               >
                 <LayoutGrid className="w-3.5 h-3.5" />
@@ -1098,10 +1030,10 @@ export function HomeFeedClient({
                 type="button"
                 onClick={() => setViewMode('compact')}
                 title="Kompakt Forum Tablo Görünümü"
-                className={`p-1.5 rounded-lg transition-colors ${
+                className={`p-1.5 rounded-sm transition-colors cursor-pointer ${
                   viewMode === 'compact'
-                    ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-2xs'
-                    : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                    ? 'bg-[#15181E] text-[#10B981]'
+                    : 'text-[#8B949E] hover:text-[#E6EDF3]'
                 }`}
               >
                 <List className="w-3.5 h-3.5" />
@@ -1112,33 +1044,32 @@ export function HomeFeedClient({
 
         {/* Konu Listesi */}
         {filteredAndSortedThreads.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 bg-white/50 dark:bg-slate-900/40 p-12 text-center space-y-3">
-            <MessageSquare className="w-10 h-10 text-slate-400 mx-auto" />
-            <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">
+          <div className="rounded-md border border-dashed border-[#232730] bg-[#15181E] p-10 text-center space-y-2.5">
+            <MessageSquare className="w-8 h-8 text-[#8B949E] mx-auto" />
+            <h3 className="text-sm font-bold text-[#E6EDF3]">
               Aradığınız kriterlere uygun konu bulunamadı
             </h3>
-            <p className="text-xs text-slate-500 max-w-sm mx-auto">
+            <p className="text-xs text-[#8B949E] max-w-sm mx-auto">
               Farklı bir kategori seçebilir, arama filtresini temizleyebilir veya bu alanda ilk konuyu siz açabilirsiniz.
             </p>
             <div className="pt-2">
               <Link
                 href="/yeni-konu"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-500"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-semibold bg-[#10B981] text-[#0D0F12] hover:bg-[#059669]"
               >
-                <PlusCircle className="w-4 h-4" />
+                <PlusCircle className="w-3.5 h-3.5" />
                 Yeni Konu Aç
               </Link>
             </div>
           </div>
         ) : viewMode === 'compact' ? (
-          <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900/90 overflow-hidden shadow-2xs">
-            {/* Profesyonel Forum Tablo Başlığı */}
-            <div className="px-4 py-2.5 bg-slate-50/90 dark:bg-slate-800/60 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-              <span>Konu & Kategori</span>
+          <div className="rounded-md border border-[#232730] bg-[#15181E] overflow-hidden">
+            <div className="px-3.5 py-2 bg-[#15181E] border-b border-[#232730] flex items-center justify-between text-[10px] font-mono font-semibold uppercase tracking-wider text-[#8B949E]">
+              <span>KONU &amp; KATEGORİ</span>
               <div className="flex items-center gap-6">
-                <span className="hidden sm:inline">İstatistik</span>
+                <span className="hidden sm:inline">METRİKLER</span>
                 <span className="hidden xl:inline min-w-[115px] text-right">
-                  Son Aktivite
+                  SON AKTİVİTE
                 </span>
               </div>
             </div>
@@ -1157,7 +1088,7 @@ export function HomeFeedClient({
             </div>
           </div>
         ) : (
-          <div className="space-y-3.5">
+          <div className="space-y-2.5">
             {paginatedThreads.map((thread) => (
               <ThreadCard
                 key={thread.id}
@@ -1173,68 +1104,68 @@ export function HomeFeedClient({
 
         {/* Sayfalama (Pagination) */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between pt-2">
+          <div className="flex items-center justify-between pt-2 font-mono">
             <button
               type="button"
               disabled={currentPage <= 1}
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              className="px-3.5 py-2 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 disabled:opacity-40 hover:bg-slate-50 dark:hover:bg-slate-800"
+              className="px-3 py-1.5 rounded-md text-xs font-medium border border-[#232730] bg-[#15181E] text-[#E6EDF3] disabled:opacity-40 hover:border-[#10B981]/50 cursor-pointer"
             >
-              ← Önceki Sayfa
+              ← Önceki
             </button>
-            <span className="text-xs font-medium text-slate-500">
-              Sayfa {currentPage} / {totalPages}
+            <span className="text-xs text-[#8B949E]">
+              [{currentPage} / {totalPages}]
             </span>
             <button
               type="button"
               disabled={currentPage >= totalPages}
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              className="px-3.5 py-2 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 disabled:opacity-40 hover:bg-slate-50 dark:hover:bg-slate-800"
+              className="px-3 py-1.5 rounded-md text-xs font-medium border border-[#232730] bg-[#15181E] text-[#E6EDF3] disabled:opacity-40 hover:border-[#10B981]/50 cursor-pointer"
             >
-              Sonraki Sayfa →
+              Sonraki →
             </button>
           </div>
         )}
       </div>
 
       {/* SAĞ KENAR ÇUBUĞU: Topluluk Nabzı, Teknoloji Radarı ve Liderlik Tablosu */}
-      <aside className="order-3 lg:col-span-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-4 sm:gap-5 lg:sticky lg:top-22">
+      <aside className="order-3 lg:col-span-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-3.5 lg:sticky lg:top-20">
         {/* Topluluk Nabzı */}
-        <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900/90 p-4">
-          <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-3 flex items-center gap-1.5">
-            <Activity className="w-3.5 h-3.5 text-indigo-500" /> Forum İstatistikleri
+        <div className="rounded-md border border-[#232730] bg-[#15181E] p-3.5">
+          <h3 className="text-[10px] font-mono font-semibold uppercase tracking-wider text-[#8B949E] mb-2.5 flex items-center gap-1.5">
+            <Activity className="w-3.5 h-3.5 text-[#10B981]" /> SİSTEM TELEMETRİSİ
           </h3>
-          <div className="grid grid-cols-2 gap-2 text-center">
-            <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
-              <p className="text-lg font-extrabold text-indigo-600 dark:text-indigo-400 tabular-nums">
+          <div className="grid grid-cols-2 gap-2 text-center font-mono">
+            <div className="p-2.5 rounded-md bg-[#0D0F12] border border-[#232730]">
+              <p className="text-base font-bold text-[#E6EDF3] tabular-nums">
                 {stats.totalThreads}
               </p>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-                Toplam Konu
+              <p className="text-[10px] text-[#8B949E] uppercase">
+                KONU
               </p>
             </div>
-            <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
-              <p className="text-lg font-extrabold text-emerald-600 dark:text-emerald-400 tabular-nums">
+            <div className="p-2.5 rounded-md bg-[#0D0F12] border border-[#232730]">
+              <p className="text-base font-bold text-[#10B981] tabular-nums">
                 {stats.totalComments}
               </p>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-                Toplam Yanıt
+              <p className="text-[10px] text-[#8B949E] uppercase">
+                YANIT
               </p>
             </div>
-            <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
-              <p className="text-lg font-extrabold text-teal-600 dark:text-teal-400 tabular-nums">
+            <div className="p-2.5 rounded-md bg-[#0D0F12] border border-[#232730]">
+              <p className="text-base font-bold text-[#10B981] tabular-nums">
                 {solvedCount}
               </p>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-                Çözülen Soru
+              <p className="text-[10px] text-[#8B949E] uppercase">
+                ÇÖZÜLEN
               </p>
             </div>
-            <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
-              <p className="text-lg font-extrabold text-amber-600 dark:text-amber-400 tabular-nums">
+            <div className="p-2.5 rounded-md bg-[#0D0F12] border border-[#232730]">
+              <p className="text-base font-bold text-[#F59E0B] tabular-nums">
                 {stats.totalUsers}
               </p>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-                Kayıtlı Üye
+              <p className="text-[10px] text-[#8B949E] uppercase">
+                ÜYE
               </p>
             </div>
           </div>
@@ -1242,35 +1173,35 @@ export function HomeFeedClient({
 
         {/* Sağ Kenar: Teknoloji Gündemi Özeti */}
         {techNews.length > 0 && (
-          <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900/90 p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
-                <Newspaper className="w-3.5 h-3.5 text-emerald-500" /> Teknoloji Radarı
+          <div className="rounded-md border border-[#232730] bg-[#15181E] p-3.5">
+            <div className="flex items-center justify-between mb-2.5 font-mono">
+              <h3 className="text-[10px] font-semibold uppercase tracking-wider text-[#8B949E] flex items-center gap-1.5">
+                <Newspaper className="w-3.5 h-3.5 text-[#10B981]" /> TEKNOLOJİ RADARI
               </h3>
               <Link
                 href="/haberler"
-                className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 hover:underline"
+                className="text-[11px] font-semibold text-[#10B981] hover:underline"
               >
                 Tümü
               </Link>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-2.5 divide-y divide-[#232730]">
               {techNews.slice(0, 4).map((item) => (
                 <Link
                   key={item.id}
                   href={`/haberler/${item.slug}`}
-                  className="block group"
+                  className="block group pt-2 first:pt-0"
                 >
-                  <div className="flex items-center gap-1.5 mb-0.5">
+                  <div className="flex items-center gap-1.5 mb-0.5 font-mono">
                     <span
-                      className="w-1.5 h-1.5 rounded-full shrink-0"
+                      className="w-1.5 h-1.5 rounded-xs shrink-0"
                       style={{ backgroundColor: item.badgeColor }}
                     />
-                    <span className="text-[10px] font-bold text-slate-400">
+                    <span className="text-[10px] text-[#8B949E]">
                       {item.category} • {item.readTime}
                     </span>
                   </div>
-                  <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2 leading-snug">
+                  <p className="text-xs font-semibold text-[#E6EDF3] group-hover:text-[#10B981] transition-colors line-clamp-2 leading-snug">
                     {item.title}
                   </p>
                 </Link>
@@ -1280,27 +1211,25 @@ export function HomeFeedClient({
         )}
 
         {/* En Aktif Katkıda Bulunanlar */}
-        <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900/90 p-4">
-          <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-3 flex items-center gap-1.5">
-            <Award className="w-3.5 h-3.5 text-amber-500" /> İtibar Liderleri
+        <div className="rounded-md border border-[#232730] bg-[#15181E] p-3.5">
+          <h3 className="text-[10px] font-mono font-semibold uppercase tracking-wider text-[#8B949E] mb-2.5 flex items-center gap-1.5">
+            <Award className="w-3.5 h-3.5 text-[#F59E0B]" /> İTİBAR LİDERLERİ
           </h3>
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {topUsers.map((u, idx) => (
               <Link
                 key={u.id}
                 href={`/kullanici/${u.username}`}
                 className="flex items-center justify-between group"
               >
-                <div className="flex items-center gap-2.5 min-w-0">
+                <div className="flex items-center gap-2 min-w-0">
                   <span
-                    className={`text-xs font-extrabold w-4 ${
+                    className={`text-xs font-mono font-bold w-4 ${
                       idx === 0
-                        ? 'text-amber-500'
+                        ? 'text-[#F59E0B]'
                         : idx === 1
-                        ? 'text-slate-400'
-                        : idx === 2
-                        ? 'text-amber-700 dark:text-amber-600'
-                        : 'text-slate-400'
+                        ? 'text-[#10B981]'
+                        : 'text-[#8B949E]'
                     }`}
                   >
                     {idx + 1}.
@@ -1308,18 +1237,18 @@ export function HomeFeedClient({
                   <UserAvatar
                     name={u.displayName}
                     avatar={u.avatarColor}
-                    className="w-8 h-8 rounded-xl text-xs"
+                    className="w-7 h-7 rounded-md text-xs border border-[#232730]"
                   />
                   <div className="min-w-0">
-                    <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate group-hover:text-indigo-500 transition-colors">
+                    <p className="text-xs font-semibold text-[#E6EDF3] truncate group-hover:text-[#10B981] transition-colors">
                       {u.displayName}
                     </p>
-                    <p className="text-[11px] text-slate-400 truncate">
+                    <p className="text-[10px] font-mono text-[#8B949E] truncate">
                       @{u.username}
                     </p>
                   </div>
                 </div>
-                <span className="text-xs font-bold px-2 py-0.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0 tabular-nums">
+                <span className="text-[11px] font-mono font-semibold px-1.5 py-0.5 rounded-sm bg-[#0D0F12] border border-[#232730] text-[#F59E0B] shrink-0 tabular-nums">
                   {u.reputation}p
                 </span>
               </Link>
@@ -1328,29 +1257,29 @@ export function HomeFeedClient({
         </div>
 
         {/* Hızlı Rehber / Bilgi Kutusu */}
-        <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900/90 p-4 space-y-2.5">
-          <div className="flex items-center justify-between">
-            <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
-              <Users className="w-3.5 h-3.5 text-indigo-500" /> Forum Rehberi
+        <div className="rounded-md border border-[#232730] bg-[#15181E] p-3.5 space-y-2">
+          <div className="flex items-center justify-between font-mono">
+            <h3 className="text-[10px] font-semibold uppercase tracking-wider text-[#8B949E] flex items-center gap-1.5">
+              <Users className="w-3.5 h-3.5 text-[#10B981]" /> FORUM PROTOKOLÜ
             </h3>
             <Link
               href="/kurallar"
-              className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 hover:underline"
+              className="text-[11px] font-semibold text-[#10B981] hover:underline"
             >
               Kurallar →
             </Link>
           </div>
-          <ul className="text-xs text-slate-600 dark:text-slate-400 space-y-1.5 list-disc pl-4">
+          <ul className="text-xs text-[#8B949E] space-y-1.5 list-disc pl-4">
             <li>Konu açarken açıklayıcı bir başlık ve doğru kategori seçin.</li>
             <li>Kod örneklerini Markdown kod blokları içine yerleştirin.</li>
-            <li>Sorunuz çözüldüğünde yardımcı olan yanıtı <strong>Çözüm Seç</strong> ile işaretleyin.</li>
+            <li>Sorunuz çözüldüğünde yardımcı olan yanıtı <strong className="text-[#E6EDF3]">Çözüm Seç</strong> ile işaretleyin.</li>
             <li>
               Şikayet, yeni kategori önerisi veya teknik destek için{' '}
               <Link
                 href="/destek"
-                className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
+                className="font-mono font-semibold text-[#10B981] hover:underline"
               >
-                Destek & Şikayet Merkezi
+                Destek &amp; Şikayet Merkezi
               </Link>
               &apos;ni kullanın.
             </li>

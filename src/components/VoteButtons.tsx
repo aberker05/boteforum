@@ -42,7 +42,6 @@ export function VoteButtons({
     const prevScore = score;
     const prevLiked = liked;
 
-    // Optimistic UI güncellemesi
     const nextLiked = !liked;
     setLiked(nextLiked);
     setScore(nextLiked ? score + 1 : Math.max(0, score - 1));
@@ -82,16 +81,14 @@ export function VoteButtons({
         type="button"
         onClick={handleToggleLike}
         title={feedback || (liked ? 'Beğeniyi Geri Çek' : 'Faydalı Buldum / Beğen')}
-        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${
+        className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-mono font-medium border transition-colors cursor-pointer ${
           liked
-            ? 'bg-indigo-600/15 border-indigo-500/40 text-indigo-600 dark:text-indigo-400'
-            : 'bg-slate-50 dark:bg-slate-800/70 border-slate-200/70 dark:border-slate-700/70 text-slate-600 dark:text-slate-300 hover:border-indigo-500/40 hover:text-indigo-600 dark:hover:text-indigo-400'
+            ? 'bg-[#10B981]/15 border-[#10B981]/50 text-[#10B981]'
+            : 'bg-[#0D0F12] border-[#232730] text-[#8B949E] hover:border-[#10B981]/40 hover:text-[#E6EDF3]'
         }`}
       >
         <ThumbsUp
-          className={`w-3.5 h-3.5 transition-transform ${
-            liked ? 'fill-current scale-110' : ''
-          }`}
+          className={`w-3 h-3 ${liked ? 'fill-current text-[#10B981]' : ''}`}
         />
         <span className="tabular-nums">{score}</span>
       </button>
@@ -103,23 +100,21 @@ export function VoteButtons({
       <button
         type="button"
         onClick={handleToggleLike}
-        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+        className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium border transition-colors cursor-pointer ${
           liked
-            ? 'bg-indigo-600/15 border-indigo-500/40 text-indigo-600 dark:text-indigo-300 shadow-2xs'
-            : 'bg-slate-50 dark:bg-slate-800/70 border-slate-200/80 dark:border-slate-700/70 text-slate-700 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 hover:border-indigo-500/30 hover:text-indigo-600 dark:hover:text-indigo-400'
+            ? 'bg-[#10B981]/15 border-[#10B981]/50 text-[#10B981]'
+            : 'bg-[#0D0F12] border-[#232730] text-[#8B949E] hover:border-[#10B981]/40 hover:text-[#E6EDF3]'
         }`}
       >
         <ThumbsUp
-          className={`w-3.5 h-3.5 transition-transform ${
-            liked ? 'fill-current scale-110 text-indigo-600 dark:text-indigo-400' : ''
-          }`}
+          className={`w-3.5 h-3.5 ${liked ? 'fill-current text-[#10B981]' : ''}`}
         />
         <span>{liked ? 'Faydalı Bulundu' : 'Faydalı'}</span>
         <span
-          className={`px-1.5 py-0.5 rounded-md text-[11px] font-bold tabular-nums ${
+          className={`px-1.5 py-0.5 rounded text-[11px] font-mono font-semibold tabular-nums border ${
             liked
-              ? 'bg-indigo-600 text-white'
-              : 'bg-slate-200/70 dark:bg-slate-700/80 text-slate-700 dark:text-slate-200'
+              ? 'bg-[#10B981] text-[#0D0F12] border-[#10B981]'
+              : 'bg-[#15181E] text-[#E6EDF3] border-[#232730]'
           }`}
         >
           {score}
@@ -127,7 +122,7 @@ export function VoteButtons({
       </button>
 
       {feedback && (
-        <span className="text-[11px] font-medium text-amber-600 dark:text-amber-400 animate-pulse">
+        <span className="text-[11px] font-mono font-medium text-[#F59E0B]">
           {feedback}
         </span>
       )}

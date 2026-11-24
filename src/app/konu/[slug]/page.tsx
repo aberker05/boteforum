@@ -251,20 +251,20 @@ export default async function ThreadDetailPage({ params }: ThreadDetailProps) {
       {/* Profesyonel Forum Breadcrumb Navigasyonu */}
       <nav
         aria-label="Breadcrumb"
-        className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900/90 text-xs"
+        className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2 rounded-md border border-[#232730] bg-[#15181E] text-xs font-mono"
       >
-        <ol className="flex items-center gap-1.5 flex-wrap text-slate-500 dark:text-slate-400 min-w-0">
+        <ol className="flex items-center gap-1.5 flex-wrap text-[#8B949E] min-w-0">
           <li>
             <Link
               href="/"
-              className="inline-flex items-center gap-1 font-semibold hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+              className="inline-flex items-center gap-1 font-semibold text-[#E6EDF3] hover:text-[#10B981] transition-colors"
             >
-              <Home className="w-3.5 h-3.5" />
+              <Home className="w-3.5 h-3.5 text-[#10B981]" />
               Forum
             </Link>
           </li>
           <li>
-            <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+            <ChevronRight className="w-3.5 h-3.5 text-[#8B949E]" />
           </li>
           <li>
             <Link
@@ -277,80 +277,77 @@ export default async function ThreadDetailPage({ params }: ThreadDetailProps) {
             </Link>
           </li>
           <li className="hidden sm:block">
-            <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+            <ChevronRight className="w-3.5 h-3.5 text-[#8B949E]" />
           </li>
-          <li className="hidden sm:block text-slate-700 dark:text-slate-200 font-semibold truncate max-w-xs md:max-w-md">
+          <li className="hidden sm:block text-[#E6EDF3] font-sans font-semibold truncate max-w-xs md:max-w-md">
             {thread.title}
           </li>
         </ol>
 
         <div className="flex items-center gap-2 shrink-0">
           {thread.isSolved ? (
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
-              <CheckCircle2 className="w-3.5 h-3.5" /> Çözüldü
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[11px] font-semibold bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/35">
+              <CheckCircle2 className="w-3 h-3" /> SOLVED
             </span>
           ) : thread.isLocked ? (
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/15 text-rose-600 dark:text-rose-400">
-              <Lock className="w-3.5 h-3.5" /> Kilitli
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[11px] font-semibold bg-rose-500/15 text-rose-400 border border-rose-500/35">
+              <Lock className="w-3 h-3" /> LOCKED
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-500/15 text-indigo-600 dark:text-indigo-400">
-              <MessageSquare className="w-3.5 h-3.5" /> Açık Tartışma
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[11px] font-semibold bg-[#0D0F12] text-[#10B981] border border-[#232730]">
+              <MessageSquare className="w-3 h-3" /> OPEN
             </span>
           )}
         </div>
       </nav>
 
       {/* 2 Sütunlu Profesyonel Forum Konu Düzeni */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
         {/* SOL SÜTUN: Ana Konu Mesajı (#1) ve Yanıtlar */}
-        <div className="lg:col-span-8 xl:col-span-9 space-y-6">
+        <div className="lg:col-span-8 xl:col-span-9 space-y-5">
           {/* Ana Konu Kartı (Post #1) */}
-          <article className="rounded-3xl border border-slate-200/90 dark:border-slate-800/90 bg-white dark:bg-slate-900/95 p-5 sm:p-7 shadow-xs">
+          <article className="rounded-md border border-[#232730] bg-[#15181E] p-5 sm:p-6">
             {/* Üst Kategori ve Durum Rozetleri */}
-            <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-              <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-3 font-mono">
+              <div className="flex flex-wrap items-center gap-1.5">
                 <Link
                   href={`/?kategori=${thread.category.slug}`}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold"
-                  style={{
-                    backgroundColor: `${thread.category.color}18`,
-                    color: thread.category.color,
-                  }}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-[#0D0F12] border border-[#232730] hover:border-[#10B981]/50"
+                  style={{ color: thread.category.color }}
                 >
                   <CategoryIcon name={thread.category.icon} className="w-3.5 h-3.5" />
                   {thread.category.name}
                 </Link>
 
                 {thread.isPinned && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400">
-                    <Pin className="w-3.5 h-3.5" /> Sabitlenen Konu
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[11px] font-semibold bg-[#F59E0B]/15 text-[#F59E0B] border border-[#F59E0B]/35">
+                    <Pin className="w-3 h-3" /> PINNED
                   </span>
                 )}
                 {thread.isSolved && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
-                    <CheckCircle2 className="w-3.5 h-3.5" /> Çözüldü
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[11px] font-semibold bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/35">
+                    <CheckCircle2 className="w-3 h-3" /> SOLVED
                   </span>
                 )}
                 {thread.isLocked && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-500/15 text-rose-600 dark:text-rose-400">
-                    <Lock className="w-3.5 h-3.5" /> Kilitli
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[11px] font-semibold bg-rose-500/15 text-rose-400 border border-rose-500/35">
+                    <Lock className="w-3 h-3" /> LOCKED
                   </span>
                 )}
               </div>
 
-              <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[11px] font-mono font-bold text-slate-500 dark:text-slate-400">
-                #1 • Konu Başlangıcı
+              <span className="px-2 py-0.5 rounded-sm bg-[#0D0F12] border border-[#232730] text-[11px] font-mono font-semibold text-[#8B949E]">
+                #1 • OP
               </span>
             </div>
 
             {/* Başlık */}
-            <h1 className="text-xl sm:text-2xl md:text-[26px] font-extrabold text-slate-900 dark:text-white leading-tight">
+            <h1 className="text-xl sm:text-2xl font-bold text-[#E6EDF3] leading-snug tracking-tight">
               {thread.title}
             </h1>
 
             {/* Yazar & Tarih Bilgisi */}
-            <div className="mt-4 pb-4 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-4">
+            <div className="mt-4 pb-4 border-b border-[#232730] flex flex-wrap items-center justify-between gap-4">
               <Link
                 href={`/kullanici/${thread.author.username}`}
                 className="flex items-center gap-3 group"
@@ -358,63 +355,63 @@ export default async function ThreadDetailPage({ params }: ThreadDetailProps) {
                 <UserAvatar
                   name={thread.author.displayName}
                   avatar={thread.author.avatarColor}
-                  className="w-10 h-10 rounded-xl text-sm shadow-xs"
+                  className="w-9 h-9 rounded-md text-xs border border-[#232730]"
                 />
                 <div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-indigo-500 transition-colors">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-sm font-bold text-[#E6EDF3] group-hover:text-[#10B981] transition-colors">
                       {thread.author.displayName}
                     </span>
-                    <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-indigo-500/15 text-indigo-600 dark:text-indigo-400">
-                      KONU SAHİBİ
+                    <span className="px-1.5 py-0.2 font-mono text-[10px] font-semibold rounded-sm bg-[#0D0F12] border border-[#232730] text-[#10B981]">
+                      AUTHOR
                     </span>
                     {thread.author.role === 'ADMIN' && (
-                      <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-amber-500/15 text-amber-600 dark:text-amber-400">
-                        YÖNETİCİ
+                      <span className="px-1.5 py-0.2 font-mono text-[10px] font-semibold rounded-sm bg-[#F59E0B]/15 text-[#F59E0B] border border-[#F59E0B]/30">
+                        ADMIN
                       </span>
                     )}
                     {thread.author.role === 'MODERATOR' && (
-                      <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-pink-500/15 text-pink-600 dark:text-pink-400">
+                      <span className="px-1.5 py-0.2 font-mono text-[10px] font-semibold rounded-sm bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30">
                         MOD
                       </span>
                     )}
                     {thread.author.role === 'BANNED' && (
-                      <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-rose-500/15 text-rose-600 dark:text-rose-400">
-                        ASKIYA ALINDI
+                      <span className="px-1.5 py-0.2 font-mono text-[10px] font-semibold rounded-sm bg-rose-500/15 text-rose-400 border border-rose-500/30">
+                        BANNED
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
+                  <div className="flex items-center gap-2 text-[11px] font-mono text-[#8B949E] mt-0.5">
                     <span>@{thread.author.username}</span>
                     <span>•</span>
                     <span
                       className="font-semibold"
                       style={{ color: authorLevel.color }}
                     >
-                      Sv.{authorLevel.level} {authorLevel.title}
+                      Lv.{authorLevel.level} {authorLevel.title}
                     </span>
                     <span>•</span>
-                    <span className="inline-flex items-center gap-0.5 text-amber-600 dark:text-amber-400 font-semibold">
+                    <span className="inline-flex items-center gap-0.5 text-[#F59E0B] font-semibold">
                       <Award className="w-3 h-3" /> {thread.author.reputation}p
                     </span>
                   </div>
                 </div>
               </Link>
 
-              <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+              <div className="flex items-center gap-3 text-xs font-mono text-[#8B949E]">
                 <span className="inline-flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5" />
+                  <Clock className="w-3.5 h-3.5 text-[#10B981]" />
                   {formatRelativeTime(thread.createdAt)}
                 </span>
                 <span className="inline-flex items-center gap-1">
-                  <Eye className="w-3.5 h-3.5" />
-                  {thread.views + 1} okunma
+                  <Eye className="w-3.5 h-3.5 text-[#F59E0B]" />
+                  {thread.views + 1} görüntü
                 </span>
               </div>
             </div>
 
             {/* Konu İçeriği */}
-            <div className="py-6 text-base leading-relaxed">
+            <div className="py-5 text-sm sm:text-[15px] leading-relaxed">
               <MarkdownRenderer content={thread.content} />
             </div>
 
@@ -425,14 +422,14 @@ export default async function ThreadDetailPage({ params }: ThreadDetailProps) {
 
             {/* Kabul Edilen Çözüm Özeti Kutusu (Varsa) */}
             {acceptedComment && (
-              <div className="my-4 rounded-2xl border border-emerald-500/40 bg-emerald-500/10 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+              <div className="my-4 rounded-md border border-[#10B981]/45 bg-[#10B981]/10 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-start gap-2.5">
+                  <CheckCircle2 className="w-4 h-4 text-[#10B981] shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-xs font-extrabold text-emerald-800 dark:text-emerald-300">
-                      Çözüm Onaylandı — @{acceptedComment.author.username} tarafından yanıtlandı
+                    <p className="text-xs font-mono font-bold text-[#10B981]">
+                      SOLVED BY @{acceptedComment.author.username}
                     </p>
-                    <p className="text-xs text-emerald-700/90 dark:text-emerald-200/80 line-clamp-1 mt-0.5">
+                    <p className="text-xs text-[#E6EDF3] line-clamp-1 mt-0.5">
                       {acceptedComment.content
                         .replace(/!\[[^\]]*\]\([^)]+\)/g, '[Görsel]')
                         .replace(/[#>*_`~-]/g, '')
@@ -442,7 +439,7 @@ export default async function ThreadDetailPage({ params }: ThreadDetailProps) {
                 </div>
                 <a
                   href={`#yorum-${acceptedComment.id}`}
-                  className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition-colors"
+                  className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-mono font-semibold bg-[#10B981] hover:bg-[#059669] text-[#0D0F12] transition-colors"
                 >
                   <ArrowDownRight className="w-3.5 h-3.5" />
                   Çözüme Git
@@ -452,12 +449,12 @@ export default async function ThreadDetailPage({ params }: ThreadDetailProps) {
 
             {/* Etiketler */}
             {tagList.length > 0 && (
-              <div className="flex flex-wrap items-center gap-2 pt-2 pb-5">
+              <div className="flex flex-wrap items-center gap-1.5 pt-2 pb-4 font-mono">
                 {tagList.map((tag) => (
                   <Link
                     key={tag}
                     href={`/?etiket=${encodeURIComponent(tag)}`}
-                    className="inline-flex items-center gap-1 px-3 py-1 rounded-xl text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-sm text-xs font-medium bg-[#0D0F12] border border-[#232730] text-[#8B949E] hover:border-[#10B981]/50 hover:text-[#10B981] transition-colors"
                   >
                     <Tag className="w-3 h-3" />
                     {tag}
@@ -467,7 +464,7 @@ export default async function ThreadDetailPage({ params }: ThreadDetailProps) {
             )}
 
             {/* Alt Bar: Oylama ve Aksiyon Butonları */}
-            <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-4">
+            <div className="pt-4 border-t border-[#232730] flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <VoteButtons
                   threadId={thread.id}
@@ -476,8 +473,8 @@ export default async function ThreadDetailPage({ params }: ThreadDetailProps) {
                   vertical={false}
                   isLoggedIn={!!user}
                 />
-                <span className="text-xs text-slate-400 hidden sm:inline">
-                  Konuyu faydalı buldunuz mu?
+                <span className="text-xs font-mono text-[#8B949E] hidden sm:inline">
+                  Faydalı mı?
                 </span>
               </div>
 
@@ -511,59 +508,59 @@ export default async function ThreadDetailPage({ params }: ThreadDetailProps) {
         </div>
 
         {/* SAĞ SÜTUN: Profesyonel Forum Bilgi Paneli (Sticky Sidebar) */}
-        <aside className="lg:col-span-4 xl:col-span-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-4 sm:gap-5 lg:sticky lg:top-22">
+        <aside className="lg:col-span-4 xl:col-span-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-4 lg:sticky lg:top-20">
           {/* Konu Özeti & Metrikler */}
-          <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900/90 p-4 space-y-4">
-            <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
-              <Activity className="w-3.5 h-3.5 text-indigo-500" /> Tartışma Özeti
+          <div className="rounded-md border border-[#232730] bg-[#15181E] p-4 space-y-3.5">
+            <h3 className="text-[10px] font-mono font-semibold uppercase tracking-wider text-[#8B949E] flex items-center gap-1.5">
+              <Activity className="w-3.5 h-3.5 text-[#10B981]" /> TARTIŞMA TELEMETRİSİ
             </h3>
 
-            <div className="grid grid-cols-3 gap-2 text-center">
-              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60">
-                <p className="text-base font-extrabold text-indigo-600 dark:text-indigo-400 tabular-nums">
+            <div className="grid grid-cols-3 gap-2 text-center font-mono">
+              <div className="p-2 rounded-md bg-[#0D0F12] border border-[#232730]">
+                <p className="text-base font-bold text-[#E6EDF3] tabular-nums">
                   {formattedComments.length}
                 </p>
-                <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
-                  Yanıt
+                <p className="text-[10px] text-[#8B949E] uppercase">
+                  YANIT
                 </p>
               </div>
-              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60">
-                <p className="text-base font-extrabold text-emerald-600 dark:text-emerald-400 tabular-nums">
+              <div className="p-2 rounded-md bg-[#0D0F12] border border-[#232730]">
+                <p className="text-base font-bold text-[#10B981] tabular-nums">
                   {thread.views + 1}
                 </p>
-                <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
-                  Okunma
+                <p className="text-[10px] text-[#8B949E] uppercase">
+                  OKUNMA
                 </p>
               </div>
-              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60">
-                <p className="text-base font-extrabold text-amber-600 dark:text-amber-400 tabular-nums">
+              <div className="p-2 rounded-md bg-[#0D0F12] border border-[#232730]">
+                <p className="text-base font-bold text-[#F59E0B] tabular-nums">
                   {score}
                 </p>
-                <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
-                  Beğeni
+                <p className="text-[10px] text-[#8B949E] uppercase">
+                  OY
                 </p>
               </div>
             </div>
 
-            <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
-              <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
-                <span>Açılış Tarihi:</span>
-                <span className="font-semibold text-slate-700 dark:text-slate-200">
+            <div className="space-y-2 pt-2 border-t border-[#232730] text-xs font-mono">
+              <div className="flex items-center justify-between text-[#8B949E]">
+                <span>Açılış:</span>
+                <span className="font-semibold text-[#E6EDF3]">
                   {formatRelativeTime(thread.createdAt)}
                 </span>
               </div>
-              <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
+              <div className="flex items-center justify-between text-[#8B949E]">
                 <span>Son Aktivite:</span>
-                <span className="font-semibold text-slate-700 dark:text-slate-200">
+                <span className="font-semibold text-[#10B981]">
                   {formatRelativeTime(thread.updatedAt)}
                 </span>
               </div>
             </div>
 
             {/* Katılımcılar */}
-            <div className="pt-3 border-t border-slate-100 dark:border-slate-800">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2 flex items-center gap-1.5">
-                <Users className="w-3.5 h-3.5" /> Katılımcılar ({participants.length})
+            <div className="pt-3 border-t border-[#232730]">
+              <p className="text-[10px] font-mono font-semibold uppercase tracking-wider text-[#8B949E] mb-2 flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5 text-[#F59E0B]" /> KATILIMCILAR ({participants.length})
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {participants.slice(0, 8).map((p) => (
@@ -571,12 +568,11 @@ export default async function ThreadDetailPage({ params }: ThreadDetailProps) {
                     key={p.username}
                     href={`/kullanici/${p.username}`}
                     title={`${p.displayName} (@${p.username})`}
-                    className="hover:scale-105 transition-transform"
                   >
                     <UserAvatar
                       name={p.displayName}
                       avatar={p.avatarColor}
-                      className="w-7 h-7 rounded-lg text-xs shadow-2xs"
+                      className="w-7 h-7 rounded-md text-xs border border-[#232730]"
                     />
                   </Link>
                 ))}
@@ -586,7 +582,7 @@ export default async function ThreadDetailPage({ params }: ThreadDetailProps) {
             {!thread.isLocked && (
               <a
                 href="#yeni-yorum-formu"
-                className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors"
+                className="w-full inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-semibold bg-[#10B981] hover:bg-[#059669] text-[#0D0F12] transition-colors"
               >
                 <MessageSquare className="w-3.5 h-3.5" />
                 Tartışmaya Yanıt Yaz
@@ -595,9 +591,9 @@ export default async function ThreadDetailPage({ params }: ThreadDetailProps) {
           </div>
 
           {/* Konu Sahibi Kartı */}
-          <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900/90 p-4 space-y-3">
-            <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" /> Konu Sahibi
+          <div className="rounded-md border border-[#232730] bg-[#15181E] p-4 space-y-3">
+            <h3 className="text-[10px] font-mono font-semibold uppercase tracking-wider text-[#8B949E] flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-[#F59E0B]" /> KONU SAHİBİ
             </h3>
 
             <Link
@@ -607,39 +603,39 @@ export default async function ThreadDetailPage({ params }: ThreadDetailProps) {
               <UserAvatar
                 name={thread.author.displayName}
                 avatar={thread.author.avatarColor}
-                className="w-11 h-11 rounded-2xl text-base"
+                className="w-10 h-10 rounded-md text-sm border border-[#232730]"
               />
               <div className="min-w-0">
-                <p className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-indigo-500 truncate">
+                <p className="text-sm font-bold text-[#E6EDF3] group-hover:text-[#10B981] truncate">
                   {thread.author.displayName}
                 </p>
-                <p className="text-xs text-slate-400 truncate">
+                <p className="text-xs font-mono text-[#8B949E] truncate">
                   @{thread.author.username}
                 </p>
               </div>
             </Link>
 
             {thread.author.bio && (
-              <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2">
+              <p className="text-xs text-[#8B949E] line-clamp-2">
                 {thread.author.bio}
               </p>
             )}
 
-            <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+            <div className="p-2.5 rounded-md bg-[#0D0F12] border border-[#232730] font-mono">
               <div className="flex items-center justify-between text-xs mb-1.5">
                 <span
-                  className="font-bold"
+                  className="font-semibold"
                   style={{ color: authorLevel.color }}
                 >
-                  Sv.{authorLevel.level} • {authorLevel.title}
+                  Lv.{authorLevel.level} • {authorLevel.title}
                 </span>
-                <span className="font-bold text-amber-600 dark:text-amber-400">
+                <span className="font-bold text-[#F59E0B]">
                   {thread.author.reputation}p
                 </span>
               </div>
-              <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+              <div className="w-full h-1 rounded-xs bg-[#232730] overflow-hidden">
                 <div
-                  className="h-full rounded-full"
+                  className="h-full"
                   style={{
                     width: `${authorLevel.progressPercent}%`,
                     backgroundColor: authorLevel.color,
@@ -651,29 +647,29 @@ export default async function ThreadDetailPage({ params }: ThreadDetailProps) {
 
           {/* Benzer / İlgili Konular */}
           {relatedThreads.length > 0 && (
-            <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900/90 p-4 space-y-3">
-              <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                Bu Kategorideki Diğer Konular
+            <div className="rounded-md border border-[#232730] bg-[#15181E] p-4 space-y-3">
+              <h3 className="text-[10px] font-mono font-semibold uppercase tracking-wider text-[#8B949E]">
+                İLGİLİ TARTIŞMALAR
               </h3>
-              <div className="space-y-3">
+              <div className="space-y-2.5 divide-y divide-[#232730]">
                 {relatedThreads.map((rt) => (
                   <Link
                     key={rt.id}
                     href={`/konu/${rt.slug}`}
-                    className="block group"
+                    className="block group pt-2 first:pt-0"
                   >
-                    <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2 leading-snug">
+                    <p className="text-xs font-semibold text-[#E6EDF3] group-hover:text-[#10B981] transition-colors line-clamp-2 leading-snug">
                       {rt.title}
                     </p>
-                    <div className="flex items-center gap-2 mt-1 text-[11px] text-slate-400">
+                    <div className="flex items-center gap-2 mt-1 text-[10px] font-mono text-[#8B949E]">
                       {rt.isSolved && (
-                        <span className="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-0.5">
-                          <CheckCircle2 className="w-3 h-3" /> Çözüldü
+                        <span className="text-[#10B981] font-semibold flex items-center gap-0.5">
+                          <CheckCircle2 className="w-3 h-3" /> SOLVED
                         </span>
                       )}
                       <span>{rt._count.comments} yanıt</span>
                       <span>•</span>
-                      <span>{rt.views} okunma</span>
+                      <span>{rt.views} görüntü</span>
                     </div>
                   </Link>
                 ))}

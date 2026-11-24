@@ -107,16 +107,16 @@ export default function RegisterPage() {
 
   return (
     <div className="max-w-md mx-auto py-8">
-      <div className="rounded-3xl border border-slate-200/90 dark:border-slate-800/90 bg-white dark:bg-slate-900/95 p-6 sm:p-8 shadow-lg">
+      <div className="rounded-md border border-[#232730] bg-[#15181E] p-6 sm:p-7">
         <div className="text-center mb-5">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 text-white flex items-center justify-center mx-auto mb-3 shadow-md shadow-indigo-500/20">
-            <Sparkles className="w-6 h-6" />
+          <div className="w-10 h-10 rounded-md bg-[#0D0F12] border border-[#232730] text-[#10B981] flex items-center justify-center mx-auto mb-3">
+            <Sparkles className="w-5 h-5" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+          <h1 className="text-xl font-bold text-[#E6EDF3]">
             Topluluğa Katılın
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Birkaç saniye içinde ücretsiz topluluk hesabınızı oluşturun
+          <p className="text-xs text-[#8B949E] mt-1">
+            Birkaç saniye içinde ücretsiz geliştirici &amp; topluluk hesabınızı oluşturun
           </p>
         </div>
 

@@ -239,30 +239,30 @@ export function NewThreadForm({ categories }: { categories: CategoryOption[] }) 
         </Link>
       </div>
 
-      <div className="rounded-3xl border border-slate-200/90 dark:border-slate-800/90 bg-white dark:bg-slate-900/95 p-6 sm:p-8 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+      <div className="rounded-md border border-[#232730] bg-[#15181E] p-5 sm:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-indigo-600/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
-              <Sparkles className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-md bg-[#0D0F12] border border-[#232730] text-[#10B981] flex items-center justify-center">
+              <Sparkles className="w-4 h-4" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-slate-900 dark:text-white">
+              <h1 className="text-lg sm:text-xl font-bold text-[#E6EDF3]">
                 Yeni Konu Başlat
               </h1>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs text-[#8B949E]">
                 Sorunuzu, projenizi veya tartışmak istediğiniz fikri toplulukla paylaşın.
               </p>
             </div>
           </div>
 
           {draftSavedTime && (
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-xs text-emerald-700 dark:text-emerald-300">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-              <span>Taslak kaydedildi ({draftSavedTime})</span>
+            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-[#10B981]/10 border border-[#10B981]/30 text-xs font-mono text-[#10B981]">
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#10B981] shrink-0" />
+              <span>Taslak ({draftSavedTime})</span>
               <button
                 type="button"
                 onClick={handleClearDraft}
-                className="ml-1 inline-flex items-center gap-1 text-[11px] font-bold text-rose-500 hover:underline"
+                className="ml-1 inline-flex items-center gap-1 text-[11px] font-bold text-rose-400 hover:underline"
                 title="Kaydedilen taslağı temizle"
               >
                 <RotateCcw className="w-3 h-3" />

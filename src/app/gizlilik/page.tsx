@@ -115,43 +115,43 @@ export default async function PrivacyPolicyPage() {
       </div>
 
       {/* Üst Hero Banner */}
-      <div className="rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-emerald-950 p-6 sm:p-9 text-white shadow-xl border border-indigo-500/20 relative overflow-hidden">
-        <div className="relative z-10 space-y-3">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
-            <ShieldCheck className="w-4 h-4" /> %100 Veri Şeffaflığı & Gizlilik Taahhüdü
+      <div className="rounded-md bg-[#15181E] p-5 sm:p-7 text-[#E6EDF3] border border-[#232730]">
+        <div className="space-y-3">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-sm font-mono text-[11px] font-semibold bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/40">
+            <ShieldCheck className="w-3.5 h-3.5" /> PRIVACY // %100 VERİ ŞEFFAFLIĞI &amp; GİZLİLİK TAAHHÜDÜ
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[#E6EDF3]">
             Gizlilik Politikası, KVKK Aydınlatma Metni ve Veri Rehberi
           </h1>
-          <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
+          <p className="text-xs sm:text-sm text-[#8B949E] max-w-2xl leading-relaxed">
             {fullName} olarak kullanıcılarımızın gizliliğine en üst düzeyde saygı duyuyoruz. Sitemizde hangi bilginin ne amaçla istendiğini, nasıl korunduğunu ve verileriniz üzerindeki tüm haklarınızı hiçbir soru işareti kalmayacak şekilde aşağıda inceleyebilirsiniz.
           </p>
 
           {/* Hızlı Bölüm Bağlantıları */}
-          <div className="pt-2 flex flex-wrap gap-2">
+          <div className="pt-2 flex flex-wrap gap-2 font-mono">
             <a
               href="#veri-tablosu"
-              className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/20 text-white border border-white/15 transition-colors"
+              className="px-2.5 py-1.5 rounded-md text-xs font-medium bg-[#0D0F12] hover:border-[#10B981]/60 text-[#E6EDF3] border border-[#232730] transition-colors"
             >
-              1. Hangi Veriyi Neden İstiyoruz?
+              01. Veri Envanteri
             </a>
             <a
               href="#cerezler"
-              className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/20 text-white border border-white/15 transition-colors"
+              className="px-2.5 py-1.5 rounded-md text-xs font-medium bg-[#0D0F12] hover:border-[#10B981]/60 text-[#E6EDF3] border border-[#232730] transition-colors"
             >
-              2. Çerez (Cookie) Politikası
+              02. Çerez Politikası
             </a>
             <a
               href="#guvenlik"
-              className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/20 text-white border border-white/15 transition-colors"
+              className="px-2.5 py-1.5 rounded-md text-xs font-medium bg-[#0D0F12] hover:border-[#10B981]/60 text-[#E6EDF3] border border-[#232730] transition-colors"
             >
-              3. Teknik Güvenlik Mimarisi
+              03. Güvenlik Mimarisi
             </a>
             <a
               href="#kvkk"
-              className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/20 text-white border border-white/15 transition-colors"
+              className="px-2.5 py-1.5 rounded-md text-xs font-medium bg-[#0D0F12] hover:border-[#10B981]/60 text-[#E6EDF3] border border-[#232730] transition-colors"
             >
-              4. KVKK ve Kullanıcı Haklarınız
+              04. KVKK Hakları
             </a>
           </div>
         </div>

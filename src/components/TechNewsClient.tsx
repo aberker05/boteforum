@@ -215,73 +215,60 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
 
       {/* Canlı Son Dakika & Radar Şeridi */}
       {initialNews.length > 0 && (
-        <div className="rounded-2xl border border-indigo-500/25 bg-slate-950/95 px-3.5 py-2.5 flex items-center gap-3 overflow-x-auto no-scrollbar shadow-md">
-          <span className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-extrabold uppercase tracking-wider bg-gradient-to-r from-rose-500 to-amber-500 text-white shadow-xs">
-            <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
-            Sıcak Gündem
+        <div className="rounded-md border border-[#232730] bg-[#15181E] px-3 py-2 flex items-center gap-3 overflow-x-auto no-scrollbar font-mono">
+          <span className="shrink-0 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider bg-[#F59E0B] text-[#0D0F12]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#0D0F12]" />
+            RADAR // LIVE
           </span>
-          <div className="flex items-center gap-4 text-xs text-slate-300 shrink-0">
+          <div className="flex items-center gap-4 text-xs text-[#8B949E] shrink-0">
             {initialNews.slice(0, 4).map((n) => (
               <Link
                 key={n.id}
                 href={`/haberler/${n.slug}`}
-                className="inline-flex items-center gap-2 hover:text-emerald-300 transition-colors group"
+                className="inline-flex items-center gap-2 hover:text-[#10B981] transition-colors group"
               >
                 <span
-                  className="w-2 h-2 rounded-full shrink-0"
+                  className="w-1.5 h-1.5 rounded-xs shrink-0"
                   style={{ backgroundColor: n.badgeColor }}
                 />
-                <span className="font-semibold text-white/90 group-hover:text-emerald-300 truncate max-w-[230px] sm:max-w-[300px]">
+                <span className="font-sans font-medium text-[#E6EDF3] group-hover:text-[#10B981] truncate max-w-[230px] sm:max-w-[300px]">
                   {n.title}
                 </span>
-                <span className="text-[10px] text-slate-500">•</span>
+                <span className="text-[10px] text-[#232730]">/</span>
               </Link>
             ))}
           </div>
         </div>
       )}
 
-      {/* Estetik Sinematik Hero Banner */}
-      <div className="rounded-3xl bg-gradient-to-br from-[#070b14] via-indigo-950/95 to-[#090d16] p-6 sm:p-9 text-white shadow-2xl border border-indigo-500/25 relative overflow-hidden">
-        {/* Arka Plan Siber Dekoratif Işıklar ve Izgara */}
-        <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-indigo-500/25 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-24 w-80 h-80 rounded-full bg-emerald-500/20 blur-3xl pointer-events-none" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-40 rounded-full bg-rose-500/10 blur-3xl pointer-events-none" />
-        <div
-          className="absolute inset-0 opacity-15 pointer-events-none"
-          style={{
-            backgroundImage:
-              'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.22) 1px, transparent 0)',
-            backgroundSize: '28px 28px',
-          }}
-        />
-
-        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="max-w-2xl space-y-3.5">
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 backdrop-blur-md">
-                <Sparkles className="w-3.5 h-3.5" />
-                Canlı Teknoloji & Bilim Dergisi
+      {/* Keskin Hatlı Teknoloji Gündemi Başlığı */}
+      <div className="rounded-md bg-[#15181E] p-5 sm:p-6 text-[#E6EDF3] border border-[#232730]">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+          <div className="max-w-2xl space-y-2.5">
+            <div className="flex flex-wrap items-center gap-2 font-mono">
+              <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm text-[11px] font-semibold bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/40">
+                <Sparkles className="w-3 h-3" />
+                TECH.RADAR // BİLİM &amp; MÜHENDİSLİK DOSYALARI
               </div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-white/10 text-slate-200 border border-white/10 backdrop-blur-md">
-                <Layers className="w-3.5 h-3.5 text-indigo-300" />
-                {initialNews.length} Özel Dosya
+              <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm text-[11px] font-medium bg-[#0D0F12] text-[#E6EDF3] border border-[#232730]">
+                <Layers className="w-3 h-3 text-[#10B981]" />
+                {initialNews.length} Dosya
               </div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-white/10 text-slate-200 border border-white/10 backdrop-blur-md">
-                <TrendingUp className="w-3.5 h-3.5 text-amber-300" />
+              <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm text-[11px] font-medium bg-[#0D0F12] text-[#E6EDF3] border border-[#232730]">
+                <TrendingUp className="w-3 h-3 text-[#F59E0B]" />
                 {totalViews.toLocaleString('tr-TR')} Okunma
               </div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-white/10 text-slate-200 border border-white/10 backdrop-blur-md">
-                <MessageSquare className="w-3.5 h-3.5 text-pink-300" />
-                {totalComments} Tartışma Yorumu
+              <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm text-[11px] font-medium bg-[#0D0F12] text-[#E6EDF3] border border-[#232730]">
+                <MessageSquare className="w-3 h-3 text-[#10B981]" />
+                {totalComments} Yorum
               </div>
             </div>
 
-            <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-white via-indigo-100 to-emerald-200 bg-clip-text text-transparent">
-              Teknoloji Gündemi & İnovasyon Radarı
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[#E6EDF3]">
+              Teknoloji Gündemi &amp; İnovasyon Radarı
             </h1>
-            <p className="text-xs sm:text-sm text-slate-300/95 leading-relaxed">
-              Otonom yapay zeka ajanları, siber güvenlikte sıfır-gün savunması, BÖTE & eğitim teknolojilerinde XR laboratuvarlar, 2nm yarı iletkenler ve modern yazılım mimarilerindeki en son kırılmaları derinlemesine inceleyin.
+            <p className="text-xs sm:text-[13px] text-[#8B949E] leading-relaxed">
+              Otonom yapay zeka ajanları, siber güvenlikte sıfır-gün savunması, BÖTE &amp; eğitim teknolojilerinde XR laboratuvarlar, 2nm yarı iletkenler ve modern yazılım mimarilerindeki en son kırılmaları derinlemesine inceleyin.
             </p>
           </div>
 
@@ -290,7 +277,7 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
               <button
                 type="button"
                 onClick={openCreateModal}
-                className="inline-flex items-center gap-2 px-5 py-3.5 rounded-2xl text-xs sm:text-sm font-bold bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-md text-xs font-semibold bg-[#10B981] hover:bg-[#059669] text-[#0D0F12] transition-colors cursor-pointer"
               >
                 <PlusCircle className="w-4 h-4" />
                 Teknolojik Gelişme Ekle
