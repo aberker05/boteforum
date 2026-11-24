@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import {
@@ -27,6 +27,11 @@ import {
   Zap,
   Shield,
   TrendingUp,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  ChevronUp,
+  FolderKanban,
 } from 'lucide-react';
 import { ThreadCard, type ThreadCardData } from './ThreadCard';
 import { CategoryIcon } from './CategoryIcon';
@@ -114,6 +119,44 @@ export function HomeFeedClient({
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState<'card' | 'compact'>('card');
+  const [catCatalogOpen, setCatCatalogOpen] = useState(false);
+  const [sidebarCatQuery, setSidebarCatQuery] = useState('');
+  const [sidebarShowAllCats, setSidebarShowAllCats] = useState(false);
+  const [canScrollCatLeft, setCanScrollCatLeft] = useState(false);
+  const [canScrollCatRight, setCanScrollCatRight] = useState(true);
+  const catRailRef = useRef<HTMLDivElement>(null);
+
+  const updateCatRailArrows = useCallback(() => {
+    const el = catRailRef.current;
+    if (!el) return;
+    setCanScrollCatLeft(el.scrollLeft > 6);
+    setCanScrollCatRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 6);
+  }, []);
+
+  useEffect(() => {
+    updateCatRailArrows();
+    window.addEventListener('resize', updateCatRailArrows);
+    return () => window.removeEventListener('resize', updateCatRailArrows);
+  }, [updateCatRailArrows, categories.length]);
+
+  const scrollCategoryRail = (dir: 'left' | 'right') => {
+    const el = catRailRef.current;
+    if (!el) return;
+    el.scrollBy({
+      left: dir === 'left' ? -260 : 260,
+      behavior: 'smooth',
+    });
+  };
+
+  const handleCategoryRailWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    const el = catRailRef.current;
+    if (!el) return;
+    if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && el.scrollWidth > el.clientWidth) {
+      e.preventDefault();
+      el.scrollLeft += e.deltaY;
+      updateCatRailArrows();
+    }
+  };
 
   // Navbar üzerinden arama veya filtre bağlantısına tıklandığında senkronize et
   useEffect(() => {
@@ -305,6 +348,74 @@ export function HomeFeedClient({
       ? Math.round((solvedCount / stats.totalThreads) * 100)
       : 0;
   const leadNews = techNews[0] || null;
+
+  // Her kategori için canlı tartışma telemetrisi (0ms istemci tarafı hesaplama, sıfır ek sorgu)
+  const categoryMetrics = useMemo(() => {
+    const map: Record<
+      string,
+      {
+        solved: number;
+        unanswered: number;
+        latestTitle: string;
+        topTags: string[];
+      }
+    > = {};
+    const tagMap: Record<string, Record<string, number>> = {};
+
+    for (const t of threads) {
+      const slug = t.category.slug;
+      if (!map[slug]) {
+        map[slug] = {
+          solved: 0,
+          unanswered: 0,
+          latestTitle: t.title,
+          topTags: [],
+        };
+        tagMap[slug] = {};
+      }
+      if (t.isSolved) map[slug].solved += 1;
+      if (t.commentCount === 0) map[slug].unanswered += 1;
+      if (t.tags) {
+        t.tags
+          .split(',')
+          .map((x) => x.trim())
+          .filter(Boolean)
+          .forEach((tg) => {
+            tagMap[slug][tg] = (tagMap[slug][tg] || 0) + 1;
+          });
+      }
+    }
+
+    for (const slug of Object.keys(map)) {
+      map[slug].topTags = Object.entries(tagMap[slug] || {})
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([tg]) => tg);
+    }
+
+    return map;
+  }, [threads]);
+
+  const maxCategoryCount = useMemo(
+    () => Math.max(1, ...categories.map((c) => c._count.threads)),
+    [categories]
+  );
+
+  const filteredSidebarCategories = useMemo(() => {
+    const q = sidebarCatQuery.trim();
+    if (!q) return categories;
+    return categories.filter(
+      (c) =>
+        matchesSearch(c.name, q) || matchesSearch(c.description || '', q)
+    );
+  }, [categories, sidebarCatQuery]);
+
+  const visibleSidebarCategories = useMemo(() => {
+    if (sidebarCatQuery.trim() || sidebarShowAllCats) {
+      return filteredSidebarCategories;
+    }
+    return filteredSidebarCategories.slice(0, 8);
+  }, [filteredSidebarCategories, sidebarCatQuery, sidebarShowAllCats]);
 
   return (
     <div className="space-y-6">
@@ -516,46 +627,259 @@ export function HomeFeedClient({
               </div>
             </div>
           </div>
+        </section>
+      )}
 
-          {/* İnteraktif Kategori Vitrin Şeridi */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
-            {categories.slice(0, 6).map((cat) => {
+      {/* KALICI KATEGORİ & ALAN GEZGİNİ (Yana Kaydırılabilir Ray + Açılır Katalog Izgarası) */}
+      <section className="rounded-md border border-[#232730] bg-[#15181E] p-2.5 sm:p-3 space-y-2.5">
+        <div className="flex items-center gap-1.5">
+          {/* Sol Kaydırma Oku */}
+          {!catCatalogOpen && (
+            <button
+              type="button"
+              onClick={() => scrollCategoryRail('left')}
+              disabled={!canScrollCatLeft}
+              title="Kategorileri Sola Kaydır"
+              className="hidden sm:inline-flex items-center justify-center w-7 h-7 rounded-md bg-[#0D0F12] border border-[#232730] text-[#8B949E] hover:text-[#E6EDF3] hover:border-[#10B981]/50 disabled:opacity-25 disabled:pointer-events-none shrink-0 cursor-pointer transition-colors"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </button>
+          )}
+
+          {/* Yatay Akıcı Kategori Rayı (Fare Tekerleği ve Parmakla Kaydırma Destekli, Kırpılmasız Tam İsimler) */}
+          <div
+            ref={catRailRef}
+            onScroll={updateCatRailArrows}
+            onWheel={handleCategoryRailWheel}
+            className="flex-1 min-w-0 flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth"
+          >
+            <button
+              type="button"
+              onClick={() => {
+                setActiveCategory('');
+                setCurrentPage(1);
+                syncUrl({ kategori: '' });
+              }}
+              className={`shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-mono font-semibold border transition-colors cursor-pointer ${
+                !activeCategory
+                  ? 'bg-[#10B981] text-[#0D0F12] border-[#10B981]'
+                  : 'bg-[#0D0F12] border-[#232730] text-[#8B949E] hover:text-[#E6EDF3] hover:border-[#343B48]'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>Tüm Alanlar</span>
+              <span
+                className={`text-[10px] px-1 rounded-xs tabular-nums ${
+                  !activeCategory
+                    ? 'bg-[#0D0F12]/20 text-[#0D0F12]'
+                    : 'text-[#8B949E]'
+                }`}
+              >
+                {threads.length}
+              </span>
+            </button>
+
+            {categories.map((cat) => {
               const isActive = activeCategory === cat.slug;
+              const catMeta = categoryMetrics[cat.slug];
               return (
                 <button
                   key={cat.id}
                   type="button"
+                  title={
+                    cat.description
+                      ? `${cat.name} — ${cat.description}`
+                      : cat.name
+                  }
                   onClick={() => selectCategory(cat.slug)}
-                  className={`group p-2.5 rounded-md border text-left transition-colors cursor-pointer flex items-center gap-2.5 ${
+                  className={`group shrink-0 inline-flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs font-medium border transition-colors cursor-pointer ${
                     isActive
-                      ? 'border-[#10B981] bg-[#10B981]/10'
-                      : 'border-[#232730] bg-[#15181E] hover:border-[#10B981]/50 hover:bg-[#1A1E26]'
+                      ? 'bg-[#10B981]/15 border-[#10B981] text-[#10B981]'
+                      : 'bg-[#0D0F12] border-[#232730] text-[#E6EDF3] hover:border-[#10B981]/50 hover:bg-[#181C23]'
                   }`}
                 >
-                  <div
-                    className="w-8 h-8 rounded-md flex items-center justify-center shrink-0 bg-[#0D0F12] border border-[#232730]"
-                    style={{ color: cat.color }}
+                  <span
+                    className="w-4 h-4 flex items-center justify-center shrink-0"
+                    style={{ color: isActive ? '#10B981' : cat.color }}
                   >
                     <CategoryIcon
                       name={cat.icon}
-                      className="w-4 h-4"
-                      color={cat.color}
+                      className="w-3.5 h-3.5"
+                      color={isActive ? '#10B981' : cat.color}
                     />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-semibold text-[#E6EDF3] truncate group-hover:text-[#10B981] transition-colors">
-                      {cat.name}
-                    </p>
-                    <p className="text-[10px] font-mono text-[#8B949E]">
-                      {cat._count.threads} konu
-                    </p>
-                  </div>
+                  </span>
+                  <span className="whitespace-nowrap font-semibold">
+                    {cat.name}
+                  </span>
+                  <span
+                    className={`font-mono text-[10px] px-1.5 py-0.2 rounded-sm font-semibold tabular-nums ${
+                      isActive
+                        ? 'bg-[#10B981] text-[#0D0F12]'
+                        : 'bg-[#15181E] text-[#8B949E] border border-[#232730]'
+                    }`}
+                  >
+                    {cat._count.threads}
+                  </span>
+                  {catMeta && catMeta.unanswered > 0 && !isActive && (
+                    <span
+                      title={`${catMeta.unanswered} cevapsız soru`}
+                      className="w-1.5 h-1.5 rounded-full bg-[#F59E0B] shrink-0"
+                    />
+                  )}
                 </button>
               );
             })}
           </div>
-        </section>
-      )}
+
+          {/* Sağ Kaydırma Oku */}
+          {!catCatalogOpen && (
+            <button
+              type="button"
+              onClick={() => scrollCategoryRail('right')}
+              disabled={!canScrollCatRight}
+              title="Kategorileri Sağa Kaydır"
+              className="hidden sm:inline-flex items-center justify-center w-7 h-7 rounded-md bg-[#0D0F12] border border-[#232730] text-[#8B949E] hover:text-[#E6EDF3] hover:border-[#10B981]/50 disabled:opacity-25 disabled:pointer-events-none shrink-0 cursor-pointer transition-colors"
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          )}
+
+          {/* Katalog Görünümü Aç/Kapat Butonu */}
+          <button
+            type="button"
+            onClick={() => setCatCatalogOpen((prev) => !prev)}
+            title="Detaylı Kategori Kataloğunu Aç / Kapat"
+            className={`shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] font-mono font-semibold border transition-colors cursor-pointer ${
+              catCatalogOpen
+                ? 'bg-[#F59E0B]/15 border-[#F59E0B]/50 text-[#F59E0B]'
+                : 'bg-[#0D0F12] border-[#232730] text-[#8B949E] hover:text-[#E6EDF3] hover:border-[#10B981]/45'
+            }`}
+          >
+            <FolderKanban className="w-3.5 h-3.5" />
+            <span className="hidden md:inline">
+              {catCatalogOpen ? 'Kataloğu Kapat' : `Katalog [${categories.length}]`}
+            </span>
+            {catCatalogOpen ? (
+              <ChevronUp className="w-3 h-3" />
+            ) : (
+              <ChevronDown className="w-3 h-3" />
+            )}
+          </button>
+        </div>
+
+        {/* Açılır Detaylı Kategori Kataloğu (Açıklamalar, Çözüm/Bekleyen Oranı ve Son Konu Önizlemesi) */}
+        {catCatalogOpen && (
+          <div className="pt-2.5 border-t border-[#232730] space-y-2.5">
+            <div className="flex flex-wrap items-center justify-between gap-2 px-0.5 font-mono text-[11px]">
+              <span className="text-[#8B949E] uppercase tracking-wider font-semibold">
+                TÜM FORUM ALANLARI &amp; TARTIŞMA YOĞUNLUĞU ({categories.length} KATEGORİ)
+              </span>
+              {activeCategory && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveCategory('');
+                    syncUrl({ kategori: '' });
+                  }}
+                  className="text-[#F59E0B] hover:underline cursor-pointer"
+                >
+                  Kategori Filtresini Sıfırla ×
+                </button>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+              {categories.map((cat) => {
+                const isActive = activeCategory === cat.slug;
+                const meta = categoryMetrics[cat.slug];
+                const barWidth = Math.max(
+                  6,
+                  Math.round((cat._count.threads / maxCategoryCount) * 100)
+                );
+
+                return (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => {
+                      selectCategory(cat.slug);
+                      setCatCatalogOpen(false);
+                    }}
+                    className={`group relative rounded-md border p-3 text-left transition-colors cursor-pointer flex flex-col justify-between overflow-hidden ${
+                      isActive
+                        ? 'border-[#10B981] bg-[#10B981]/10'
+                        : 'border-[#232730] bg-[#0D0F12] hover:border-[#10B981]/50 hover:bg-[#12161C]'
+                    }`}
+                  >
+                    <div
+                      className="absolute left-0 top-0 bottom-0 w-[3px]"
+                      style={{ backgroundColor: cat.color }}
+                    />
+
+                    <div className="pl-1.5 space-y-1.5">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span
+                            className="w-7 h-7 rounded-md bg-[#15181E] border border-[#232730] flex items-center justify-center shrink-0"
+                            style={{ color: cat.color }}
+                          >
+                            <CategoryIcon
+                              name={cat.icon}
+                              className="w-3.5 h-3.5"
+                              color={cat.color}
+                            />
+                          </span>
+                          <span className="text-xs sm:text-[13px] font-bold text-[#E6EDF3] group-hover:text-[#10B981] transition-colors leading-snug">
+                            {cat.name}
+                          </span>
+                        </div>
+
+                        <span className="shrink-0 font-mono text-[11px] font-bold px-1.5 py-0.5 rounded-sm bg-[#15181E] border border-[#232730] text-[#E6EDF3] tabular-nums">
+                          {cat._count.threads} konu
+                        </span>
+                      </div>
+
+                      {cat.description && (
+                        <p className="text-[11px] text-[#8B949E] line-clamp-2 leading-relaxed">
+                          {cat.description}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="pl-1.5 mt-3 pt-2 border-t border-[#232730]/80 space-y-1.5">
+                      <div className="flex items-center justify-between gap-2 font-mono text-[10px]">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[#10B981]">
+                            ✓ {meta?.solved || 0} çözüldü
+                          </span>
+                          {(meta?.unanswered || 0) > 0 && (
+                            <span className="text-[#F59E0B]">
+                              • {meta?.unanswered} bekliyor
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-[#8B949E] group-hover:text-[#10B981]">
+                          Filtrele →
+                        </span>
+                      </div>
+
+                      <div className="w-full h-1 rounded-xs bg-[#15181E] overflow-hidden">
+                        <div
+                          className="h-full"
+                          style={{
+                            width: `${barWidth}%`,
+                            backgroundColor: cat.color,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
       {/* SOL KENAR ÇUBUĞU: Forum Navigasyonu & Kategoriler */}
@@ -665,42 +989,160 @@ export function HomeFeedClient({
           </div>
         </div>
 
-        {/* Forum Kategorileri */}
-        <div className="hidden lg:block rounded-md border border-[#232730] bg-[#15181E] p-3">
-          <h3 className="text-[10px] font-mono font-semibold uppercase tracking-wider text-[#8B949E] px-2 mb-2">
-            KATEGORİLER
-          </h3>
-          <div className="space-y-1">
-            {categories.map((cat) => {
-              const isActive = activeCategory === cat.slug;
-              return (
-                <button
-                  key={cat.id}
-                  type="button"
-                  onClick={() => selectCategory(cat.slug)}
-                  className={`w-full flex items-center justify-between px-2 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
-                    isActive
-                      ? 'bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/40'
-                      : 'text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#0D0F12] border border-transparent'
-                  }`}
-                >
-                  <span className="flex items-center gap-2 truncate">
-                    <span className="w-6 h-6 rounded-sm bg-[#0D0F12] border border-[#232730] flex items-center justify-center shrink-0">
-                      <CategoryIcon
-                        name={cat.icon}
-                        className="w-3.5 h-3.5"
-                        color={cat.color}
-                      />
-                    </span>
-                    <span className="truncate">{cat.name}</span>
-                  </span>
-                  <span className="text-[11px] font-mono px-1.5 py-0.2 rounded-sm bg-[#0D0F12] border border-[#232730] text-[#8B949E] tabular-nums">
-                    {cat._count.threads}
-                  </span>
-                </button>
-              );
-            })}
+        {/* Forum Kategorileri (Gelişmiş Sol Kategori Dizini) */}
+        <div className="hidden lg:block rounded-md border border-[#232730] bg-[#15181E] p-3 space-y-2.5">
+          <div className="flex items-center justify-between px-1">
+            <h3 className="text-[10px] font-mono font-semibold uppercase tracking-wider text-[#8B949E] flex items-center gap-1.5">
+              <FolderKanban className="w-3.5 h-3.5 text-[#10B981]" />
+              KATEGORİ DİZİNİ [{categories.length}]
+            </h3>
+            {activeCategory && (
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveCategory('');
+                  syncUrl({ kategori: '' });
+                }}
+                className="text-[10px] font-mono font-semibold text-[#F59E0B] hover:underline cursor-pointer"
+              >
+                Sıfırla
+              </button>
+            )}
           </div>
+
+          {categories.length > 5 && (
+            <div className="relative">
+              <Search className="w-3 h-3 text-[#8B949E] absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type="text"
+                value={sidebarCatQuery}
+                onChange={(e) => setSidebarCatQuery(e.target.value)}
+                placeholder="Kategori filtrele..."
+                className="w-full pl-7 pr-6 py-1 rounded-md text-[11px] font-mono bg-[#0D0F12] border border-[#232730] text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:border-[#10B981]"
+              />
+              {sidebarCatQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSidebarCatQuery('')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-[#8B949E] hover:text-[#E6EDF3]"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              )}
+            </div>
+          )}
+
+          <div className="space-y-1">
+            {!sidebarCatQuery && (
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveCategory('');
+                  setCurrentPage(1);
+                  syncUrl({ kategori: '' });
+                }}
+                className={`w-full flex items-center justify-between px-2 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer border ${
+                  !activeCategory
+                    ? 'bg-[#10B981]/15 text-[#10B981] border-[#10B981]/40 font-semibold'
+                    : 'text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#0D0F12] border-transparent'
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-sm bg-[#0D0F12] border border-[#232730] flex items-center justify-center shrink-0 text-[#10B981]">
+                    <Layers className="w-3.5 h-3.5" />
+                  </span>
+                  <span>Tüm Kategoriler</span>
+                </span>
+                <span className="text-[11px] font-mono px-1.5 py-0.2 rounded-sm bg-[#0D0F12] border border-[#232730] text-[#E6EDF3] tabular-nums">
+                  {threads.length}
+                </span>
+              </button>
+            )}
+
+            {visibleSidebarCategories.length === 0 ? (
+              <p className="text-[11px] font-mono text-[#8B949E] py-2 text-center">
+                Eşleşen kategori yok
+              </p>
+            ) : (
+              visibleSidebarCategories.map((cat) => {
+                const isActive = activeCategory === cat.slug;
+                const ratio = Math.max(
+                  8,
+                  Math.round((cat._count.threads / maxCategoryCount) * 100)
+                );
+                return (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    title={
+                      cat.description
+                        ? `${cat.name} — ${cat.description}`
+                        : cat.name
+                    }
+                    onClick={() => selectCategory(cat.slug)}
+                    className={`group relative w-full px-2 py-1.5 rounded-md text-left transition-colors cursor-pointer border ${
+                      isActive
+                        ? 'bg-[#10B981]/12 text-[#10B981] border-[#10B981]/45'
+                        : 'text-[#E6EDF3]/90 hover:text-[#E6EDF3] hover:bg-[#0D0F12] border-transparent'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="flex items-center gap-2 min-w-0">
+                        <span className="w-6 h-6 rounded-sm bg-[#0D0F12] border border-[#232730] flex items-center justify-center shrink-0">
+                          <CategoryIcon
+                            name={cat.icon}
+                            className="w-3.5 h-3.5"
+                            color={isActive ? '#10B981' : cat.color}
+                          />
+                        </span>
+                        <span className="text-xs font-medium leading-snug line-clamp-1">
+                          {cat.name}
+                        </span>
+                      </span>
+                      <span
+                        className={`text-[10px] font-mono px-1.5 py-0.2 rounded-sm shrink-0 tabular-nums ${
+                          isActive
+                            ? 'bg-[#10B981] text-[#0D0F12] font-bold'
+                            : 'bg-[#0D0F12] border border-[#232730] text-[#8B949E]'
+                        }`}
+                      >
+                        {cat._count.threads}
+                      </span>
+                    </div>
+                    <div className="mt-1.5 ml-8 h-[2px] rounded-xs bg-[#0D0F12] overflow-hidden">
+                      <div
+                        className="h-full transition-all"
+                        style={{
+                          width: `${ratio}%`,
+                          backgroundColor: isActive ? '#10B981' : cat.color,
+                          opacity: isActive ? 1 : 0.65,
+                        }}
+                      />
+                    </div>
+                  </button>
+                );
+              })
+            )}
+          </div>
+
+          {!sidebarCatQuery.trim() && filteredSidebarCategories.length > 8 && (
+            <button
+              type="button"
+              onClick={() => setSidebarShowAllCats((prev) => !prev)}
+              className="w-full py-1.5 rounded-md text-[11px] font-mono font-semibold text-[#8B949E] hover:text-[#10B981] bg-[#0D0F12] border border-[#232730] transition-colors cursor-pointer flex items-center justify-center gap-1"
+            >
+              {sidebarShowAllCats ? (
+                <>
+                  Daha Az Göster <ChevronUp className="w-3 h-3" />
+                </>
+              ) : (
+                <>
+                  Tümünü Göster (+{filteredSidebarCategories.length - 8}){' '}
+                  <ChevronDown className="w-3 h-3" />
+                </>
+              )}
+            </button>
+          )}
         </div>
 
         {/* Popüler Etiketler */}
@@ -732,8 +1174,8 @@ export function HomeFeedClient({
 
       {/* ORTA SÜTUN: Ana Forum Tartışma Akışı */}
       <div className="order-1 lg:order-2 lg:col-span-6 space-y-3 min-w-0">
-        {/* Mobil & Tablet Hızlı Filtre ve Kategori Şeridi */}
-        <div className="lg:hidden space-y-2 font-mono">
+        {/* Mobil & Tablet Hızlı Durum Filtre Şeridi (Kategoriler üstteki kalıcı rayda yer alır) */}
+        <div className="lg:hidden font-mono">
           <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 no-scrollbar">
             <button
               type="button"
@@ -789,77 +1231,103 @@ export function HomeFeedClient({
               </button>
             )}
           </div>
-
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 no-scrollbar">
-            <button
-              type="button"
-              onClick={() => selectCategory('')}
-              className={`shrink-0 px-2.5 py-1.5 rounded-md text-xs font-semibold border transition-colors cursor-pointer ${
-                !activeCategory
-                  ? 'bg-[#E6EDF3] text-[#0D0F12] border-[#E6EDF3]'
-                  : 'bg-[#15181E] border-[#232730] text-[#8B949E]'
-              }`}
-            >
-              Tüm Kategoriler
-            </button>
-            {categories.map((cat) => {
-              const isActive = activeCategory === cat.slug;
-              return (
-                <button
-                  key={cat.id}
-                  type="button"
-                  onClick={() => selectCategory(cat.slug)}
-                  className={`shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold border transition-colors cursor-pointer ${
-                    isActive
-                      ? 'bg-[#10B981] border-[#10B981] text-[#0D0F12]'
-                      : 'bg-[#15181E] border-[#232730] text-[#E6EDF3]'
-                  }`}
-                >
-                  <span
-                    className="w-2 h-2 rounded-xs"
-                    style={{ backgroundColor: isActive ? '#0D0F12' : cat.color }}
-                  />
-                  {cat.name}
-                  <span className="text-[10px] opacity-65">({cat._count.threads})</span>
-                </button>
-              );
-            })}
-          </div>
         </div>
 
-        {/* Kategori Başlık Kartı */}
+        {/* Seçili Kategori Komuta Başlığı (Canlı İstatistikler, Etiketler & Hızlı Konu Açma) */}
         {selectedCategoryObj && (
-          <div className="rounded-md border border-[#232730] bg-[#15181E] p-4 flex items-start justify-between gap-4">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-md bg-[#0D0F12] border border-[#232730] flex items-center justify-center shrink-0">
-                <CategoryIcon
-                  name={selectedCategoryObj.icon}
-                  className="w-5 h-5"
-                  color={selectedCategoryObj.color}
-                />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-base font-bold text-[#E6EDF3]">
-                    {selectedCategoryObj.name}
-                  </h1>
-                  <span className="px-2 py-0.5 rounded-sm font-mono text-[11px] font-semibold bg-[#0D0F12] border border-[#232730] text-[#10B981]">
-                    {selectedCategoryObj._count.threads} konu
-                  </span>
+          <div className="relative rounded-md border border-[#232730] bg-[#15181E] overflow-hidden">
+            <div
+              className="h-[3px] w-full"
+              style={{ backgroundColor: selectedCategoryObj.color }}
+            />
+            <div className="p-4 space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-md bg-[#0D0F12] border border-[#232730] flex items-center justify-center shrink-0">
+                    <CategoryIcon
+                      name={selectedCategoryObj.icon}
+                      className="w-5 h-5"
+                      color={selectedCategoryObj.color}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h1 className="text-base sm:text-lg font-bold text-[#E6EDF3]">
+                        {selectedCategoryObj.name}
+                      </h1>
+                      <span className="px-2 py-0.5 rounded-sm font-mono text-[11px] font-semibold bg-[#0D0F12] border border-[#232730] text-[#10B981]">
+                        {selectedCategoryObj._count.threads} konu
+                      </span>
+                      {(categoryMetrics[selectedCategoryObj.slug]?.solved || 0) >
+                        0 && (
+                        <span className="px-2 py-0.5 rounded-sm font-mono text-[10px] font-semibold bg-[#10B981]/15 border border-[#10B981]/35 text-[#10B981]">
+                          ✓ {categoryMetrics[selectedCategoryObj.slug].solved} çözüldü
+                        </span>
+                      )}
+                      {(categoryMetrics[selectedCategoryObj.slug]?.unanswered ||
+                        0) > 0 && (
+                        <span className="px-2 py-0.5 rounded-sm font-mono text-[10px] font-semibold bg-[#F59E0B]/15 border border-[#F59E0B]/35 text-[#F59E0B]">
+                          ? {categoryMetrics[selectedCategoryObj.slug].unanswered} cevapsız
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-[#8B949E] leading-relaxed">
+                      {selectedCategoryObj.description}
+                    </p>
+                  </div>
                 </div>
-                <p className="text-xs text-[#8B949E] mt-0.5">
-                  {selectedCategoryObj.description}
-                </p>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <Link
+                    href={
+                      isLoggedIn
+                        ? `/yeni-konu?kategoriId=${encodeURIComponent(
+                            selectedCategoryObj.id
+                          )}`
+                        : '/giris'
+                    }
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold bg-[#10B981] hover:bg-[#059669] text-[#0D0F12] transition-colors"
+                  >
+                    <PlusCircle className="w-3.5 h-3.5" />
+                    Bu Alanda Konu Aç
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => selectCategory(selectedCategoryObj.slug)}
+                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-mono font-medium bg-[#0D0F12] border border-[#232730] text-[#8B949E] hover:text-[#E6EDF3] cursor-pointer"
+                    title="Kategori Filtresini Kaldır"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                    <span>Tümü</span>
+                  </button>
+                </div>
               </div>
+
+              {(categoryMetrics[selectedCategoryObj.slug]?.topTags.length || 0) >
+                0 && (
+                <div className="pt-2.5 border-t border-[#232730] flex items-center gap-1.5 flex-wrap font-mono">
+                  <span className="text-[10px] uppercase tracking-wider text-[#8B949E] mr-1">
+                    BU ALANDAKİ ETİKETLER:
+                  </span>
+                  {categoryMetrics[selectedCategoryObj.slug].topTags.map(
+                    (tg) => (
+                      <button
+                        key={tg}
+                        type="button"
+                        onClick={() => selectTag(tg)}
+                        className={`px-2 py-0.5 rounded-sm text-[11px] border transition-colors cursor-pointer ${
+                          activeTag === tg
+                            ? 'bg-[#10B981] border-[#10B981] text-[#0D0F12] font-semibold'
+                            : 'bg-[#0D0F12] border-[#232730] text-[#8B949E] hover:border-[#10B981]/50 hover:text-[#10B981]'
+                        }`}
+                      >
+                        #{tg}
+                      </button>
+                    )
+                  )}
+                </div>
+              )}
             </div>
-            <button
-              type="button"
-              onClick={() => selectCategory(selectedCategoryObj.slug)}
-              className="p-1.5 rounded-md text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#0D0F12]"
-              title="Filtreyi Temizle"
-            >
-              <X className="w-4 h-4" />
-            </button>
           </div>
         )}
 

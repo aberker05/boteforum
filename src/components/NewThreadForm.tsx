@@ -76,6 +76,12 @@ export function NewThreadForm({ categories }: { categories: CategoryOption[] }) 
             setDraftSavedTime(parsed.savedAt || 'Az önce');
           }
         }
+      } else {
+        const params = new URLSearchParams(window.location.search);
+        const requestedCatId = params.get('kategoriId');
+        if (requestedCatId && categories.some((c) => c.id === requestedCatId)) {
+          setCategoryId(requestedCatId);
+        }
       }
     } catch {
       // localStorage erişim hatası yoksayılır
