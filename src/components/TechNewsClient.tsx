@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import {
   Newspaper,
@@ -18,6 +18,9 @@ import {
   MessageSquare,
   TrendingUp,
   Layers,
+  ChevronLeft,
+  ChevronRight,
+  SlidersHorizontal,
 } from 'lucide-react';
 import { TechNewsItem, TECH_NEWS_CATEGORIES } from '@/lib/techNews';
 import { formatRelativeTime } from '@/lib/utils';
@@ -36,13 +39,34 @@ interface TechNewsClientProps {
   } | null;
 }
 
+const COMPACT_CATEGORY_LABELS: Record<string, string> = {
+  'Yapay Zeka': 'Yapay Zeka',
+  'Siber Güvenlik': 'Siber Güvenlik',
+  'Web & Yazılım': 'Web & Yazılım',
+  'Donanım & Çip': 'Donanım & Çip',
+  'Mobil & Bulut': 'Mobil & Bulut',
+  'Veri Bilimi & Ağ': 'Veri & Ağ',
+  'Oyun & Simülasyon': 'Oyun & Sim.',
+  'Eğitim Teknolojileri': 'Eğitim Tek.',
+  'BÖTE & Akademi': 'BÖTE & Akademi',
+  'Robotik & Otomasyon': 'Robotik',
+  'Uzay & Bilim': 'Uzay & Bilim',
+};
+
 export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'newest' | 'popular' | 'discussed'>('newest');
   const [activeHeroIdx, setActiveHeroIdx] = useState<number>(0);
+  const [radarIdx, setRadarIdx] = useState<number>(0);
+  const [radarPaused, setRadarPaused] = useState<boolean>(false);
+  const [showAllCatsGrid, setShowAllCatsGrid] = useState<boolean>(false);
+  const [canScrollLeft, setCanScrollLeft] = useState<boolean>(false);
+  const [canScrollRight, setCanScrollRight] = useState<boolean>(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<TechNewsItem | null>(null);
+
+  const catScrollRef = useRef<HTMLDivElement>(null);
 
   // Yeni / Düzenlenen Haber Formu
   const [title, setTitle] = useState('');
@@ -61,6 +85,49 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
   const canModerate =
     !!currentUser &&
     (currentUser.role === 'ADMIN' || currentUser.role === 'MODERATOR');
+
+  const radarItems = initialNews.slice(0, Math.min(6, initialNews.length));
+
+  // Canlı Radar otomatik geçişi (üzerine gelindiğinde duraklar)
+  useEffect(() => {
+    if (radarItems.length <= 1 || radarPaused) return;
+    const timer = window.setInterval(() => {
+      setRadarIdx((prev) => (prev + 1) % radarItems.length);
+    }, 4500);
+    return () => window.clearInterval(timer);
+  }, [radarItems.length, radarPaused]);
+
+  const updateCatScrollButtons = useCallback(() => {
+    const el = catScrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 6);
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 6);
+  }, []);
+
+  useEffect(() => {
+    updateCatScrollButtons();
+    window.addEventListener('resize', updateCatScrollButtons);
+    return () => window.removeEventListener('resize', updateCatScrollButtons);
+  }, [updateCatScrollButtons]);
+
+  const scrollCategories = (dir: 'left' | 'right') => {
+    const el = catScrollRef.current;
+    if (!el) return;
+    el.scrollBy({
+      left: dir === 'left' ? -240 : 240,
+      behavior: 'smooth',
+    });
+  };
+
+  const handleCatWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    const el = catScrollRef.current;
+    if (!el) return;
+    if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && el.scrollWidth > el.clientWidth) {
+      e.preventDefault();
+      el.scrollLeft += e.deltaY;
+      updateCatScrollButtons();
+    }
+  };
 
   const openCreateModal = () => {
     setEditingItem(null);
@@ -141,6 +208,7 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
   const sideFeaturedItems = featuredNews.filter(
     (item) => !activeHeroItem || item.id !== activeHeroItem.id
   );
+  const currentRadarItem = radarItems[radarIdx] || radarItems[0] || null;
 
   const handleCreateNews = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -194,50 +262,103 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
   };
 
   return (
-    <div className="space-y-7">
+    <div className="space-y-5">
       {/* Üst Geri Dönüş */}
       <div className="flex items-center justify-between">
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-mono font-medium text-[#8B949E] hover:text-[#10B981] transition-colors"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-3.5 h-3.5" />
           Forum Akışına Dön
         </Link>
 
-        <div className="hidden sm:flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 font-semibold">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            Canlı Teknoloji Radarı
+        <div className="hidden sm:flex items-center gap-2 text-xs font-mono text-[#8B949E]">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-[#15181E] text-[#10B981] border border-[#232730] font-semibold">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" />
+            SYS:RADAR // AKTİF AKIŞ
           </span>
         </div>
       </div>
 
-      {/* Canlı Son Dakika & Radar Şeridi */}
-      {initialNews.length > 0 && (
-        <div className="rounded-md border border-[#232730] bg-[#15181E] px-3 py-2 flex items-center gap-3 overflow-x-auto no-scrollbar font-mono">
-          <span className="shrink-0 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider bg-[#F59E0B] text-[#0D0F12]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#0D0F12]" />
-            RADAR // LIVE
-          </span>
-          <div className="flex items-center gap-4 text-xs text-[#8B949E] shrink-0">
-            {initialNews.slice(0, 4).map((n) => (
-              <Link
-                key={n.id}
-                href={`/haberler/${n.slug}`}
-                className="inline-flex items-center gap-2 hover:text-[#10B981] transition-colors group"
-              >
-                <span
-                  className="w-1.5 h-1.5 rounded-xs shrink-0"
-                  style={{ backgroundColor: n.badgeColor }}
-                />
-                <span className="font-sans font-medium text-[#E6EDF3] group-hover:text-[#10B981] truncate max-w-[230px] sm:max-w-[300px]">
-                  {n.title}
-                </span>
-                <span className="text-[10px] text-[#232730]">/</span>
-              </Link>
-            ))}
+      {/* Canlı Radar Şeridi: Taşmayan, Tek Satır İnteraktif Haber Geçiş Barı */}
+      {currentRadarItem && (
+        <div
+          onMouseEnter={() => setRadarPaused(true)}
+          onMouseLeave={() => setRadarPaused(false)}
+          className="rounded-md border border-[#232730] bg-[#15181E] px-3 py-2 flex items-center justify-between gap-2.5"
+        >
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+            <span className="shrink-0 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm font-mono text-[10px] font-bold uppercase tracking-wider bg-[#F59E0B] text-[#0D0F12]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#0D0F12] animate-pulse" />
+              RADAR
+            </span>
+
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedCategory(
+                  selectedCategory === currentRadarItem.category
+                    ? ''
+                    : currentRadarItem.category
+                );
+                setActiveHeroIdx(0);
+              }}
+              className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm font-mono text-[10px] font-semibold bg-[#0D0F12] border border-[#232730] hover:border-[#10B981]/50 shrink-0 cursor-pointer transition-colors"
+              style={{ color: currentRadarItem.badgeColor }}
+              title={`${currentRadarItem.category} kategorisini filtrele`}
+            >
+              <span
+                className="w-1.5 h-1.5 rounded-xs shrink-0"
+                style={{ backgroundColor: currentRadarItem.badgeColor }}
+              />
+              {COMPACT_CATEGORY_LABELS[currentRadarItem.category] ||
+                currentRadarItem.category}
+            </button>
+
+            <Link
+              href={`/haberler/${currentRadarItem.slug}`}
+              className="min-w-0 flex-1 flex items-center gap-2 group"
+            >
+              <span className="text-xs sm:text-[13px] font-semibold text-[#E6EDF3] group-hover:text-[#10B981] transition-colors truncate">
+                {currentRadarItem.title}
+              </span>
+              <span className="hidden md:inline-block shrink-0 font-mono text-[11px] text-[#8B949E]">
+                • {currentRadarItem.readTime}
+              </span>
+            </Link>
           </div>
+
+          {/* Sağ: Kompakt Sayaç ve Önceki / Sonraki Kontrol Okları */}
+          {radarItems.length > 1 && (
+            <div className="flex items-center gap-1 shrink-0 font-mono pl-2 border-l border-[#232730]">
+              <span className="hidden sm:inline text-[10px] text-[#8B949E] mr-1 tabular-nums">
+                0{radarIdx + 1}/0{radarItems.length}
+              </span>
+              <button
+                type="button"
+                onClick={() =>
+                  setRadarIdx((prev) =>
+                    prev <= 0 ? radarItems.length - 1 : prev - 1
+                  )
+                }
+                className="p-1 rounded-sm bg-[#0D0F12] border border-[#232730] text-[#8B949E] hover:text-[#E6EDF3] hover:border-[#10B981]/50 transition-colors cursor-pointer"
+                title="Önceki Gündem Başlığı"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setRadarIdx((prev) => (prev + 1) % radarItems.length)
+                }
+                className="p-1 rounded-sm bg-[#0D0F12] border border-[#232730] text-[#8B949E] hover:text-[#E6EDF3] hover:border-[#10B981]/50 transition-colors cursor-pointer"
+                title="Sonraki Gündem Başlığı"
+              >
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -287,64 +408,129 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
         </div>
       </div>
 
-      {/* Kategori Filtreleri, Sıralama ve Arama Çubuğu */}
-      <div className="space-y-3 bg-white/95 dark:bg-slate-900/90 p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs backdrop-blur-md">
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 sm:flex-wrap">
+      {/* Kategori Filtreleri, Kaydırma Okları, Sıralama ve Arama Çubuğu */}
+      <div className="rounded-md bg-[#15181E] p-3 sm:p-3.5 border border-[#232730] space-y-3">
+        {/* Üst Satır: Sol/Sağ Oklarla Kaydırılabilir Kompakt Kategori Şeridi + Tüm Alanlar Butonu */}
+        <div className="flex items-center gap-1.5">
           <button
             type="button"
-            onClick={() => {
-              setSelectedCategory('');
-              setActiveHeroIdx(0);
-            }}
-            className={`shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              selectedCategory === ''
-                ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-500/30'
-                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+            onClick={() => scrollCategories('left')}
+            disabled={!canScrollLeft}
+            title="Sola Kaydır"
+            className="hidden sm:inline-flex items-center justify-center w-7 h-7 rounded-md bg-[#0D0F12] border border-[#232730] text-[#8B949E] hover:text-[#E6EDF3] hover:border-[#10B981]/50 disabled:opacity-25 disabled:pointer-events-none shrink-0 cursor-pointer transition-colors"
+          >
+            <ChevronLeft className="w-3.5 h-3.5" />
+          </button>
+
+          <div
+            ref={catScrollRef}
+            onScroll={updateCatScrollButtons}
+            onWheel={handleCatWheel}
+            className={`flex-1 min-w-0 flex items-center gap-1.5 ${
+              showAllCatsGrid
+                ? 'flex-wrap'
+                : 'overflow-x-auto no-scrollbar scroll-smooth'
             }`}
           >
-            Tümü ({initialNews.length})
-          </button>
-          {TECH_NEWS_CATEGORIES.map((cat) => {
-            const active = selectedCategory === cat.name;
-            const count = categoryCounts[cat.name] || 0;
-            return (
-              <button
-                key={cat.name}
-                type="button"
-                onClick={() => {
-                  setSelectedCategory(active ? '' : cat.name);
-                  setActiveHeroIdx(0);
-                }}
-                className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
-                  active
-                    ? 'bg-indigo-600 text-white border-indigo-500 shadow-sm shadow-indigo-500/30'
-                    : 'border-transparent text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedCategory('');
+                setActiveHeroIdx(0);
+              }}
+              className={`shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-mono font-semibold border transition-colors cursor-pointer ${
+                selectedCategory === ''
+                  ? 'bg-[#10B981] text-[#0D0F12] border-[#10B981]'
+                  : 'bg-[#0D0F12] border-[#232730] text-[#8B949E] hover:text-[#E6EDF3] hover:border-[#343B48]'
+              }`}
+            >
+              <span>Tümü</span>
+              <span
+                className={`text-[10px] px-1 rounded-xs tabular-nums ${
+                  selectedCategory === ''
+                    ? 'bg-[#0D0F12]/20 text-[#0D0F12]'
+                    : 'text-[#8B949E]'
                 }`}
               >
-                <span style={{ color: active ? '#ffffff' : cat.color }}>
-                  {getCategoryIcon(cat.name, 'w-3.5 h-3.5')}
-                </span>
-                <span>{cat.name}</span>
-                {count > 0 && (
-                  <span
-                    className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                      active
-                        ? 'bg-white/20 text-white'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
-                    }`}
-                  >
-                    {count}
+                {initialNews.length}
+              </span>
+            </button>
+
+            {TECH_NEWS_CATEGORIES.map((cat) => {
+              const active = selectedCategory === cat.name;
+              const count = categoryCounts[cat.name] || 0;
+              const shortLabel = COMPACT_CATEGORY_LABELS[cat.name] || cat.name;
+              return (
+                <button
+                  key={cat.name}
+                  type="button"
+                  title={cat.name}
+                  onClick={() => {
+                    setSelectedCategory(active ? '' : cat.name);
+                    setActiveHeroIdx(0);
+                  }}
+                  className={`shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium border transition-colors cursor-pointer ${
+                    active
+                      ? 'bg-[#10B981]/15 text-[#10B981] border-[#10B981]'
+                      : 'bg-[#0D0F12] border-[#232730] text-[#E6EDF3]/90 hover:border-[#10B981]/45 hover:text-[#10B981]'
+                  }`}
+                >
+                  <span style={{ color: active ? '#10B981' : cat.color }}>
+                    {getCategoryIcon(cat.name, 'w-3.5 h-3.5')}
                   </span>
-                )}
-              </button>
-            );
-          })}
+                  <span className="whitespace-nowrap">
+                    {showAllCatsGrid ? cat.name : shortLabel}
+                  </span>
+                  {count > 0 && (
+                    <span
+                      className={`font-mono text-[10px] px-1 py-0.2 rounded-sm font-semibold tabular-nums ${
+                        active
+                          ? 'bg-[#10B981] text-[#0D0F12]'
+                          : 'bg-[#15181E] text-[#8B949E] border border-[#232730]'
+                      }`}
+                    >
+                      {count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {!showAllCatsGrid && (
+            <button
+              type="button"
+              onClick={() => scrollCategories('right')}
+              disabled={!canScrollRight}
+              title="Sağa Kaydır"
+              className="hidden sm:inline-flex items-center justify-center w-7 h-7 rounded-md bg-[#0D0F12] border border-[#232730] text-[#8B949E] hover:text-[#E6EDF3] hover:border-[#10B981]/50 disabled:opacity-25 disabled:pointer-events-none shrink-0 cursor-pointer transition-colors"
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={() => setShowAllCatsGrid((v) => !v)}
+            title={showAllCatsGrid ? 'Tek Satır Ray Görünümü' : 'Tüm Kategorileri Aç'}
+            className={`shrink-0 inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md text-[11px] font-mono font-semibold border transition-colors cursor-pointer ${
+              showAllCatsGrid
+                ? 'bg-[#F59E0B]/15 border-[#F59E0B]/50 text-[#F59E0B]'
+                : 'bg-[#0D0F12] border-[#232730] text-[#8B949E] hover:text-[#E6EDF3] hover:border-[#343B48]'
+            }`}
+          >
+            <SlidersHorizontal className="w-3 h-3" />
+            <span className="hidden md:inline">
+              {showAllCatsGrid ? 'Daralt' : 'Tümü'}
+            </span>
+          </button>
         </div>
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-800/80">
-          <div className="flex items-center gap-1.5">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mr-1">
-              Sırala:
+        {/* Alt Satır: Sıralama Sekmeleri ve Hızlı Arama */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-2.5 border-t border-[#232730]">
+          <div className="flex items-center gap-1.5 flex-wrap font-mono">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8B949E] mr-1">
+              SIRALA:
             </span>
             {(
               [
@@ -357,31 +543,42 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
                 key={opt.id}
                 type="button"
                 onClick={() => setSortBy(opt.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
+                className={`px-2.5 py-1 rounded-md text-xs font-medium border transition-colors cursor-pointer ${
                   sortBy === opt.id
-                    ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
-                    : 'bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    ? 'bg-[#0D0F12] border-[#10B981] text-[#10B981]'
+                    : 'bg-[#0D0F12] border-[#232730] text-[#8B949E] hover:text-[#E6EDF3]'
                 }`}
               >
                 {opt.label}
               </button>
             ))}
+
+            {selectedCategory && (
+              <button
+                type="button"
+                onClick={() => setSelectedCategory('')}
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold bg-[#F59E0B]/15 border border-[#F59E0B]/40 text-[#F59E0B] hover:bg-[#F59E0B]/25 cursor-pointer"
+              >
+                <span>{selectedCategory}</span>
+                <X className="w-3 h-3" />
+              </button>
+            )}
           </div>
 
           <div className="relative w-full sm:w-72 shrink-0">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-3.5 h-3.5 text-[#8B949E] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Başlık, kategori veya kaynak ara..."
-              className="w-full pl-9 pr-7 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/80 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+              className="w-full pl-8 pr-7 py-1.5 rounded-md text-xs font-mono bg-[#0D0F12] border border-[#232730] text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:border-[#10B981] transition-colors"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8B949E] hover:text-[#E6EDF3]"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -390,26 +587,26 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
         </div>
       </div>
 
-      {/* Bento-Grid Sinematik Manşet Vitrini */}
+      {/* Manşet Vitrini */}
       {featuredNews.length > 0 && activeHeroItem && (
-        <div className="space-y-3.5">
-          <div className="flex flex-wrap items-center justify-between gap-2 px-1">
-            <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
-              <Flame className="w-4 h-4 text-amber-500" />
-              Editörün Seçimi & Manşet Dosyaları
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 px-0.5 font-mono">
+            <h2 className="text-[11px] font-semibold uppercase tracking-wider text-[#E6EDF3] flex items-center gap-1.5">
+              <Flame className="w-3.5 h-3.5 text-[#F59E0B]" />
+              EDİTÖRÜN SEÇİMİ &amp; MANŞET DOSYALARI
             </h2>
 
             {featuredNews.length > 1 && (
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1">
                 {featuredNews.map((fn, idx) => (
                   <button
                     key={fn.id}
                     type="button"
                     onClick={() => setActiveHeroIdx(idx)}
-                    className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                    className={`px-2 py-0.5 rounded-sm text-[11px] font-semibold border transition-colors cursor-pointer ${
                       activeHeroItem.id === fn.id
-                        ? 'bg-indigo-600 text-white shadow-xs'
-                        : 'bg-slate-200/70 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-700'
+                        ? 'bg-[#10B981] border-[#10B981] text-[#0D0F12]'
+                        : 'bg-[#15181E] border-[#232730] text-[#8B949E] hover:text-[#E6EDF3]'
                     }`}
                   >
                     0{idx + 1}
@@ -419,12 +616,12 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
             )}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
             {/* Sol Büyük Vitrin (Ana Manşet) */}
             <div
               className={`${
                 sideFeaturedItems.length > 0 ? 'lg:col-span-7' : 'lg:col-span-12'
-              } group relative rounded-3xl overflow-hidden border border-slate-200/80 dark:border-slate-800/90 bg-slate-950 shadow-xl hover:shadow-2xl hover:border-indigo-500/50 transition-all duration-300 flex flex-col justify-end min-h-[390px] sm:min-h-[450px]`}
+              } group relative rounded-md overflow-hidden border border-[#232730] bg-[#15181E] hover:border-[#10B981]/60 transition-colors flex flex-col justify-end min-h-[360px] sm:min-h-[420px]`}
             >
               <TechNewsCover
                 title={activeHeroItem.title}
@@ -436,35 +633,31 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
                 overlayVariant="hero"
               />
 
-              {/* Üst Yüzen Rozetler ve Yönetici Butonları */}
-              <div className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 flex-wrap">
+              {/* Üst Rozetler ve Yönetici Butonları */}
+              <div className="absolute top-3.5 left-3.5 right-3.5 z-20 flex items-center justify-between gap-2 font-mono">
+                <div className="flex items-center gap-1.5 flex-wrap">
                   <span
-                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold backdrop-blur-md shadow-sm border"
-                    style={{
-                      backgroundColor: 'rgba(9, 13, 22, 0.80)',
-                      borderColor: `${activeHeroItem.badgeColor}75`,
-                      color: activeHeroItem.badgeColor,
-                    }}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-sm text-[11px] font-semibold bg-[#0D0F12]/90 border border-[#232730]"
+                    style={{ color: activeHeroItem.badgeColor }}
                   >
-                    {getCategoryIcon(activeHeroItem.category, 'w-3.5 h-3.5')}
+                    {getCategoryIcon(activeHeroItem.category, 'w-3 h-3')}
                     {activeHeroItem.category}
                   </span>
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 shadow-sm">
-                    <Flame className="w-3 h-3 fill-slate-950" />
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] font-bold bg-[#F59E0B] text-[#0D0F12]">
+                    <Flame className="w-3 h-3 fill-[#0D0F12]" />
                     BAŞ MANŞET
                   </span>
                 </div>
 
                 {canModerate && (
-                  <div className="flex items-center gap-1.5 bg-slate-950/80 backdrop-blur-md p-1 rounded-xl border border-white/15">
+                  <div className="flex items-center gap-1 bg-[#0D0F12]/90 p-1 rounded-md border border-[#232730]">
                     <button
                       type="button"
                       onClick={() => openEditModal(activeHeroItem)}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-indigo-300 hover:bg-indigo-500/25 transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-1 px-2 py-1 rounded-sm text-[11px] font-medium text-[#10B981] hover:bg-[#15181E] transition-colors cursor-pointer"
                       title="Haberi Düzenle"
                     >
-                      <Edit2 className="w-3.5 h-3.5" />
+                      <Edit2 className="w-3 h-3" />
                       <span>Düzenle</span>
                     </button>
                     <button
@@ -472,10 +665,10 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
                       onClick={() =>
                         handleDelete(activeHeroItem.id, activeHeroItem.title)
                       }
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-rose-300 hover:bg-rose-500/25 transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-1 px-2 py-1 rounded-sm text-[11px] font-medium text-rose-400 hover:bg-[#15181E] transition-colors cursor-pointer"
                       title="Haberi Sil"
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Trash2 className="w-3 h-3" />
                       <span>Sil</span>
                     </button>
                   </div>
@@ -483,9 +676,9 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
               </div>
 
               {/* Alt İçerik Katmanı */}
-              <div className="relative z-10 p-6 sm:p-8 pt-28 flex flex-col justify-end bg-gradient-to-t from-[#060911] via-[#060911]/92 to-transparent">
-                <div className="flex items-center gap-2 text-xs text-slate-300/90 mb-2">
-                  <span className="font-bold text-emerald-300">
+              <div className="relative z-10 p-5 sm:p-6 bg-[#0D0F12]/92 border-t border-[#232730] flex flex-col justify-end">
+                <div className="flex items-center gap-2 text-xs font-mono text-[#8B949E] mb-1.5">
+                  <span className="font-semibold text-[#10B981]">
                     {activeHeroItem.source}
                   </span>
                   <span>•</span>
@@ -493,34 +686,34 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
                 </div>
 
                 <Link href={`/haberler/${activeHeroItem.slug}`}>
-                  <h3 className="text-xl sm:text-3xl font-extrabold text-white group-hover:text-emerald-300 transition-colors leading-tight">
+                  <h3 className="text-lg sm:text-2xl font-bold text-[#E6EDF3] group-hover:text-[#10B981] transition-colors leading-snug">
                     {activeHeroItem.title}
                   </h3>
                 </Link>
 
-                <p className="mt-3 text-xs sm:text-sm text-slate-300 leading-relaxed line-clamp-3">
+                <p className="mt-2 text-xs sm:text-sm text-[#8B949E] leading-relaxed line-clamp-2">
                   {activeHeroItem.summary}
                 </p>
 
-                <div className="mt-5 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-300">
-                  <div className="flex items-center gap-4">
+                <div className="mt-4 pt-3 border-t border-[#232730] flex flex-wrap items-center justify-between gap-3 text-xs font-mono text-[#8B949E]">
+                  <div className="flex items-center gap-3.5">
                     <span className="inline-flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5 text-indigo-400" />
+                      <Clock className="w-3.5 h-3.5 text-[#10B981]" />
                       {activeHeroItem.readTime}
                     </span>
                     <span className="inline-flex items-center gap-1">
-                      <Eye className="w-3.5 h-3.5 text-emerald-400" />
+                      <Eye className="w-3.5 h-3.5 text-[#F59E0B]" />
                       {activeHeroItem.views} okunma
                     </span>
                     <span className="inline-flex items-center gap-1">
-                      <MessageSquare className="w-3.5 h-3.5 text-amber-400" />
+                      <MessageSquare className="w-3.5 h-3.5 text-[#10B981]" />
                       {activeHeroItem.commentCount || 0} yorum
                     </span>
                   </div>
 
                   <Link
                     href={`/haberler/${activeHeroItem.slug}`}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 shadow-md transition-all"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md font-sans font-semibold bg-[#10B981] hover:bg-[#059669] text-[#0D0F12] transition-colors"
                   >
                     Dosyayı İncele <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
@@ -530,11 +723,11 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
 
             {/* Sağ Sütun: Diğer Manşet Kartları */}
             {sideFeaturedItems.length > 0 && (
-              <div className="lg:col-span-5 flex flex-col justify-between gap-4">
+              <div className="lg:col-span-5 flex flex-col justify-between gap-3">
                 {sideFeaturedItems.slice(0, 3).map((item) => (
                   <div
                     key={item.id}
-                    className="group relative flex-1 rounded-3xl overflow-hidden border border-slate-200/80 dark:border-slate-800/90 bg-slate-950 shadow-md hover:shadow-xl hover:border-indigo-500/50 transition-all duration-300 flex flex-col justify-end min-h-[140px]"
+                    className="group relative flex-1 rounded-md overflow-hidden border border-[#232730] bg-[#15181E] hover:border-[#10B981]/60 transition-colors flex flex-col justify-end min-h-[132px]"
                   >
                     <TechNewsCover
                       title={item.title}
@@ -546,22 +739,18 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
                       overlayVariant="hero"
                     />
 
-                    <div className="relative z-10 p-4 sm:p-5 bg-gradient-to-t from-[#060911] via-[#060911]/85 to-slate-950/30 flex flex-col justify-between h-full">
-                      <div className="flex items-center justify-between gap-2">
+                    <div className="relative z-10 p-4 bg-[#0D0F12]/88 flex flex-col justify-between h-full">
+                      <div className="flex items-center justify-between gap-2 font-mono">
                         <span
-                          className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold backdrop-blur-md border"
-                          style={{
-                            backgroundColor: 'rgba(9, 13, 22, 0.80)',
-                            borderColor: `${item.badgeColor}65`,
-                            color: item.badgeColor,
-                          }}
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] font-semibold bg-[#15181E] border border-[#232730]"
+                          style={{ color: item.badgeColor }}
                         >
                           {getCategoryIcon(item.category, 'w-3 h-3')}
                           {item.category}
                         </span>
 
                         <div className="flex items-center gap-1.5">
-                          <span className="text-[10px] font-semibold text-slate-300 bg-slate-950/70 px-2 py-0.5 rounded-md border border-white/10">
+                          <span className="text-[10px] font-medium text-[#8B949E] bg-[#15181E] px-1.5 py-0.5 rounded-sm border border-[#232730]">
                             {item.readTime}
                           </span>
                           {canModerate && (
@@ -569,7 +758,7 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
                               <button
                                 type="button"
                                 onClick={() => openEditModal(item)}
-                                className="p-1 rounded-lg bg-slate-950/80 text-indigo-300 hover:bg-indigo-500/30 transition-colors cursor-pointer"
+                                className="p-1 rounded-sm bg-[#15181E] border border-[#232730] text-[#10B981] hover:bg-[#0D0F12] transition-colors cursor-pointer"
                                 title="Haberi Düzenle"
                               >
                                 <Edit2 className="w-3 h-3" />
@@ -577,7 +766,7 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
                               <button
                                 type="button"
                                 onClick={() => handleDelete(item.id, item.title)}
-                                className="p-1 rounded-lg bg-slate-950/80 text-rose-300 hover:bg-rose-500/30 transition-colors cursor-pointer"
+                                className="p-1 rounded-sm bg-[#15181E] border border-[#232730] text-rose-400 hover:bg-[#0D0F12] transition-colors cursor-pointer"
                                 title="Haberi Sil"
                               >
                                 <Trash2 className="w-3 h-3" />
@@ -587,24 +776,24 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
                         </div>
                       </div>
 
-                      <div className="mt-3">
+                      <div className="mt-2.5">
                         <Link href={`/haberler/${item.slug}`}>
-                          <h4 className="text-sm sm:text-base font-extrabold text-white group-hover:text-emerald-300 transition-colors leading-snug line-clamp-2">
+                          <h4 className="text-sm font-bold text-[#E6EDF3] group-hover:text-[#10B981] transition-colors leading-snug line-clamp-2">
                             {item.title}
                           </h4>
                         </Link>
-                        <div className="mt-2 flex items-center justify-between text-[11px] text-slate-300/90">
-                          <span className="text-emerald-300 font-semibold truncate">
+                        <div className="mt-1.5 flex items-center justify-between text-[11px] font-mono text-[#8B949E]">
+                          <span className="text-[#10B981] font-medium truncate">
                             {item.source}
                           </span>
                           <div className="flex items-center gap-2.5 shrink-0">
                             <span className="inline-flex items-center gap-1">
-                              <Eye className="w-3 h-3 text-slate-400" />
+                              <Eye className="w-3 h-3 text-[#8B949E]" />
                               {item.views}
                             </span>
                             <Link
                               href={`/haberler/${item.slug}`}
-                              className="inline-flex items-center gap-0.5 font-bold text-white group-hover:text-emerald-300"
+                              className="inline-flex items-center gap-0.5 font-semibold text-[#E6EDF3] group-hover:text-[#10B981]"
                             >
                               Oku <ArrowRight className="w-3 h-3" />
                             </Link>
@@ -622,45 +811,41 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
 
       {/* En Çok Okunanlar / Trend Radar Barı */}
       {!selectedCategory && !searchQuery && topTrendingNews.length >= 4 && (
-        <div className="rounded-3xl border border-slate-200/80 dark:border-slate-800/90 bg-white/90 dark:bg-slate-900/80 p-5 space-y-3.5 shadow-xs">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
-              <TrendingUp className="w-4 h-4 text-emerald-500" />
-              Haftanın En Çok Okunan Teknoloji Dosyaları
+        <div className="rounded-md border border-[#232730] bg-[#15181E] p-4 space-y-3">
+          <div className="flex items-center justify-between font-mono">
+            <h2 className="text-[11px] font-semibold uppercase tracking-wider text-[#E6EDF3] flex items-center gap-1.5">
+              <TrendingUp className="w-3.5 h-3.5 text-[#10B981]" />
+              HAFTANIN EN ÇOK OKUNAN DOSYALARI
             </h2>
-            <span className="text-[11px] text-slate-400 font-medium">
-              Okunma Sıralaması
+            <span className="text-[10px] text-[#8B949E]">
+              POPULAR // TOP 04
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {topTrendingNews.map((item, idx) => (
               <Link
                 key={item.id}
                 href={`/haberler/${item.slug}`}
-                className="group relative rounded-2xl border border-slate-200/70 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/60 p-3.5 hover:border-indigo-500/40 hover:bg-white dark:hover:bg-slate-900 transition-all flex items-start gap-3"
+                className="group relative rounded-md border border-[#232730] bg-[#0D0F12] p-3 hover:border-[#10B981]/50 transition-colors flex items-start gap-2.5"
               >
                 <div
-                  className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs shrink-0 border"
-                  style={{
-                    backgroundColor: `${item.badgeColor}15`,
-                    borderColor: `${item.badgeColor}40`,
-                    color: item.badgeColor,
-                  }}
+                  className="w-8 h-8 rounded-md flex items-center justify-center font-mono font-bold text-xs shrink-0 border border-[#232730] bg-[#15181E]"
+                  style={{ color: item.badgeColor }}
                 >
                   0{idx + 1}
                 </div>
                 <div className="min-w-0 flex-1 space-y-1">
                   <span
-                    className="text-[10px] font-bold uppercase tracking-wider block truncate"
+                    className="text-[10px] font-mono font-semibold uppercase tracking-wider block truncate"
                     style={{ color: item.badgeColor }}
                   >
                     {item.category}
                   </span>
-                  <h4 className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2 leading-snug">
+                  <h4 className="text-xs font-bold text-[#E6EDF3] group-hover:text-[#10B981] transition-colors line-clamp-2 leading-snug">
                     {item.title}
                   </h4>
-                  <div className="flex items-center gap-2 text-[10px] text-slate-400">
+                  <div className="flex items-center gap-2 text-[10px] font-mono text-[#8B949E]">
                     <span className="inline-flex items-center gap-0.5">
                       <Eye className="w-3 h-3" /> {item.views}
                     </span>
@@ -674,35 +859,33 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
         </div>
       )}
 
-      {/* Tüm Teknolojik Gelişmeler Izgarası (Görsel Kapaklı Dergi Kartları) */}
-      <div className="space-y-3.5">
-        <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5 px-1">
-          <Newspaper className="w-4 h-4 text-indigo-500" />
-          Son Teknolojik Gelişmeler
+      {/* Tüm Teknolojik Gelişmeler Izgarası */}
+      <div className="space-y-3">
+        <h2 className="text-[11px] font-mono font-semibold uppercase tracking-wider text-[#8B949E] flex items-center gap-1.5 px-0.5">
+          <Newspaper className="w-3.5 h-3.5 text-[#10B981]" />
+          SON TEKNOLOJİK GELİŞMELER
         </h2>
 
         {filteredNews.length === 0 ? (
-          <div className="rounded-3xl border border-dashed border-slate-300 dark:border-slate-800 p-12 text-center space-y-2">
-            <Newspaper className="w-10 h-10 text-slate-400 mx-auto" />
-            <p className="text-sm font-bold text-slate-700 dark:text-slate-200">
+          <div className="rounded-md border border-dashed border-[#232730] bg-[#15181E] p-10 text-center space-y-2">
+            <Newspaper className="w-8 h-8 text-[#8B949E] mx-auto" />
+            <p className="text-sm font-bold text-[#E6EDF3]">
               Bu filtreye uygun teknolojik gelişme bulunamadı.
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {(regularNews.length > 0 ? regularNews : filteredNews).map((item) => (
               <div
                 key={item.id}
-                className="group rounded-3xl overflow-hidden border border-slate-200/80 dark:border-slate-800/90 bg-white dark:bg-slate-900/95 hover:border-indigo-500/50 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between relative"
+                className="group rounded-md overflow-hidden border border-[#232730] bg-[#15181E] hover:border-[#10B981]/55 transition-colors flex flex-col justify-between relative"
               >
-                {/* Kategori Rengi Üst Vurgu Şeridi */}
                 <div
-                  className="h-1 w-full"
+                  className="h-[2px] w-full"
                   style={{ backgroundColor: item.badgeColor }}
                 />
                 <div>
-                  {/* Üst Görsel Kapak Alanı */}
-                  <div className="relative h-48 w-full overflow-hidden">
+                  <div className="relative h-44 w-full overflow-hidden border-b border-[#232730]">
                     <Link href={`/haberler/${item.slug}`} className="block w-full h-full">
                       <TechNewsCover
                         title={item.title}
@@ -715,28 +898,22 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
                       />
                     </Link>
 
-                    {/* Sol Üst Kategori Rozeti */}
-                    <div className="absolute top-3 left-3 z-10">
+                    <div className="absolute top-2.5 left-2.5 z-10">
                       <span
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold backdrop-blur-md border shadow-sm"
-                        style={{
-                          backgroundColor: 'rgba(9, 13, 22, 0.78)',
-                          borderColor: `${item.badgeColor}60`,
-                          color: item.badgeColor,
-                        }}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm font-mono text-[10px] font-semibold bg-[#0D0F12]/90 border border-[#232730]"
+                        style={{ color: item.badgeColor }}
                       >
                         {getCategoryIcon(item.category, 'w-3 h-3')}
                         {item.category}
                       </span>
                     </div>
 
-                    {/* Sağ Üst Yönetici Hızlı Düzenle / Sil */}
                     {canModerate && (
-                      <div className="absolute top-3 right-3 z-10 flex items-center gap-1 bg-slate-950/80 backdrop-blur-md p-1 rounded-xl border border-white/15">
+                      <div className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1 bg-[#0D0F12]/90 p-1 rounded-md border border-[#232730]">
                         <button
                           type="button"
                           onClick={() => openEditModal(item)}
-                          className="p-1.5 rounded-lg text-indigo-300 hover:bg-indigo-500/25 transition-colors cursor-pointer"
+                          className="p-1 rounded-sm text-[#10B981] hover:bg-[#15181E] transition-colors cursor-pointer"
                           title="Haberi Düzenle"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
@@ -744,7 +921,7 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
                         <button
                           type="button"
                           onClick={() => handleDelete(item.id, item.title)}
-                          className="p-1.5 rounded-lg text-rose-300 hover:bg-rose-500/25 transition-colors cursor-pointer"
+                          className="p-1 rounded-sm text-rose-400 hover:bg-[#15181E] transition-colors cursor-pointer"
                           title="Haberi Sil"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -752,19 +929,17 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
                       </div>
                     )}
 
-                    {/* Sağ Alt Okuma Süresi */}
-                    <div className="absolute bottom-3 right-3 z-10">
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[11px] font-semibold bg-slate-950/75 text-slate-200 backdrop-blur-md border border-white/10">
-                        <Clock className="w-3 h-3 text-indigo-400" />
+                    <div className="absolute bottom-2.5 right-2.5 z-10">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm font-mono text-[10px] font-medium bg-[#0D0F12]/90 text-[#E6EDF3] border border-[#232730]">
+                        <Clock className="w-3 h-3 text-[#10B981]" />
                         {item.readTime}
                       </span>
                     </div>
                   </div>
 
-                  {/* Kart Gövdesi */}
-                  <div className="p-5 pb-3">
-                    <div className="flex items-center justify-between gap-2 text-[11px] text-slate-500 dark:text-slate-400 mb-2">
-                      <span className="font-semibold text-indigo-600 dark:text-indigo-400 truncate">
+                  <div className="p-4 pb-3">
+                    <div className="flex items-center justify-between gap-2 text-[11px] font-mono text-[#8B949E] mb-1.5">
+                      <span className="font-semibold text-[#10B981] truncate">
                         {item.source}
                       </span>
                       <span className="shrink-0">
@@ -773,34 +948,33 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
                     </div>
 
                     <Link href={`/haberler/${item.slug}`}>
-                      <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors leading-snug line-clamp-2">
+                      <h3 className="text-sm sm:text-base font-bold text-[#E6EDF3] group-hover:text-[#10B981] transition-colors leading-snug line-clamp-2">
                         {item.title}
                       </h3>
                     </Link>
 
-                    <p className="mt-2 text-xs text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-3">
+                    <p className="mt-1.5 text-xs text-[#8B949E] leading-relaxed line-clamp-3">
                       {item.summary}
                     </p>
                   </div>
                 </div>
 
-                {/* Kart Alt Bilgi Çubuğu */}
-                <div className="px-5 py-3.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 bg-slate-50/50 dark:bg-slate-900/50">
+                <div className="px-4 py-2.5 border-t border-[#232730] flex items-center justify-between text-xs font-mono text-[#8B949E] bg-[#0D0F12]">
                   <div className="flex items-center gap-3">
                     <span className="inline-flex items-center gap-1">
-                      <Eye className="w-3.5 h-3.5 text-slate-400" /> {item.views}
+                      <Eye className="w-3.5 h-3.5" /> {item.views}
                     </span>
                     <span className="inline-flex items-center gap-1">
-                      <MessageSquare className="w-3.5 h-3.5 text-slate-400" />{' '}
-                      {item.commentCount || 0} yorum
+                      <MessageSquare className="w-3.5 h-3.5" />{' '}
+                      {item.commentCount || 0}
                     </span>
                   </div>
 
                   <Link
                     href={`/haberler/${item.slug}`}
-                    className="inline-flex items-center gap-1 font-bold text-indigo-600 dark:text-indigo-400 group-hover:translate-x-0.5 transition-transform"
+                    className="inline-flex items-center gap-1 font-semibold text-[#10B981] hover:underline"
                   >
-                    Oku & Tartış <ArrowRight className="w-3.5 h-3.5" />
+                    Oku &amp; Tartış <ArrowRight className="w-3 h-3" />
                   </Link>
                 </div>
               </div>
@@ -811,11 +985,11 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
 
       {/* Yeni / Düzenlenen Teknolojik Gelişme Modalı */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
-          <div className="w-full max-w-2xl max-h-[92vh] overflow-y-auto rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs">
+          <div className="w-full max-w-2xl max-h-[92vh] overflow-y-auto rounded-md border border-[#232730] bg-[#15181E] p-5 sm:p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-indigo-500" />
+              <h3 className="text-base sm:text-lg font-bold text-[#E6EDF3] flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-[#10B981]" />
                 {editingItem
                   ? 'Teknolojik Gelişmeyi Düzenle'
                   : 'Yeni Teknolojik Gelişme Paylaş'}
@@ -823,21 +997,21 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
               <button
                 type="button"
                 onClick={() => setModalOpen(false)}
-                className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="p-1.5 rounded-md text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#0D0F12]"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {error && (
-              <div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-600 dark:text-rose-400">
+              <div className="mb-4 p-3 rounded-md bg-rose-500/10 border border-rose-500/30 text-xs text-rose-400">
                 {error}
               </div>
             )}
 
             <form onSubmit={handleCreateNews} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-mono font-semibold text-[#E6EDF3] mb-1">
                   Gelişme / Haber Başlığı
                 </label>
                 <input
@@ -846,13 +1020,13 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Örn: Açık Kaynaklı Yeni Nesil Kodlama Modeli Duyuruldu"
-                  className="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
+                  className="w-full px-3 py-2 rounded-md text-sm bg-[#0D0F12] border border-[#232730] text-[#E6EDF3]"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-mono font-semibold text-[#E6EDF3] mb-1">
                     Alan / Kategori
                   </label>
                   <select
@@ -865,7 +1039,7 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
                       );
                       if (found) setBadgeColor(found.color);
                     }}
-                    className="w-full px-3 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
+                    className="w-full px-3 py-2 rounded-md text-sm bg-[#0D0F12] border border-[#232730] text-[#E6EDF3]"
                   >
                     {TECH_NEWS_CATEGORIES.map((c) => (
                       <option key={c.name} value={c.name}>
@@ -876,7 +1050,7 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-mono font-semibold text-[#E6EDF3] mb-1">
                     Kaynak Belirtin
                   </label>
                   <input
@@ -884,12 +1058,12 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
                     value={source}
                     onChange={(e) => setSource(e.target.value)}
                     placeholder="Örn: IEEE Spectrum / ArXiv"
-                    className="w-full px-3 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
+                    className="w-full px-3 py-2 rounded-md text-sm bg-[#0D0F12] border border-[#232730] text-[#E6EDF3]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-mono font-semibold text-[#E6EDF3] mb-1">
                     Okuma Süresi
                   </label>
                   <input
@@ -897,12 +1071,11 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
                     value={readTime}
                     onChange={(e) => setReadTime(e.target.value)}
                     placeholder="3 dk okuma"
-                    className="w-full px-3 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
+                    className="w-full px-3 py-2 rounded-md text-sm bg-[#0D0F12] border border-[#232730] text-[#E6EDF3]"
                   />
                 </div>
               </div>
 
-              {/* Kapak Görseli Seçici / Yükleyici */}
               <TechNewsCoverPicker
                 imageUrl={imageUrl}
                 category={category}
@@ -912,7 +1085,7 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
               />
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-mono font-semibold text-[#E6EDF3] mb-1">
                   Kısa Özet (Kartlarda görünür)
                 </label>
                 <textarea
@@ -921,12 +1094,12 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
                   value={summary}
                   onChange={(e) => setSummary(e.target.value)}
                   placeholder="Gelişmeyi 1-2 cümleyle özetleyin..."
-                  className="w-full px-3.5 py-2 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
+                  className="w-full px-3 py-2 rounded-md text-sm bg-[#0D0F12] border border-[#232730] text-[#E6EDF3]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-mono font-semibold text-[#E6EDF3] mb-1">
                   Detaylı Teknik İnceleme (Markdown)
                 </label>
                 <MarkdownEditor
@@ -938,12 +1111,12 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
               </div>
 
               {canModerate && (
-                <label className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
+                <label className="inline-flex items-center gap-2 text-xs font-semibold text-[#E6EDF3] cursor-pointer">
                   <input
                     type="checkbox"
                     checked={isFeatured}
                     onChange={(e) => setIsFeatured(e.target.checked)}
-                    className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    className="rounded-sm border-[#232730] bg-[#0D0F12] text-[#10B981] focus:ring-[#10B981]"
                   />
                   Bu gelişmeyi Manşet (Öne Çıkan) olarak işaretle
                 </label>
@@ -953,14 +1126,14 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  className="px-3.5 py-2 rounded-md text-xs font-semibold text-[#8B949E] hover:text-[#E6EDF3] bg-[#0D0F12] border border-[#232730]"
                 >
                   İptal
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-50 cursor-pointer"
+                  className="px-4 py-2 rounded-md text-xs font-semibold bg-[#10B981] hover:bg-[#059669] text-[#0D0F12] disabled:opacity-50 cursor-pointer"
                 >
                   {submitting
                     ? 'Kaydediliyor...'
