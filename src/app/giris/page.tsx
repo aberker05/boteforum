@@ -2,7 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { LogIn, Sparkles, Eye, EyeOff } from 'lucide-react';
+import {
+  LogIn,
+  Sparkles,
+  Eye,
+  EyeOff,
+  MessageSquare,
+  CheckCircle2,
+  Compass,
+} from 'lucide-react';
 import { GoogleSignInButton } from '@/components/GoogleSignInButton';
 
 const OAUTH_ERROR_MESSAGES: Record<string, string> = {
@@ -28,9 +36,21 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [timeGreeting, setTimeGreeting] = useState('TOPLULUĞA HOŞ GELDİNİZ');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      const hour = new Date().getHours();
+      if (hour >= 6 && hour < 12) {
+        setTimeGreeting('GÜNAYDIN • HOŞ GELDİNİZ');
+      } else if (hour >= 12 && hour < 18) {
+        setTimeGreeting('İYİ GÜNLER • HOŞ GELDİNİZ');
+      } else if (hour >= 18 && hour < 23) {
+        setTimeGreeting('İYİ AKŞAMLAR • HOŞ GELDİNİZ');
+      } else {
+        setTimeGreeting('İYİ GECELER • HOŞ GELDİNİZ');
+      }
+
       const params = new URLSearchParams(window.location.search);
       const errCode = params.get('error');
       if (errCode && OAUTH_ERROR_MESSAGES[errCode]) {
@@ -89,18 +109,42 @@ export default function LoginPage() {
 
   return (
     <div className="max-w-md mx-auto py-8">
-      <div className="rounded-md border border-[#232730] bg-[#15181E] p-6 sm:p-7">
-        <div className="text-center mb-5">
-          <div className="w-10 h-10 rounded-md bg-[#0D0F12] border border-[#232730] text-[#10B981] flex items-center justify-center mx-auto mb-3">
-            <Sparkles className="w-5 h-5" />
+      <div className="rounded-md border border-[#232730] bg-[#15181E] overflow-hidden">
+        {/* Üst Karşılama Alanı */}
+        <div className="p-6 sm:p-7 pb-5 border-b border-[#232730] bg-gradient-to-b from-[#10B981]/[0.06] to-transparent">
+          <div className="text-center">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-[#10B981]/10 border border-[#10B981]/30 text-[#10B981] font-mono text-[10px] font-semibold tracking-wider mb-3">
+              <Sparkles className="w-3 h-3" />
+              <span>{timeGreeting}</span>
+            </div>
+
+            <h1 className="text-xl sm:text-2xl font-bold text-[#E6EDF3] tracking-tight">
+              Tekrar Hoş Geldiniz!
+            </h1>
+            <p className="text-xs sm:text-[13px] text-[#8B949E] mt-1.5 leading-relaxed">
+              Sizi yeniden aramızda görmek çok güzel. Hesabınıza oturum açarak
+              tartışmalara katılabilir, sorularınıza çözüm bulabilir ve
+              deneyimlerinizi paylaşabilirsiniz.
+            </p>
           </div>
-          <h1 className="text-xl font-bold text-[#E6EDF3]">
-            Oturum Açın
-          </h1>
-          <p className="text-xs text-[#8B949E] mt-1">
-            Topluluk hesabınıza giriş yaparak teknik tartışmalara katılın
-          </p>
+
+          <div className="mt-4 grid grid-cols-3 gap-1.5 text-[10px] font-mono text-[#8B949E]">
+            <div className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-sm bg-[#0D0F12] border border-[#232730]">
+              <MessageSquare className="w-3 h-3 text-[#10B981] shrink-0" />
+              <span className="truncate">Tartışma</span>
+            </div>
+            <div className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-sm bg-[#0D0F12] border border-[#232730]">
+              <CheckCircle2 className="w-3 h-3 text-[#10B981] shrink-0" />
+              <span className="truncate">Soru &amp; Çözüm</span>
+            </div>
+            <div className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-sm bg-[#0D0F12] border border-[#232730]">
+              <Compass className="w-3 h-3 text-[#F59E0B] shrink-0" />
+              <span className="truncate">Tekno Radar</span>
+            </div>
+          </div>
         </div>
+
+        <div className="p-6 sm:p-7 pt-5">
 
         {error && (
           <div className="mb-4 p-3 rounded-md bg-rose-500/10 border border-rose-500/30 text-xs font-medium text-rose-400">
@@ -197,15 +241,16 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        <p className="mt-5 text-center text-xs text-[#8B949E]">
-          Henüz hesabınız yok mu?{' '}
-          <Link
-            href="/kayit"
-            className="font-mono font-semibold text-[#10B981] hover:underline"
-          >
-            Hemen Kayıt Olun
-          </Link>
-        </p>
+          <p className="mt-5 text-center text-xs text-[#8B949E]">
+            Aramıza ilk kez mi katılıyorsunuz?{' '}
+            <Link
+              href="/kayit"
+              className="font-mono font-semibold text-[#10B981] hover:underline"
+            >
+              Ücretsiz Kayıt Olun
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

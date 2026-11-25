@@ -59,11 +59,11 @@ export function GoogleSignInButton({
   return (
     <div>
       <div className="my-5 flex items-center gap-3">
-        <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800" />
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+        <div className="h-px flex-1 bg-[#232730]" />
+        <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-[#8B949E]">
           veya
         </span>
-        <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800" />
+        <div className="h-px flex-1 bg-[#232730]" />
       </div>
 
       <button
@@ -73,7 +73,7 @@ export function GoogleSignInButton({
           setRedirecting(true);
           window.location.href = '/api/auth/google';
         }}
-        className="w-full inline-flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl text-sm font-semibold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700/80 shadow-xs transition-all cursor-pointer disabled:opacity-60"
+        className="w-full inline-flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-md text-xs sm:text-sm font-semibold bg-[#0D0F12] border border-[#232730] text-[#E6EDF3] hover:border-[#10B981]/60 hover:bg-[#181C23] transition-colors cursor-pointer disabled:opacity-60"
       >
         <GoogleLogo />
         <span>{redirecting ? 'Google Hesabına Yönlendiriliyor...' : label}</span>
