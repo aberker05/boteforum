@@ -166,10 +166,10 @@ CREATE TABLE IF NOT EXISTS "SiteSettings" (
   "siteNameAccent" TEXT NOT NULL,
   "siteTagline" TEXT NOT NULL,
   "logoType" TEXT NOT NULL DEFAULT 'icon',
-  "logoIcon" TEXT NOT NULL DEFAULT 'Sparkles',
+  "logoIcon" TEXT NOT NULL DEFAULT 'Terminal',
   "logoText" TEXT NOT NULL DEFAULT 'NF',
   "logoImageUrl" TEXT NOT NULL DEFAULT '',
-  "brandColor" TEXT NOT NULL DEFAULT '#6366f1',
+  "brandColor" TEXT NOT NULL DEFAULT '#10B981',
   "footerDescription" TEXT NOT NULL,
   "copyrightText" TEXT NOT NULL,
   "updatedAt" TEXT NOT NULL
@@ -234,5 +234,7 @@ VALUES
   ('cat_ai', 'Yapay Zeka & Veri Bilimi', 'yapay-zeka-veri', 'LLM modelleri, otonom ajanlar, makine öğrenmesi, Python ve veri mühendisliği.', 'Sparkles', '#10b981', 3),
   ('cat_tasarim', 'UI/UX & Ürün Tasarımı', 'ui-ux-tasarim', 'Arayüz tasarımı, Figma, tasarım sistemleri, CSS sanatları ve kullanıcı deneyimi.', 'Palette', '#ec4899', 4),
   ('cat_kariyer', 'Kariyer & Proje Vitrin', 'kariyer-proje-vitrin', 'Kendi projelerinizi tanıtın, geri bildirim alın, mülakat deneyimleri ve kariyer tavsiyeleri.', 'Rocket', '#f59e0b', 5),
-  ('cat_yardim', 'Soru & Cevap (Teknik Yardım)', 'soru-cevap', 'Kodunuzda takıldığınız noktalar, hata çözümleri ve mimari danışmanlık soruları.', 'HelpCircle', '#8b5cf6', 6)
+  ('cat_yardim', 'Soru & Cevap (Teknik Yardım)', 'soru-cevap', 'Kodunuzda takıldığınız noktalar, hata çözümleri ve mimari danışmanlık soruları.', 'HelpCircle', '#8b5cf6', 6),
+  ('cat_edtech', 'Eğitim Teknolojileri', 'egitim-teknolojileri', 'Dijital öğrenme araçları, öğretim tasarımı, LMS sistemleri ve eğitimde yapay zeka uygulamaları.', 'BookOpen', '#6366f1', 7),
+  ('cat_bote', 'BÖTE & Akademi', 'bote-ve-akademi', 'Bilgisayar ve Öğretim Teknolojileri Eğitimi akademik çalışmaları, öğretmenlik deneyimleri ve bölüm topluluğu.', 'GraduationCap', '#0ea5e9', 8)
 ON CONFLICT ("slug") DO NOTHING;

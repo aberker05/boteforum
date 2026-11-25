@@ -81,22 +81,23 @@ const NewNewsCommentForm = memo(function NewNewsCommentForm({
 
   return (
     <form
+      id="yeni-yorum-formu"
       onSubmit={handleSubmit}
-      className="rounded-3xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900/90 p-5 space-y-3 shadow-xs"
+      className="rounded-md border border-[#232730] bg-[#15181E] p-4 sm:p-5 space-y-3"
     >
-      <label className="block text-sm font-bold text-slate-800 dark:text-slate-200">
+      <label className="block text-sm font-bold text-[#E6EDF3]">
         Bu Teknolojik Gelişme Hakkında Görüşünüzü Paylaşın
       </label>
 
-      <div className="flex items-start gap-2.5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 text-xs text-amber-800 dark:text-amber-300">
-        <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+      <div className="flex items-start gap-2.5 p-3 rounded-md bg-[#F59E0B]/10 border border-[#F59E0B]/30 text-xs text-[#F59E0B]">
+        <AlertTriangle className="w-4 h-4 text-[#F59E0B] shrink-0 mt-0.5" />
         <span>
           <strong>Topluluk Kuralları Uyarısı:</strong> Yorumlarda küfür, hakaret, aşağılayıcı ifadeler, nefret söylemi veya zararlı içerik paylaşılması kesinlikle yasaktır. Kurallara aykırı içerikler otomatik filtre tarafından engellenir.
         </span>
       </div>
 
       {error && (
-        <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-600 dark:text-rose-400">
+        <div className="p-3 rounded-md bg-rose-500/10 border border-rose-500/30 text-xs text-rose-400">
           {error}
         </div>
       )}
@@ -110,9 +111,9 @@ const NewNewsCommentForm = memo(function NewNewsCommentForm({
         <button
           type="submit"
           disabled={submitting || !newComment.trim()}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm shadow-indigo-500/20 disabled:opacity-50 transition-all"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-md text-xs sm:text-sm font-semibold bg-[#10B981] hover:bg-[#059669] text-[#0D0F12] disabled:opacity-50 transition-colors cursor-pointer"
         >
-          <Send className="w-4 h-4" />
+          <Send className="w-3.5 h-3.5" />
           {submitting ? 'Gönderiliyor...' : 'Yorumu Gönder'}
         </button>
       </div>

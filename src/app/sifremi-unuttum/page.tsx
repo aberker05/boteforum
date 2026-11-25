@@ -117,15 +117,15 @@ export default function ForgotPasswordPage() {
         </Link>
       </div>
 
-      <div className="rounded-3xl border border-slate-200/90 dark:border-slate-800/90 bg-white dark:bg-slate-900/95 p-6 sm:p-8 shadow-lg">
-        <div className="text-center mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 text-white flex items-center justify-center mx-auto mb-3 shadow-md shadow-indigo-500/20">
-            <KeyRound className="w-6 h-6" />
+      <div className="rounded-md border border-[#232730] bg-[#15181E] p-6 sm:p-7">
+        <div className="text-center mb-5">
+          <div className="w-10 h-10 rounded-md bg-[#0D0F12] border border-[#232730] text-[#10B981] flex items-center justify-center mx-auto mb-3">
+            <KeyRound className="w-5 h-5" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+          <h1 className="text-xl font-bold text-[#E6EDF3]">
             Şifremi Unuttum
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+          <p className="text-xs text-[#8B949E] mt-1">
             {step === 'request' &&
               'Hesabınızı doğrulayarak yeni şifre belirleme kodu alın'}
             {step === 'verify' &&
@@ -135,19 +135,19 @@ export default function ForgotPasswordPage() {
         </div>
 
         {/* Adım Göstergesi */}
-        <div className="grid grid-cols-2 gap-2 mb-6">
+        <div className="grid grid-cols-2 gap-2 mb-5">
           <div
-            className={`h-1.5 rounded-full transition-colors ${
+            className={`h-1 rounded-xs transition-colors ${
               step === 'request' || step === 'verify' || step === 'done'
-                ? 'bg-indigo-600'
-                : 'bg-slate-200 dark:bg-slate-800'
+                ? 'bg-[#10B981]'
+                : 'bg-[#232730]'
             }`}
           />
           <div
-            className={`h-1.5 rounded-full transition-colors ${
+            className={`h-1 rounded-xs transition-colors ${
               step === 'verify' || step === 'done'
-                ? 'bg-indigo-600'
-                : 'bg-slate-200 dark:bg-slate-800'
+                ? 'bg-[#10B981]'
+                : 'bg-[#232730]'
             }`}
           />
         </div>
@@ -278,10 +278,10 @@ export default function ForgotPasswordPage() {
               <input
                 type="password"
                 required
-                minLength={6}
+                minLength={8}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="••••••"
+                placeholder="••••••••"
                 className="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
               />
             </div>

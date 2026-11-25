@@ -90,13 +90,20 @@ export function ThreadActions({
       router.push('/giris');
       return;
     }
-    setBookmarked(!bookmarked);
-    await fetch('/api/bookmarks', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ threadId }),
-    });
-    router.refresh();
+    const prev = bookmarked;
+    setBookmarked(!prev);
+    try {
+      const res = await fetch('/api/bookmarks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ threadId }),
+      });
+      if (!res.ok) {
+        setBookmarked(prev);
+      }
+    } catch {
+      setBookmarked(prev);
+    }
   };
 
   const handleAction = async (action: 'togglePin' | 'toggleLock' | 'toggleSolved') => {
@@ -115,7 +122,7 @@ export function ThreadActions({
         if (action === 'toggleSolved') setSolved((prev) => !prev);
         if (action === 'togglePin') setPinned((prev) => !prev);
         if (action === 'toggleLock') setLocked((prev) => !prev);
-      } else {
+      } else if (action === 'toggleLock') {
         router.refresh();
       }
     } catch {

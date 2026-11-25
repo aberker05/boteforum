@@ -104,9 +104,9 @@ export default async function TechNewsDetailPage({ params }: NewsDetailProps) {
         </div>
       </div>
 
-      <article className="rounded-3xl overflow-hidden border border-slate-200/90 dark:border-slate-800/90 bg-white dark:bg-slate-900/95 shadow-lg">
+      <article className="rounded-md overflow-hidden border border-[#232730] bg-[#15181E]">
         {/* Tam Genişlik Sinematik Kapak Görseli */}
-        <div className="relative h-64 sm:h-80 md:h-96 w-full group overflow-hidden">
+        <div className="relative h-64 sm:h-80 md:h-96 w-full group overflow-hidden border-b border-[#232730]">
           <TechNewsCover
             title={item.title}
             category={item.category}
@@ -117,37 +117,33 @@ export default async function TechNewsDetailPage({ params }: NewsDetailProps) {
             overlayVariant="detail"
           />
 
-          <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between gap-2">
+          <div className="absolute top-3.5 left-3.5 right-3.5 z-10 flex items-center justify-between gap-2 font-mono">
             <div className="flex items-center gap-2">
               <span
-                className="px-3.5 py-1 rounded-full text-xs font-bold backdrop-blur-md border shadow-sm"
-                style={{
-                  backgroundColor: 'rgba(9, 13, 22, 0.80)',
-                  borderColor: `${item.badgeColor}65`,
-                  color: item.badgeColor,
-                }}
+                className="px-2.5 py-0.5 rounded-sm text-xs font-semibold bg-[#0D0F12]/90 border border-[#232730]"
+                style={{ color: item.badgeColor }}
               >
                 {item.category}
               </span>
               {Number(item.isFeatured) === 1 && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-amber-500 text-slate-950 shadow-sm">
-                  <Flame className="w-3 h-3 fill-slate-950" />
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] font-bold bg-[#F59E0B] text-[#0D0F12]">
+                  <Flame className="w-3 h-3 fill-[#0D0F12]" />
                   MANŞET
                 </span>
               )}
             </div>
 
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-950/75 text-slate-200 backdrop-blur-md border border-white/15">
-              <Clock className="w-3.5 h-3.5 text-indigo-400" />
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-sm text-xs font-medium bg-[#0D0F12]/90 text-[#E6EDF3] border border-[#232730]">
+              <Clock className="w-3.5 h-3.5 text-[#10B981]" />
               {item.readTime}
             </span>
           </div>
         </div>
 
-        <div className="p-6 sm:p-9 space-y-6">
-          <div className="space-y-4 border-b border-slate-100 dark:border-slate-800 pb-6">
-            <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400">
-              <span className="font-bold text-indigo-600 dark:text-indigo-400 inline-flex items-center gap-1">
+        <div className="p-5 sm:p-8 space-y-6">
+          <div className="space-y-4 border-b border-[#232730] pb-5">
+            <div className="flex flex-wrap items-center gap-3 text-xs font-mono text-[#8B949E]">
+              <span className="font-bold text-[#10B981] inline-flex items-center gap-1">
                 <Sparkles className="w-3.5 h-3.5" />
                 {item.source}
               </span>
@@ -161,23 +157,23 @@ export default async function TechNewsDetailPage({ params }: NewsDetailProps) {
               <span>•</span>
               <a
                 href="#tartisma"
-                className="inline-flex items-center gap-1 hover:text-indigo-500 transition-colors"
+                className="inline-flex items-center gap-1 hover:text-[#10B981] transition-colors"
               >
                 <MessageSquare className="w-3.5 h-3.5" />
                 {comments.length} yorum
               </a>
             </div>
 
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white leading-tight">
+            <h1 className="text-xl sm:text-2xl md:text-[28px] font-bold text-[#E6EDF3] leading-snug tracking-tight">
               {item.title}
             </h1>
 
-            <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 font-medium leading-relaxed bg-slate-50 dark:bg-slate-800/60 p-4 sm:p-5 rounded-2xl border border-slate-200/60 dark:border-slate-700/60">
+            <p className="text-sm sm:text-[15px] text-[#8B949E] font-medium leading-relaxed bg-[#0D0F12] p-4 rounded-md border border-[#232730]">
               {item.summary}
             </p>
           </div>
 
-          <div className="py-2 text-base">
+          <div className="py-1 text-sm sm:text-base">
             <MarkdownRenderer content={item.content} />
           </div>
         </div>

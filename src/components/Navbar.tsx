@@ -432,8 +432,12 @@ export function Navbar({
         return;
       }
 
-      // 'r': Konu detay sayfasındayken yanıt kutusuna in ve odaklan
-      if (key === 'r' && !e.shiftKey && pathname.startsWith('/konu/')) {
+      // 'r': Konu veya Gündem detay sayfasındayken yanıt kutusuna in ve odaklan
+      if (
+        key === 'r' &&
+        !e.shiftKey &&
+        (pathname.startsWith('/konu/') || pathname.startsWith('/haberler/'))
+      ) {
         const formEl = document.getElementById('yeni-yorum-formu');
         if (formEl) {
           e.preventDefault();

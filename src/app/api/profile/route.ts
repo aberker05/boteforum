@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser, invalidateUserCache } from '@/lib/auth';
+import { invalidateHomeCache } from '@/lib/homeCache';
 import { checkContentModeration } from '@/lib/moderation';
 import {
   validateContentLength,
@@ -152,6 +153,7 @@ export async function PATCH(request: Request) {
     });
 
     invalidateUserCache(user.id);
+    invalidateHomeCache();
     return NextResponse.json({ user: updated });
   } catch (error) {
     console.error('Profile update error:', error);

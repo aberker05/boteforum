@@ -162,30 +162,25 @@ function CodeBlockContainer({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="my-4 rounded-2xl overflow-hidden border border-slate-800 bg-[#0b0f19] shadow-lg group relative">
+    <div className="my-4 rounded-md overflow-hidden border border-[#232730] bg-[#0D0F12] group relative">
       {/* Üst Kod Başlık Çubuğu */}
-      <div className="flex items-center justify-between px-4 py-2.5 bg-slate-900/95 border-b border-slate-800/90 text-xs text-slate-400">
+      <div className="flex items-center justify-between px-3.5 py-2 bg-[#15181E] border-b border-[#232730] text-xs font-mono text-[#8B949E]">
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 mr-1">
-            <span className="w-2.5 h-2.5 rounded-full bg-rose-500/80" />
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
-          </div>
-          <Terminal className="w-3.5 h-3.5 text-indigo-400" />
-          <span className="font-mono font-bold uppercase tracking-wider text-[11px] text-slate-200">
+          <Terminal className="w-3.5 h-3.5 text-[#10B981]" />
+          <span className="font-bold uppercase tracking-wider text-[11px] text-[#E6EDF3]">
             {language}
           </span>
-          <span className="text-[11px] text-slate-500">• {lineCount} satır</span>
+          <span className="text-[11px] text-[#8B949E]">• {lineCount} satır</span>
         </div>
 
         <div className="flex items-center gap-1.5">
           <button
             type="button"
             onClick={() => setWordWrap(!wordWrap)}
-            className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-medium transition-colors cursor-pointer ${
+            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[11px] font-medium transition-colors cursor-pointer border ${
               wordWrap
-                ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40'
-                : 'bg-slate-800/80 hover:bg-slate-700 text-slate-400 border border-slate-700/80'
+                ? 'bg-[#10B981]/15 text-[#10B981] border-[#10B981]/40'
+                : 'bg-[#0D0F12] hover:border-[#343B48] text-[#8B949E] border-[#232730]'
             }`}
             title="Satır Kaydırmayı Aç/Kapat"
           >
@@ -196,22 +191,22 @@ function CodeBlockContainer({ children }: { children: React.ReactNode }) {
           <button
             type="button"
             onClick={handleCopy}
-            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+            className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-sm text-[11px] font-semibold transition-colors cursor-pointer border ${
               copied
-                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
-                : 'bg-indigo-600/90 hover:bg-indigo-500 text-white border border-indigo-500/40 shadow-xs'
+                ? 'bg-[#10B981]/15 text-[#10B981] border-[#10B981]/40'
+                : 'bg-[#10B981] hover:bg-[#059669] text-[#0D0F12] border-[#10B981]'
             }`}
             title="Kodu Panoya Kopyala"
           >
             {copied ? (
               <>
-                <Check className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Kopyalandı!</span>
+                <Check className="w-3 h-3" />
+                <span>Kopyalandı</span>
               </>
             ) : (
               <>
-                <Copy className="w-3.5 h-3.5" />
-                <span>Kodu Kopyala</span>
+                <Copy className="w-3 h-3" />
+                <span>Kopyala</span>
               </>
             )}
           </button>
@@ -219,11 +214,11 @@ function CodeBlockContainer({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Satır Numaralı Kod İçeriği */}
-      <div className="flex overflow-x-auto text-xs sm:text-sm font-mono leading-relaxed">
+      <div className="flex overflow-x-auto text-xs sm:text-[13px] font-mono leading-relaxed custom-scrollbar">
         {lineCount > 1 && (
           <div
             aria-hidden="true"
-            className="select-none py-4 pl-3.5 pr-2.5 text-right text-slate-600 bg-slate-950/50 border-r border-slate-800/60 shrink-0"
+            className="select-none py-3.5 pl-3 pr-2.5 text-right text-[#8B949E]/60 bg-[#0D0F12] border-r border-[#232730] shrink-0"
           >
             {lines.map((_, idx) => (
               <div key={idx}>{idx + 1}</div>
@@ -231,7 +226,7 @@ function CodeBlockContainer({ children }: { children: React.ReactNode }) {
           </div>
         )}
         <pre
-          className={`!my-0 !rounded-none !border-0 !bg-transparent flex-1 p-4 text-slate-100 ${
+          className={`!my-0 !rounded-none !border-0 !bg-transparent flex-1 p-3.5 text-[#E6EDF3] ${
             wordWrap ? 'whitespace-pre-wrap break-words' : 'overflow-x-auto'
           }`}
         >
@@ -247,6 +242,15 @@ export const MarkdownRenderer = React.memo(function MarkdownRenderer({
   className = '',
 }: MarkdownRendererProps) {
   const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string } | null>(null);
+
+  React.useEffect(() => {
+    if (!lightboxImage) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightboxImage(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [lightboxImage]);
 
   return (
     <>
