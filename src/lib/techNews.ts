@@ -102,6 +102,22 @@ export const DEFAULT_NEWS_IMAGES_BY_SLUG: Record<string, string> = {
     'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80',
   'rust-tabanli-ultra-hizli-web-arac-zincirleri-ve-sunucusuz-edge-veritabanlari':
     'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=1200&q=80',
+  'acik-agirlikli-akil-yuruten-modeller-ve-yerel-cikarim-sunucularinda-yeni-standart':
+    'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=1200&q=80',
+  'bote-ve-akademik-arastirmalarda-yapay-zeka-okuryazarligi-ve-acik-bilim-standartlari':
+    'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1200&q=80',
+  'react-19-ve-nextjs-use-cache-mimarisiyle-hibrit-web-uygulamalarinda-sifir-gecikme':
+    'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80',
+  'passkey-zorunlulugu-ve-cihaza-bagli-oturum-kimlikleriyle-sifresiz-guvenlik-donemi':
+    'https://images.unsplash.com/photo-1614064641938-3bbee52942c7?auto=format&fit=crop&w=1200&q=80',
+  'hbm4-bellekler-ve-cxl-3-1-havuzlama-mimarisi-yapay-zeka-sunucularinda-bellek-duvarini-yikiyor':
+    'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=1200&q=80',
+  'wifi-7-coklu-baglanti-mlo-ve-veri-merkezlerinde-800g-ultra-ethernet-donemi':
+    'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=1200&q=80',
+  'bulut-yerel-mimaride-webassembly-mikro-konteynerler-ve-otonom-finops-optimizasyonu':
+    'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80',
+  'nukleer-fuzyon-reaktorlerinde-yuksek-sicaklik-superiletken-miknatislar-ve-veri-merkezi-enerjisi':
+    'https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=1200&q=80',
 };
 
 export const TECH_NEWS_PRESET_COVERS = [
@@ -172,7 +188,7 @@ const INITIAL_NEWS: Omit<TechNewsItem, 'id'>[] = [
     title: 'Otonom Yazılım Ajanları ve Çoklu-Model Mimarilerinde Yeni Dönem',
     slug: 'otonom-yazilim-ajanlari-ve-coklu-model-mimarilerinde-yeni-donem',
     summary:
-      'Yeni nesil akıl yürüten (reasoning) modeller artık tek başına kod yazmakla kalmıyor; uçtan uca test, güvenlik taraması ve mimari重构 (refactoring) süreçlerini otonom yürütüyor.',
+      'Yeni nesil akıl yürüten (reasoning) modeller artık tek başına kod yazmakla kalmıyor; uçtan uca test, güvenlik taraması ve mimari yeniden yapılandırma (refactoring) süreçlerini otonom yürütüyor.',
     content: `### Yazılım Geliştirmede Ajan (Agentic) Devrimi
 
 2026 itibarıyla büyük dil modelleri (LLM), yalnızca metin veya kod tamamlayan yardımcılar olmaktan çıkıp **uzun süreli görevleri planlayabilen otonom mühendislik ajanlarına** dönüştü.
@@ -445,6 +461,190 @@ Klasik rasterizasyon tekniklerinin yerini tamamen **Sinirsel İşleme (Neural Re
     views: 310,
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 36).toISOString(),
   },
+  {
+    title: 'Açık Ağırlıklı Akıl Yürüten Modeller ve Yerel Çıkarım Sunucularında Yeni Standart',
+    slug: 'acik-agirlikli-akil-yuruten-modeller-ve-yerel-cikarim-sunucularinda-yeni-standart',
+    summary:
+      'Doğrulanabilir ödüllerle pekiştirmeli öğrenme (RLVR) ve KV-Cache sıkıştırma mimarileri sayesinde açık ağırlıklı modeller, şirket içi sunucularda bulut API maliyetlerini %85 düşürerek sınır modellere yetişti.',
+    content: `### Kurumsal Yapay Zekada Açık Ağırlıklı (Open-Weight) Dönüm Noktası
+
+Kapalı kaynaklı dev modellere bağımlılık, **doğrulanabilir ödüllerle eğitilen açık ağırlıklı akıl yürütme (reasoning) modellerinin** yükselişiyle yerini hibrit ve yerel (on-premise) çıkarım mimarilerine bırakıyor.
+
+#### Mimarideki 3 Kritik Atılım
+1. **RLVR (Reinforcement Learning with Verifiable Rewards):** Matematiksel ispatlar, birim testleri ve derleyici çıktıları üzerinden kendi düşünce zincirini (Chain-of-Thought) doğrulayan modeller, halüsinasyon oranlarını radikal biçimde aşağı çekti.
+2. **MLA ve FP8 KV-Cache Sıkıştırma:** Uzun bağlam (128K+ token) pencerelerinde bellek darboğazını çözen Multi-head Latent Attention (MLA) tekniği, tek bir iş istasyonu GPU'sunda yüksek eşzamanlı istek (throughput) sunulmasını sağlıyor.
+3. **vLLM ve SGLang Üretim Motorları:** Önek önbellekleme (Prefix Caching) ve spekülatif kod çözme (Speculative Decoding) ile token üretim hızı saniyede yüzlerce token seviyesine ulaştı.
+
+\`\`\`bash
+# vLLM ile yerel FP8 nicelenmiş akıl yürütme modeli servisi başlatma
+vllm serve Qwen/QwQ-32B-FP8 \\
+  --enable-prefix-caching \\
+  --max-model-len 65536 \\
+  --kv-cache-dtype fp8 \\
+  --reasoning-parser deepseek_r1
+\`\`\`
+
+Veri mahremiyeti gerektiren finans, sağlık, savunma ve üniversite araştırma ağları artık verilerini dışarı çıkarmadan kendi özel yapay zeka kümelerini işletebiliyor.`,
+    category: 'Yapay Zeka',
+    badgeColor: '#10b981',
+    source: 'OpenAI & Sistem Mimarisi',
+    readTime: '5 dk okuma',
+    isFeatured: 1,
+    views: 642,
+    createdAt: new Date(Date.now() - 1000 * 60 * 25).toISOString(),
+  },
+  {
+    title: 'BÖTE ve Akademik Araştırmalarda Yapay Zeka Okuryazarlığı ve Açık Bilim Standartları',
+    slug: 'bote-ve-akademik-arastirmalarda-yapay-zeka-okuryazarligi-ve-acik-bilim-standartlari',
+    summary:
+      'Üniversitelerin BÖTE ve mühendislik bölümlerinde öğretim tasarımı müfredatı; doğrulanabilir veri setleri, tekrarlanabilir kod defterleri ve pedagojik yapay zeka etiği ekseninde yeniden şekilleniyor.',
+    content: `### Akademide ve Öğretim Teknolojilerinde Yeni Yetkinlik Çerçevesi
+
+Üretken yapay zeka araçlarının yaygınlaşmasıyla birlikte, Bilgisayar ve Öğretim Teknolojileri Eğitimi (**BÖTE**) ile mühendislik fakültelerinde ölçme-değerlendirme ve akademik yayın standartları köklü biçimde güncelleniyor.
+
+#### Öne Çıkan Akademik ve Pedagojik Uygulamalar
+- **Süreç Odaklı Ölçme ve Değerlendirme:** Yalnızca sonuç raporu yerine; öğrencinin problem çözme adımlarını, Git sürüm geçmişini ve sözlü kod savunmasını merkeze alan otantik değerlendirme rubrikleri yaygınlaşıyor.
+- **Tekrarlanabilir Açık Bilim (Reproducible Science):** Akademik makalelerde ham veri setlerinin ve analiz betiklerinin konteynerleştirilmiş çalışma ortamlarıyla birlikte paylaşılması hakemli dergilerde temel kriter haline geldi.
+- **Eleştirel Yapay Zeka Okuryazarlığı:** Öğretmen adaylarına ve araştırmacılara yalnızca istem (prompt) mühendisliği değil; algoritmik önyargı analizi, kaynak doğrulama ve veri gizliliği ilkeleri uygulamalı olarak kazandırılıyor.`,
+    category: 'BÖTE & Akademi',
+    badgeColor: '#0ea5e9',
+    source: 'Akademik Bilişim Raporu',
+    readTime: '4 dk okuma',
+    isFeatured: 1,
+    views: 518,
+    createdAt: new Date(Date.now() - 1000 * 60 * 95).toISOString(),
+  },
+  {
+    title: 'React 19 ve Next.js Önbellek Mimarisiyle Hibrit Web Uygulamalarında Sıfır Gecikme',
+    slug: 'react-19-ve-nextjs-use-cache-mimarisiyle-hibrit-web-uygulamalarinda-sifir-gecikme',
+    summary:
+      'Kısmi Ön Oluşturma (Partial Prerendering), derleyici düzeyinde otomatik memoization ve açık önbellek direktifleri sayesinde dinamik web uygulamaları statik site hızında açılıyor.',
+    content: `### Modern Tam Yığın (Full-Stack) Web Mimarilerinde Yeni Dönem
+
+Geleneksel SPA (Single Page Application) ile klasik SSR arasındaki ödünleşimler, **statik kabuk + akışkan dinamik adalar (Streaming Islands)** mimarisiyle tamamen ortadan kalkıyor.
+
+#### Öne Çıkan Mühendislik Yenilikleri
+1. **React Compiler ile Otomatik Optimizasyon:** Bileşen ağacındaki gereksiz yeniden çizimleri (re-render) derleme aşamasında analiz eden derleyici, manuel \`useMemo\` ve \`useCallback\` karmaşasını sona erdiriyor.
+2. **İnce Taneli \`use cache\` Kontrolü:** Sayfa düzeyinde katı önbellekleme yerine fonksiyon ve bileşen bazında etiketlenebilir (\`cacheTag\`) önbellek stratejisiyle veri güncelliği milisaniyeler içinde korunuyor.
+3. **Sunucu Eylemlerinde (Server Actions) Sıfır Güven İlkesi:** Her sunucu eyleminin tıpkı açık bir HTTP uç noktası gibi şema doğrulaması ve oturum kontrolünden geçirilmesi standart güvenlik pratiği olarak benimseniyor.
+
+\`\`\`tsx
+// Örnek: Etiket bazlı önbelleğe alınan sunucu veri katmanı
+import { unstable_cacheTag as cacheTag } from 'next/cache';
+
+export async function getCachedCategoryStats(slug: string) {
+  'use cache';
+  cacheTag(\`category-\${slug}\`);
+  return db.category.findUnique({ where: { slug }, include: { _count: true } });
+}
+\`\`\``,
+    category: 'Web & Yazılım',
+    badgeColor: '#3b82f6',
+    source: 'Frontend Architecture Digest',
+    readTime: '4 dk okuma',
+    isFeatured: 0,
+    views: 476,
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString(),
+  },
+  {
+    title: 'Passkey Zorunluluğu ve Cihaza Bağlı Oturum Kimlikleriyle Şifresiz Güvenlik Dönemi',
+    slug: 'passkey-zorunlulugu-ve-cihaza-bagli-oturum-kimlikleriyle-sifresiz-guvenlik-donemi',
+    summary:
+      'FIDO2/WebAuthn tabanlı geçiş anahtarları (Passkeys) ve çerez çalınmasını engelleyen DBSC (Device Bound Session Credentials) protokolü, oltalama ve oturum gaspı saldırılarını etkisizleştiriyor.',
+    content: `### Kimlik Doğrulamada Parola ve SMS OTP Sonrası Çağ
+
+Veri ihlallerinin %80'inden fazlasına kaynaklık eden zayıf parolalar ve SIM kopyalama saldırılarına açık SMS doğrulama kodları, yerini kriptografik **Passkey** ve **DBSC** standartlarına bırakıyor.
+
+#### Güvenlik Mimarisi Nasıl Çalışıyor?
+- **Asimetrik Anahtar Çifti ve TPM Koruması:** Özel anahtar kullanıcının cihazındaki güvenli donanım modülünden (Secure Enclave / TPM) asla dışarı çıkmaz; sunucuda yalnızca açık anahtar tutulur.
+- **Alan Adı Bağlama (Origin Binding):** Sahte bir oltalama (phishing) sitesi gerçek alan adını taklit etse bile tarayıcı kriptografik imzayı üretmeyi reddeder.
+- **DBSC ile Çerez Hırsızlığına Son:** Zararlı yazılımlar oturum çerezini kopyalasa dahi, kısa ömürlü oturum yenileme istekleri fiziksel cihazın donanım anahtarıyla imzalanmadığı için başka bilgisayarda kullanılamaz.`,
+    category: 'Siber Güvenlik',
+    badgeColor: '#f43f5e',
+    source: 'ZeroTrust Security Lab',
+    readTime: '4 dk okuma',
+    isFeatured: 0,
+    views: 438,
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 7).toISOString(),
+  },
+  {
+    title: 'HBM4 Bellekler ve CXL 3.1 Havuzlama Mimarisi Yapay Zeka Sunucularında Bellek Duvarını Yıkıyor',
+    slug: 'hbm4-bellekler-ve-cxl-3-1-havuzlama-mimarisi-yapay-zeka-sunucularinda-bellek-duvarini-yikiyor',
+    summary:
+      '2048-bit veri yoluna sahip HBM4 yığın bellekler ve sunucular arası paylaşımlı RAM havuzu kuran CXL 3.1 standardı, trilyon parametreli modellerin bellek bant genişliği darboğazını aşıyor.',
+    content: `### İşlem Gücü Değil, Veri Taşıma Hızı Belirleyici Oldu
+
+Modern yapay zeka hızlandırıcılarında aritmetik işlem kapasitesi (FLOPS) hızla artarken, ağırlıkların bellekten işlem çekirdeklerine taşınması sırasında yaşanan **"Bellek Duvarı" (Memory Wall)** en büyük mühendislik engeli haline gelmişti.
+
+#### Donanım Cephesindeki Çözümler
+1. **2048-Bit Arayüzlü HBM4:** Önceki nesle göre veri yolu genişliğini ikiye katlayan HBM4 istifleri, yığın başına saniyede 2 Terabayt'ı aşan bant genişliği ve özel mantık tabanı (base logic die) sunuyor.
+2. **CXL 3.1 (Compute Express Link) Bellek Kumaşı:** Birden fazla CPU ve GPU düğümünün aynı fiziksel bellek havuzuna önbellek tutarlılığıyla (cache-coherent) erişmesini sağlayarak atıl RAM kapasitesini ortadan kaldırıyor.`,
+    category: 'Donanım & Çip',
+    badgeColor: '#f59e0b',
+    source: 'Silicon & Systems Review',
+    readTime: '3 dk okuma',
+    isFeatured: 0,
+    views: 364,
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 10).toISOString(),
+  },
+  {
+    title: 'Wi-Fi 7 Çoklu Bağlantı (MLO) ve Veri Merkezlerinde 800G Ultra Ethernet Dönemi',
+    slug: 'wifi-7-coklu-baglanti-mlo-ve-veri-merkezlerinde-800g-ultra-ethernet-donemi',
+    summary:
+      '2.4 GHz, 5 GHz ve 6 GHz bantlarını tek bir sanal boruda birleştiren Wi-Fi 7 MLO teknolojisi kablosuz ağlarda kablolu gecikme kararlılığı sunarken, veri merkezlerinde 800G Ultra Ethernet küme iletişimini hızlandırıyor.',
+    content: `### Kampüs Ağlarından Yapay Zeka Kümelerine Yeni Nesil İletişim
+
+Ağ mühendisliğinde hem son kullanıcı erişim katmanında hem de omurga veri merkezlerinde paket kaybını ve gecikme titremesini (jitter) minimize eden iki büyük standart sahaya indi.
+
+- **Wi-Fi 7 (IEEE 802.11be) ve MLO:** Cihazların aynı anda birden fazla frekans bandından veri gönderip almasını sağlayan Multi-Link Operation (MLO) ve 320 MHz kanallar sayesinde parazitli ortamlarda bile 2 milisaniyenin altında kararlı gecikme elde ediliyor.
+- **800G Ultra Ethernet (UEC):** Büyük ölçekli GPU kümelerinde RDMA (Remote Direct Memory Access) trafiğini açık standart Ethernet üzerinde paket bazlı yük dengelemeyle taşıyarak kapalı ağ protokollerine güçlü bir alternatif oluşturuyor.`,
+    category: 'Veri Bilimi & Ağ',
+    badgeColor: '#06b6d4',
+    source: 'NetEng & Infra Radar',
+    readTime: '3 dk okuma',
+    isFeatured: 0,
+    views: 329,
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 14).toISOString(),
+  },
+  {
+    title: 'Bulut-Yerel Mimaride WebAssembly Mikro-Konteynerler ve Otonom FinOps Optimizasyonu',
+    slug: 'bulut-yerel-mimaride-webassembly-mikro-konteynerler-ve-otonom-finops-optimizasyonu',
+    summary:
+      'Kubernetes kümelerinde Linux konteynerleriyle yan yana koşan Wasm iş yükleri bellek tüketimini %80 azaltırken, telemetri güdümlü FinOps ajanları bulut faturalarındaki atıl kaynak israfını anlık kapatıyor.',
+    content: `### Bulut Altyapılarında Verimlilik ve Anlık Ölçeklenme
+
+Mikroservis mimarilerinde her küçük API uç noktası için tam bir işletim sistemi katmanı barındıran konteynerler ayağa kaldırmak yüksek bellek ve soğuk başlangıç maliyetine yol açıyordu.
+
+#### Bulut Mühendisliğinde Yeni Yaklaşımlar
+1. **Kubernetes Üzerinde Wasm (SpinKube & wasmCloud):** Megabayt yerine kilobayt boyutundaki WebAssembly modülleri milisaniyenin altında sıfırdan yüzlerce kopyaya ölçeklenip istek bittiğinde sıfıra inebiliyor (scale-to-zero).
+2. **Otonom FinOps Politikaları:** Prometheus ve OpenTelemetry metriklerini sürekli izleyen orkestrasyon katmanı, düşük trafikli saatlerde iş yüklerini spot düğümlere ve ARM64 işlemcilere kesintisiz taşıyarak bulut maliyetlerinde %45'e varan tasarruf sağlıyor.`,
+    category: 'Mobil & Bulut',
+    badgeColor: '#ec4899',
+    source: 'Cloud Native Weekly',
+    readTime: '4 dk okuma',
+    isFeatured: 0,
+    views: 284,
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 20).toISOString(),
+  },
+  {
+    title: 'Nükleer Füzyon Reaktörlerinde Yüksek Sıcaklık Süperiletken Mıknatıslar ve Veri Merkezi Enerjisi',
+    slug: 'nukleer-fuzyon-reaktorlerinde-yuksek-sicaklik-superiletken-miknatislar-ve-veri-merkezi-enerjisi',
+    summary:
+      'REBCO yüksek sıcaklık süperiletken şeritleri ve derin pekiştirmeli öğrenme tabanlı plazma kontrolü, kompakt tokamak reaktörlerini ticari temiz enerji şebekesine bir adım daha yaklaştırıyor.',
+    content: `### Yapay Zeka Çağında Sürdürülebilir Baz Yük Enerji Arayışı
+
+Küresel veri merkezlerinin elektrik talebi katlanarak büyürken, kesintisiz ve sıfır karbonlu baz yük enerji sağlayacak **kompakt füzyon ve yeni nesil modüler reaktör** teknolojilerinde tarihi mühendislik eşikleri aşılıyor.
+
+- **20 Tesla Üstü HTS Mıknatıslar:** Nadir toprak baryum bakır oksit (REBCO) süperiletken şeritler, çok daha küçük hacimli tokamak odalarında çok daha güçlü manyetik hapsetme alanı üretebiliyor.
+- **Yapay Zeka ile Milisaniye Plazma Kararlılığı:** Yüzlerce manyetik bobini saniyede binlerce kez ayarlayan sinir ağları, plazma yırtılmalarını (tearing modes) oluşmadan milisaniyeler önce sönümlüyor.`,
+    category: 'Uzay & Bilim',
+    badgeColor: '#8b5cf6',
+    source: 'CleanTech & Energy Lab',
+    readTime: '3 dk okuma',
+    isFeatured: 0,
+    views: 356,
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 26).toISOString(),
+  },
 ];
 
 const globalForTechNews = globalThis as unknown as {
@@ -485,12 +685,26 @@ export async function ensureTechNewsTable() {
   `;
   const existingSlugs = new Set(existingRows.map((r) => r.slug));
 
-  if (existingSlugs.size < INITIAL_NEWS.length) {
-    for (let i = 0; i < INITIAL_NEWS.length; i++) {
+  const hasWave2 = INITIAL_NEWS.slice(6, 12).some((s) =>
+    existingSlugs.has(s.slug)
+  );
+  const hasWave3 = INITIAL_NEWS.slice(12).some((s) =>
+    existingSlugs.has(s.slug)
+  );
+
+  let startSeedIndex = INITIAL_NEWS.length;
+  if (existingSlugs.size === 0) {
+    startSeedIndex = 0;
+  } else if (!hasWave2) {
+    startSeedIndex = 6;
+  } else if (!hasWave3) {
+    startSeedIndex = 12;
+  }
+
+  if (startSeedIndex < INITIAL_NEWS.length) {
+    for (let i = startSeedIndex; i < INITIAL_NEWS.length; i++) {
       const item = INITIAL_NEWS[i];
       if (existingSlugs.has(item.slug)) continue;
-      // Eğer başlangıçtaki ilk 6 haber zaten varsa sadece yeni eklenen (i >= 6) özel dosyaları otomatik tamamla
-      if (existingSlugs.size > 0 && i < 6) continue;
 
       const id = `news_seed_2026_${i + 1}`;
       const cleanTitle = item.title.trim();
@@ -498,7 +712,7 @@ export async function ensureTechNewsTable() {
       await prisma.$executeRaw`
         INSERT INTO "TechNews" ("id", "title", "slug", "summary", "content", "category", "badgeColor", "source", "readTime", "isFeatured", "views", "createdAt", "imageUrl")
         VALUES (${id}, ${cleanTitle}, ${item.slug}, ${item.summary}, ${item.content}, ${item.category}, ${item.badgeColor}, ${item.source}, ${item.readTime}, ${item.isFeatured}, ${item.views}, ${item.createdAt}, ${imgUrl})
-        ON CONFLICT ("id") DO NOTHING
+        ON CONFLICT ("slug") DO NOTHING
       `.catch(async () => {
         // SQLite/Postgres uyumluluğu için yedek INSERT
         await prisma.$executeRaw`
@@ -507,6 +721,7 @@ export async function ensureTechNewsTable() {
         `.catch(() => {});
       });
     }
+    invalidateTechNewsCache();
   }
 
   await prisma.$executeRaw`
@@ -578,17 +793,19 @@ export async function getAllTechNews(category?: string, search?: string): Promis
         `,
       ]);
 
-      // Tablo boşsa yalnızca ilk kurulumda senkron oluştur; yeni eklenen (6->12) dosyalar eksikse yanıtı hiç bekletmeden arka planda tamamla
-      if (items.length === 0 && !globalForTechNews.techNewsInitialized) {
+      const hasWave3 = INITIAL_NEWS.slice(12).some((seed) =>
+        items.some((row) => row.slug === seed.slug)
+      );
+
+      // Tablo boşsa veya yeni eklenen güncel haber paketi henüz veritabanına işlenmemişse senkron tamamla ve anında listeye yansıt
+      if (
+        (items.length === 0 || !hasWave3) &&
+        !globalForTechNews.techNewsInitialized
+      ) {
         await ensureTechNewsTable();
         items = await prisma.$queryRaw<TechNewsItem[]>`
           SELECT * FROM "TechNews" ORDER BY "isFeatured" DESC, "createdAt" DESC
         `;
-      } else if (
-        items.length < INITIAL_NEWS.length &&
-        !globalForTechNews.techNewsInitialized
-      ) {
-        void ensureTechNewsTable().catch(() => {});
       }
     } catch {
       await ensureTechNewsTable();

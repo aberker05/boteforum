@@ -188,7 +188,6 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
     });
 
   const featuredNews = filteredNews.filter((n) => Number(n.isFeatured) === 1);
-  const regularNews = filteredNews.filter((n) => Number(n.isFeatured) !== 1);
   const topTrendingNews = [...initialNews]
     .sort((a, b) => (Number(b.views) || 0) - (Number(a.views) || 0))
     .slice(0, 4);
@@ -208,6 +207,11 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
   const sideFeaturedItems = featuredNews.filter(
     (item) => !activeHeroItem || item.id !== activeHeroItem.id
   );
+  const visibleShowcaseIds = new Set<string>([
+    ...(activeHeroItem ? [activeHeroItem.id] : []),
+    ...sideFeaturedItems.slice(0, 3).map((item) => item.id),
+  ]);
+  const gridNews = filteredNews.filter((n) => !visibleShowcaseIds.has(n.id));
   const currentRadarItem = radarItems[radarIdx] || radarItems[0] || null;
 
   const handleCreateNews = async (e: React.FormEvent) => {
@@ -333,7 +337,8 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
           {radarItems.length > 1 && (
             <div className="flex items-center gap-1 shrink-0 font-mono pl-2 border-l border-[#232730]">
               <span className="hidden sm:inline text-[10px] text-[#8B949E] mr-1 tabular-nums">
-                0{radarIdx + 1}/0{radarItems.length}
+                {String(radarIdx + 1).padStart(2, '0')}/
+                {String(radarItems.length).padStart(2, '0')}
               </span>
               <button
                 type="button"
@@ -609,7 +614,7 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
                         : 'bg-[#15181E] border-[#232730] text-[#8B949E] hover:text-[#E6EDF3]'
                     }`}
                   >
-                    0{idx + 1}
+                    {String(idx + 1).padStart(2, '0')}
                   </button>
                 ))}
               </div>
@@ -909,7 +914,7 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {(regularNews.length > 0 ? regularNews : filteredNews).map((item) => (
+            {(gridNews.length > 0 ? gridNews : filteredNews).map((item) => (
               <div
                 key={item.id}
                 className="group rounded-md overflow-hidden border border-[#232730] bg-[#15181E] hover:border-[#10B981]/55 transition-colors flex flex-col justify-between relative"
