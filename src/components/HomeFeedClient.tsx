@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Flame,
   Clock,
@@ -101,8 +101,10 @@ export function HomeFeedClient({
   initialFilter,
   initialSearch,
 }: HomeFeedClientProps) {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [threads, setThreads] = useState<HomeThreadItem[]>(initialThreads);
+  const [focusedIdx, setFocusedIdx] = useState<number>(-1);
 
   useEffect(() => {
     setThreads(initialThreads);
@@ -324,6 +326,99 @@ export function HomeFeedClient({
     [filteredAndSortedThreads, currentPage]
   );
 
+  // Filtre veya sayfa değiştiğinde klavye seçili konu indeksini sıfırla
+  useEffect(() => {
+    setFocusedIdx(-1);
+  }, [activeCategory, activeTag, filterBy, searchQuery, sortBy, currentPage]);
+
+  // Ana Sayfa Klavye Kısayolları (j/k konu gezinme, Enter/o açma, 1/2/3 filtre, v görünüm, x sıfırla)
+  useEffect(() => {
+    const handleFeedKeyDown = (e: KeyboardEvent) => {
+      const target = e.target;
+      if (
+        target instanceof HTMLElement &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.tagName === 'SELECT' ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+      const key = e.key.toLowerCase();
+
+      if (key === 'j' && !e.shiftKey && paginatedThreads.length > 0) {
+        e.preventDefault();
+        setFocusedIdx((prev) => {
+          const next = Math.min(paginatedThreads.length - 1, prev + 1);
+          const el = document.getElementById(`feed-thread-${next}`);
+          el?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          return next;
+        });
+        return;
+      }
+
+      if (key === 'k' && !e.shiftKey && paginatedThreads.length > 0) {
+        e.preventDefault();
+        setFocusedIdx((prev) => {
+          const next = prev <= 0 ? 0 : prev - 1;
+          const el = document.getElementById(`feed-thread-${next}`);
+          el?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          return next;
+        });
+        return;
+      }
+
+      if (
+        (e.key === 'Enter' || (key === 'o' && !e.shiftKey)) &&
+        focusedIdx >= 0 &&
+        focusedIdx < paginatedThreads.length
+      ) {
+        // Odakta başka bir buton/link yoksa seçili konuyu aç
+        if (
+          document.activeElement === document.body ||
+          document.activeElement === document.documentElement
+        ) {
+          e.preventDefault();
+          router.push(`/konu/${paginatedThreads[focusedIdx].slug}`);
+        }
+        return;
+      }
+
+      if (e.key === '1') {
+        e.preventDefault();
+        selectFilter('');
+        return;
+      }
+      if (e.key === '2') {
+        e.preventDefault();
+        selectFilter('cevapsiz');
+        return;
+      }
+      if (e.key === '3') {
+        e.preventDefault();
+        selectFilter('cozuldu');
+        return;
+      }
+      if (key === 'v' && !e.shiftKey) {
+        e.preventDefault();
+        setViewMode((prev) => (prev === 'card' ? 'compact' : 'card'));
+        return;
+      }
+      if (key === 'x' && !e.shiftKey) {
+        if (activeCategory || activeTag || filterBy || searchQuery || catCatalogOpen) {
+          e.preventDefault();
+          setCatCatalogOpen(false);
+          clearAllFilters();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleFeedKeyDown);
+    return () => window.removeEventListener('keydown', handleFeedKeyDown);
+  });
+
   // Popüler etiketler
   const popularTags = useMemo(() => {
     const tagCounts: Record<string, number> = {};
@@ -461,6 +556,14 @@ export function HomeFeedClient({
                       setSearchQuery(e.target.value);
                       setCurrentPage(1);
                       syncUrl({ q: e.target.value });
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') {
+                        e.stopPropagation();
+                        setSearchQuery('');
+                        syncUrl({ q: '' });
+                        e.currentTarget.blur();
+                      }
                     }}
                     placeholder="Tartışmalarda, kod bloklarında veya #etiketlerde filtrele..."
                     className="w-full pl-10 pr-24 py-2.5 rounded-md text-xs sm:text-sm bg-[#0D0F12] border border-[#232730] text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:border-[#10B981] transition-colors font-mono"
@@ -1543,29 +1646,47 @@ export function HomeFeedClient({
             </div>
 
             <div>
-              {paginatedThreads.map((thread) => (
-                <ThreadCard
+              {paginatedThreads.map((thread, idx) => (
+                <div
                   key={thread.id}
-                  thread={thread}
-                  isLoggedIn={isLoggedIn}
-                  canModerate={canModerate}
-                  compact={true}
-                  onDeleted={handleThreadDeleted}
-                />
+                  id={`feed-thread-${idx}`}
+                  className={
+                    focusedIdx === idx
+                      ? 'ring-1 ring-inset ring-[#10B981] bg-[#10B981]/5'
+                      : ''
+                  }
+                >
+                  <ThreadCard
+                    thread={thread}
+                    isLoggedIn={isLoggedIn}
+                    canModerate={canModerate}
+                    compact={true}
+                    onDeleted={handleThreadDeleted}
+                  />
+                </div>
               ))}
             </div>
           </div>
         ) : (
           <div className="space-y-2.5">
-            {paginatedThreads.map((thread) => (
-              <ThreadCard
+            {paginatedThreads.map((thread, idx) => (
+              <div
                 key={thread.id}
-                thread={thread}
-                isLoggedIn={isLoggedIn}
-                canModerate={canModerate}
-                compact={false}
-                onDeleted={handleThreadDeleted}
-              />
+                id={`feed-thread-${idx}`}
+                className={`rounded-md transition-all ${
+                  focusedIdx === idx
+                    ? 'ring-1 ring-[#10B981]'
+                    : ''
+                }`}
+              >
+                <ThreadCard
+                  thread={thread}
+                  isLoggedIn={isLoggedIn}
+                  canModerate={canModerate}
+                  compact={false}
+                  onDeleted={handleThreadDeleted}
+                />
+              </div>
             ))}
           </div>
         )}

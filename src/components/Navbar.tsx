@@ -25,6 +25,7 @@ import {
   ArrowRight,
   CornerDownLeft,
   Lock,
+  Keyboard,
 } from 'lucide-react';
 import { useTheme } from './ThemeProvider';
 import { NotificationBell } from './NotificationBell';
@@ -121,6 +122,8 @@ export function Navbar({
   const [sessionPref, setSessionPref] = useState<'ask' | 'close' | 'keep'>('ask');
   const [exitPromptOpen, setExitPromptOpen] = useState(false);
   const [autoLoggingOut, setAutoLoggingOut] = useState(false);
+  const [shortcutsModalOpen, setShortcutsModalOpen] = useState(false);
+  const [gChordActive, setGChordActive] = useState(false);
 
   // Canlı arama önerileri (Autocomplete) durumları
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
@@ -282,26 +285,181 @@ export function Navbar({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Ctrl+K veya "/" ile arama kutusuna odaklanma
+  // Global Klavye Kısayolları Motoru (Linear & GitHub Discussions Standardı)
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
+    let chordTimer: number | undefined;
+    let awaitingGoto = false;
+
+    const isEditable = (el: EventTarget | null) => {
+      if (!(el instanceof HTMLElement)) return false;
+      const tag = el.tagName;
+      return (
+        tag === 'INPUT' ||
+        tag === 'TEXTAREA' ||
+        tag === 'SELECT' ||
+        el.isContentEditable
+      );
+    };
+
+    const focusGlobalSearch = () => {
+      ensureSearchIndex();
+      setSuggestionsOpen(true);
+      if (window.innerWidth < 640) {
+        setMobileSearchOpen(true);
+      } else {
         searchInputRef.current?.focus();
-        setSuggestionsOpen(true);
-      } else if (
-        e.key === '/' &&
-        document.activeElement?.tagName !== 'INPUT' &&
-        document.activeElement?.tagName !== 'TEXTAREA'
-      ) {
-        e.preventDefault();
-        searchInputRef.current?.focus();
-        setSuggestionsOpen(true);
+        searchInputRef.current?.select();
       }
     };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl+K / Cmd+K: Her yerden hızlı arama
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setShortcutsModalOpen(false);
+        focusGlobalSearch();
+        return;
+      }
+
+      // Escape: Açık pencereleri kapat veya aktif input odağını kaldır
+      if (e.key === 'Escape') {
+        if (shortcutsModalOpen) {
+          setShortcutsModalOpen(false);
+          return;
+        }
+        if (suggestionsOpen) {
+          setSuggestionsOpen(false);
+          return;
+        }
+        if (menuOpen) {
+          setMenuOpen(false);
+          return;
+        }
+        if (exitPromptOpen) {
+          setExitPromptOpen(false);
+          return;
+        }
+        if (awaitingGoto) {
+          awaitingGoto = false;
+          setGChordActive(false);
+          return;
+        }
+        if (document.activeElement instanceof HTMLElement && isEditable(document.activeElement)) {
+          document.activeElement.blur();
+        }
+        return;
+      }
+
+      // Kullanıcı bir metin kutusunda yazıyorsa tek tuşlu kısayolları çalıştırma
+      if (isEditable(e.target) || e.ctrlKey || e.metaKey || e.altKey) {
+        return;
+      }
+
+      const key = e.key.toLowerCase();
+
+      // '?' tuşu: Kısayol rehberi modalını aç/kapat
+      if (e.key === '?') {
+        e.preventDefault();
+        setShortcutsModalOpen((prev) => !prev);
+        return;
+      }
+
+      // 'g' ardından ikinci tuş (Go-To Chords: g+h, g+g, g+d, g+k, g+p, g+s, g+a)
+      if (awaitingGoto) {
+        awaitingGoto = false;
+        setGChordActive(false);
+        if (chordTimer) window.clearTimeout(chordTimer);
+
+        if (key === 'h') {
+          e.preventDefault();
+          router.push('/');
+          return;
+        }
+        if (key === 'g' || key === 'n') {
+          e.preventDefault();
+          router.push('/haberler');
+          return;
+        }
+        if (key === 'd') {
+          e.preventDefault();
+          router.push('/destek');
+          return;
+        }
+        if (key === 'k') {
+          e.preventDefault();
+          router.push('/kurallar');
+          return;
+        }
+        if (key === 's' && user) {
+          e.preventDefault();
+          router.push('/?filtre=kaydedilenler');
+          return;
+        }
+        if (key === 'p' && user) {
+          e.preventDefault();
+          router.push(`/kullanici/${user.username}`);
+          return;
+        }
+        if (key === 'a' && user?.role === 'ADMIN') {
+          e.preventDefault();
+          router.push('/admin');
+          return;
+        }
+      }
+
+      if (key === 'g' && !e.shiftKey) {
+        awaitingGoto = true;
+        setGChordActive(true);
+        if (chordTimer) window.clearTimeout(chordTimer);
+        chordTimer = window.setTimeout(() => {
+          awaitingGoto = false;
+          setGChordActive(false);
+        }, 1400);
+        return;
+      }
+
+      // '/' tuşu: Arama kutusuna odaklan
+      if (e.key === '/') {
+        e.preventDefault();
+        focusGlobalSearch();
+        return;
+      }
+
+      // 'c' veya 'n': Yeni Konu Başlat
+      if ((key === 'c' || key === 'n') && !e.shiftKey) {
+        e.preventDefault();
+        router.push(user ? '/yeni-konu' : '/giris');
+        return;
+      }
+
+      // 'r': Konu detay sayfasındayken yanıt kutusuna in ve odaklan
+      if (key === 'r' && !e.shiftKey && pathname.startsWith('/konu/')) {
+        const formEl = document.getElementById('yeni-yorum-formu');
+        if (formEl) {
+          e.preventDefault();
+          formEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          const ta = formEl.querySelector('textarea');
+          if (ta) {
+            window.setTimeout(() => ta.focus(), 120);
+          }
+        }
+      }
+    };
+
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+    return () => {
+      if (chordTimer) window.clearTimeout(chordTimer);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [
+    router,
+    user,
+    pathname,
+    shortcutsModalOpen,
+    suggestionsOpen,
+    menuOpen,
+    exitPromptOpen,
+  ]);
 
   const ensureSearchIndex = async () => {
     if (searchIndex || loadingIndex) return;
@@ -803,6 +961,16 @@ export function Navbar({
               <span className="hidden md:inline">Gündem</span>
             </Link>
 
+            <button
+              type="button"
+              onClick={() => setShortcutsModalOpen(true)}
+              title="Klavye Kısayolları Rehberi [ ? ]"
+              className="hidden sm:inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-mono font-semibold border border-[#232730] bg-[#15181E] text-[#8B949E] hover:border-[#10B981]/60 hover:text-[#10B981] transition-colors cursor-pointer"
+            >
+              <Keyboard className="w-3.5 h-3.5" />
+              <span className="text-[11px]">?</span>
+            </button>
+
             {user ? (
               <>
                 <button
@@ -1219,6 +1387,201 @@ export function Navbar({
               >
                 Gezinmeye Devam Et
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 'g' Hızlı Geçiş Tuş Dizisi Göstergesi (Sağ Alt Köşe) */}
+      {gChordActive && (
+        <div className="fixed bottom-5 right-5 z-50 rounded-md border border-[#10B981]/60 bg-[#15181E] px-3.5 py-2.5 font-mono text-xs text-[#E6EDF3] space-y-1.5">
+          <div className="flex items-center gap-2 text-[#10B981] font-bold">
+            <kbd className="px-1.5 py-0.5 rounded-sm bg-[#0D0F12] border border-[#232730] text-[#10B981]">
+              g
+            </kbd>
+            <span>+ hedef tuşa basın...</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 text-[11px] text-[#8B949E]">
+            <span><strong className="text-[#E6EDF3]">h</strong> Forum</span>
+            <span>•</span>
+            <span><strong className="text-[#E6EDF3]">g</strong> Gündem</span>
+            <span>•</span>
+            <span><strong className="text-[#E6EDF3]">d</strong> Destek</span>
+            <span>•</span>
+            <span><strong className="text-[#E6EDF3]">k</strong> Kurallar</span>
+            {user && (
+              <>
+                <span>•</span>
+                <span><strong className="text-[#E6EDF3]">p</strong> Profil</span>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Klavye Kısayolları Rehberi Modalı ('?' Tuşu veya Üst Menü Butonu) */}
+      {shortcutsModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs"
+          onClick={() => setShortcutsModalOpen(false)}
+        >
+          <div
+            className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-md border border-[#232730] bg-[#15181E] p-5 sm:p-6 space-y-5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between gap-3 pb-3 border-b border-[#232730]">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-md bg-[#0D0F12] border border-[#232730] text-[#10B981] flex items-center justify-center">
+                  <Keyboard className="w-4 h-4" />
+                </div>
+                <div>
+                  <h2 className="text-sm sm:text-base font-bold text-[#E6EDF3]">
+                    Klavye Kısayolları Rehberi
+                  </h2>
+                  <p className="text-[11px] font-mono text-[#8B949E]">
+                    Fare kullanmadan forumda hızlı gezinme, filtreleme ve içerik üretimi
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShortcutsModalOpen(false)}
+                className="p-1.5 rounded-md text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#0D0F12] cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              {/* 1. Genel & Sayfalar Arası Gezinme */}
+              <div className="rounded-md border border-[#232730] bg-[#0D0F12] p-3.5 space-y-2.5">
+                <h3 className="font-mono text-[11px] font-bold uppercase tracking-wider text-[#10B981]">
+                  01 // GENEL &amp; HIZLI GEZİNME
+                </h3>
+                <div className="space-y-2">
+                  {[
+                    { keys: ['Ctrl', 'K'], alt: '/', label: 'Hızlı Arama Çubuğuna Odaklan' },
+                    { keys: ['c'], alt: 'n', label: 'Yeni Konu Başlat' },
+                    { keys: ['?'], label: 'Kısayol Rehberini Aç / Kapat' },
+                    { keys: ['Esc'], label: 'Pencereyi Kapat / Odağı Bırak' },
+                    { keys: ['g', 'h'], label: 'Ana Sayfa (Forum Akışı)' },
+                    { keys: ['g', 'g'], label: 'Teknoloji Gündemi & Radar' },
+                    { keys: ['g', 'd'], label: 'Destek, Talep & Şikayet' },
+                    { keys: ['g', 'k'], label: 'Topluluk Kuralları' },
+                    ...(user
+                      ? [
+                          { keys: ['g', 'p'], label: 'Profilim & Rozetlerim' },
+                          { keys: ['g', 's'], label: 'Kaydedilen Konular' },
+                        ]
+                      : []),
+                    ...(user?.role === 'ADMIN'
+                      ? [{ keys: ['g', 'a'], label: 'Yönetim Paneli (/admin)' }]
+                      : []),
+                  ].map((item) => (
+                    <div
+                      key={item.label}
+                      className="flex items-center justify-between gap-2 text-[#E6EDF3]"
+                    >
+                      <span className="text-[#8B949E]">{item.label}</span>
+                      <div className="flex items-center gap-1 shrink-0 font-mono text-[11px]">
+                        {item.keys.map((k, idx) => (
+                          <React.Fragment key={k}>
+                            {idx > 0 && <span className="text-[#8B949E]">+</span>}
+                            <kbd className="px-1.5 py-0.5 rounded-sm bg-[#15181E] border border-[#232730] text-[#E6EDF3] font-semibold">
+                              {k}
+                            </kbd>
+                          </React.Fragment>
+                        ))}
+                        {'alt' in item && item.alt && (
+                          <>
+                            <span className="text-[#8B949E] text-[10px]">veya</span>
+                            <kbd className="px-1.5 py-0.5 rounded-sm bg-[#15181E] border border-[#232730] text-[#10B981] font-semibold">
+                              {item.alt}
+                            </kbd>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 2. Akış & Editör Kısayolları */}
+              <div className="space-y-4">
+                <div className="rounded-md border border-[#232730] bg-[#0D0F12] p-3.5 space-y-2.5">
+                  <h3 className="font-mono text-[11px] font-bold uppercase tracking-wider text-[#F59E0B]">
+                    02 // TARTIŞMA AKIŞI &amp; KONU İÇİ
+                  </h3>
+                  <div className="space-y-2">
+                    {[
+                      { keys: ['j'], alt: 'k', label: 'Sonraki / Önceki Konuya Geç' },
+                      { keys: ['Enter'], alt: 'o', label: 'Seçili Konuyu Aç' },
+                      { keys: ['1'], alt: '2 / 3', label: 'Tümü / Cevapsız / Çözülen' },
+                      { keys: ['v'], label: 'Kart / Kompakt Tablo Görünümü' },
+                      { keys: ['x'], label: 'Aktif Filtreleri Sıfırla' },
+                      { keys: ['r'], label: 'Konu İçinde Yanıt Kutusuna İn' },
+                    ].map((item) => (
+                      <div
+                        key={item.label}
+                        className="flex items-center justify-between gap-2 text-[#E6EDF3]"
+                      >
+                        <span className="text-[#8B949E]">{item.label}</span>
+                        <div className="flex items-center gap-1 shrink-0 font-mono text-[11px]">
+                          {item.keys.map((k) => (
+                            <kbd
+                              key={k}
+                              className="px-1.5 py-0.5 rounded-sm bg-[#15181E] border border-[#232730] text-[#E6EDF3] font-semibold"
+                            >
+                              {k}
+                            </kbd>
+                          ))}
+                          {item.alt && (
+                            <>
+                              <span className="text-[#8B949E] text-[10px]">/</span>
+                              <kbd className="px-1.5 py-0.5 rounded-sm bg-[#15181E] border border-[#232730] text-[#F59E0B] font-semibold">
+                                {item.alt}
+                              </kbd>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-md border border-[#232730] bg-[#0D0F12] p-3.5 space-y-2.5">
+                  <h3 className="font-mono text-[11px] font-bold uppercase tracking-wider text-[#10B981]">
+                    03 // MARKDOWN &amp; KOD EDİTÖRÜ
+                  </h3>
+                  <div className="space-y-2">
+                    {[
+                      { keys: ['Ctrl', 'Enter'], label: 'Konuyu / Yorumu Hemen Gönder' },
+                      { keys: ['Ctrl', 'B'], label: 'Kalın Metin (**bold**)' },
+                      { keys: ['Ctrl', 'I'], label: 'İtalik Metin (*italic*)' },
+                      { keys: ['Ctrl', 'E'], label: 'Satır İçi Kod (`code`)' },
+                      { keys: ['Ctrl', 'Shift', 'C'], label: 'Kod Bloğu Ekle (```)' },
+                      { keys: ['Alt', 'P'], label: 'Düzenle / Önizleme Geçişi' },
+                    ].map((item) => (
+                      <div
+                        key={item.label}
+                        className="flex items-center justify-between gap-2 text-[#E6EDF3]"
+                      >
+                        <span className="text-[#8B949E]">{item.label}</span>
+                        <div className="flex items-center gap-1 shrink-0 font-mono text-[11px]">
+                          {item.keys.map((k, idx) => (
+                            <React.Fragment key={k}>
+                              {idx > 0 && <span className="text-[#8B949E]">+</span>}
+                              <kbd className="px-1.5 py-0.5 rounded-sm bg-[#15181E] border border-[#232730] text-[#E6EDF3] font-semibold">
+                                {k}
+                              </kbd>
+                            </React.Fragment>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
