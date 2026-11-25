@@ -525,24 +525,24 @@ export function HomeFeedClient({
                 <div className="flex flex-wrap items-center gap-2 font-mono">
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-sm text-[11px] font-semibold bg-[#10B981]/15 border border-[#10B981]/40 text-[#10B981]">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" />
-                    SYS:ACTIVE // BÖTE &amp; TECH DISCUSSIONS
+                    CANLI AKIM // YAZILIM &amp; TEKNOLOJİ EKOSİSTEMİ
                   </span>
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-sm text-[11px] font-medium bg-[#0D0F12] border border-[#232730] text-[#F59E0B]">
                     <Shield className="w-3 h-3 text-[#F59E0B]" />
-                    VERIFIED CODE &amp; KNOWLEDGE BASE
+                    DOĞRULANMIŞ KOD &amp; ÇÖZÜM ARŞİVİ
                   </span>
                 </div>
 
                 {/* Ana Başlık & Slogan */}
                 <div className="space-y-2">
                   <h1 className="text-xl sm:text-2xl xl:text-[28px] font-bold tracking-tight leading-snug text-[#E6EDF3]">
-                    Mühendislik, Bilişim ve{' '}
+                    Yazılım, Yapay Zeka ve Bilişim Dünyasının{' '}
                     <span className="text-[#10B981] underline decoration-[#10B981]/40 underline-offset-4">
-                      BÖTE Tartışma Platformu
+                      Yeni Nesil Bilgi ve Çözüm Merkezi
                     </span>
                   </h1>
                   <p className="text-xs sm:text-[13px] text-[#8B949E] leading-relaxed max-w-2xl">
-                    Yazılım mimarileri, siber güvenlik, yapay zeka, donanım, BÖTE ve eğitim teknolojileri üzerine yüksek bilgi yoğunluklu teknik tartışmalar başlatın, çalışan kod blokları paylaşın ve çözüm üreterek itibar kazanın.
+                    Modern yazılım mimarileri, siber güvenlik, yapay zeka, donanım ve dijital teknolojiler üzerine nitelikli tartışmalara katılın; çalışan kod blokları paylaşın, sorularınıza hızlı çözümler bulun ve uzmanlığınızla öne çıkın.
                   </p>
                 </div>
 
