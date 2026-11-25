@@ -91,9 +91,9 @@ export default async function TechNewsDetailPage({ params }: NewsDetailProps) {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <Link
           href="/haberler"
-          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-mono font-medium text-[#8B949E] hover:text-[#10B981] transition-colors"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-3.5 h-3.5" />
           Tüm Teknolojik Gelişmelere Dön
         </Link>
 
@@ -188,19 +188,23 @@ export default async function TechNewsDetailPage({ params }: NewsDetailProps) {
 
       {/* Diğer Güncel Gelişmeler (Görsel Kapaklı) */}
       {relatedNews.length > 0 && (
-        <div className="space-y-3.5">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5 px-1">
-            <Newspaper className="w-4 h-4 text-indigo-500" />
-            Diğer Güncel Gelişmeler
+        <div className="space-y-3">
+          <h3 className="text-[11px] font-mono font-semibold uppercase tracking-wider text-[#8B949E] flex items-center gap-1.5 px-0.5">
+            <Newspaper className="w-3.5 h-3.5 text-[#10B981]" />
+            DİĞER GÜNCEL GELİŞMELER
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {relatedNews.map((n) => (
               <Link
                 key={n.id}
                 href={`/haberler/${n.slug}`}
-                className="group rounded-2xl overflow-hidden border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900/90 hover:border-indigo-500/40 hover:shadow-lg transition-all flex flex-col"
+                className="group rounded-md overflow-hidden border border-[#232730] bg-[#15181E] hover:border-[#10B981]/55 transition-colors flex flex-col"
               >
-                <div className="relative h-36 w-full overflow-hidden">
+                <div
+                  className="h-[2px] w-full"
+                  style={{ backgroundColor: n.badgeColor }}
+                />
+                <div className="relative h-36 w-full overflow-hidden border-b border-[#232730]">
                   <TechNewsCover
                     title={n.title}
                     category={n.category}
@@ -211,21 +215,19 @@ export default async function TechNewsDetailPage({ params }: NewsDetailProps) {
                     overlayVariant="card"
                   />
                   <span
-                    className="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold backdrop-blur-md border"
-                    style={{
-                      backgroundColor: 'rgba(9, 13, 22, 0.78)',
-                      borderColor: `${n.badgeColor}60`,
-                      color: n.badgeColor,
-                    }}
+                    className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-sm font-mono text-[10px] font-semibold bg-[#0D0F12]/90 border border-[#232730]"
+                    style={{ color: n.badgeColor }}
                   >
                     {n.category}
                   </span>
                 </div>
                 <div className="p-4 space-y-1.5">
-                  <h4 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-indigo-500 transition-colors line-clamp-2">
+                  <h4 className="text-sm font-bold text-[#E6EDF3] group-hover:text-[#10B981] transition-colors line-clamp-2 leading-snug">
                     {n.title}
                   </h4>
-                  <p className="text-xs text-slate-500 line-clamp-2">{n.summary}</p>
+                  <p className="text-xs text-[#8B949E] line-clamp-2 leading-relaxed">
+                    {n.summary}
+                  </p>
                 </div>
               </Link>
             ))}

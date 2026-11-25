@@ -618,52 +618,53 @@ export function HomeFeedClient({
 
             {/* Sağ Panel: Günün Teknoloji Manşeti + Canlı Telemetri (5 Sütun) */}
             <div className="lg:col-span-5 flex flex-col justify-between gap-3">
-              {/* Üst: Günün Öne Çıkan Teknoloji Dosyası */}
+              {/* Üst: Günün Öne Çıkan Teknoloji Dosyası (Net Görsel + Editöryal Alt Panel) */}
               {leadNews && (
                 <Link
                   href={`/haberler/${leadNews.slug}`}
-                  className="group relative flex-1 rounded-md overflow-hidden border border-[#232730] bg-[#15181E] hover:border-[#10B981]/60 transition-colors flex flex-col justify-end min-h-[190px]"
+                  className="group relative flex-1 rounded-md overflow-hidden border border-[#232730] bg-[#15181E] hover:border-[#10B981]/60 transition-colors flex flex-col justify-between"
                 >
-                  <TechNewsCover
-                    title={leadNews.title}
-                    category={leadNews.category}
-                    badgeColor={leadNews.badgeColor}
-                    imageUrl={leadNews.imageUrl}
-                    slug={leadNews.slug}
-                    className="absolute inset-0 w-full h-full"
-                    overlayVariant="hero"
-                  />
+                  <div className="relative h-32 sm:h-36 w-full overflow-hidden border-b border-[#232730]">
+                    <TechNewsCover
+                      title={leadNews.title}
+                      category={leadNews.category}
+                      badgeColor={leadNews.badgeColor}
+                      imageUrl={leadNews.imageUrl}
+                      slug={leadNews.slug}
+                      className="w-full h-full"
+                      overlayVariant="card"
+                    />
 
-                  <div className="absolute top-3 left-3 right-3 z-10 flex items-center justify-between gap-2 font-mono">
-                    <span
-                      className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm text-[10px] font-semibold border bg-[#0D0F12]/90"
-                      style={{
-                        borderColor: '#232730',
-                        color: leadNews.badgeColor,
-                      }}
-                    >
+                    <div className="absolute top-2.5 left-2.5 right-2.5 z-10 flex items-center justify-between gap-2 font-mono">
                       <span
-                        className="w-1.5 h-1.5 rounded-xs"
-                        style={{ backgroundColor: leadNews.badgeColor }}
-                      />
-                      {leadNews.category}
-                    </span>
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] font-semibold bg-[#F59E0B] text-[#0D0F12]">
-                      <Flame className="w-3 h-3 fill-[#0D0F12]" />
-                      FEATURED
-                    </span>
+                        className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm text-[10px] font-semibold border border-[#232730] bg-[#0D0F12]/90 backdrop-blur-xs"
+                        style={{ color: leadNews.badgeColor }}
+                      >
+                        <span
+                          className="w-1.5 h-1.5 rounded-xs"
+                          style={{ backgroundColor: leadNews.badgeColor }}
+                        />
+                        {leadNews.category === 'Eğitim Teknolojileri (BÖTE)'
+                          ? 'Eğitim Teknolojileri'
+                          : leadNews.category}
+                      </span>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] font-bold bg-[#F59E0B] text-[#0D0F12]">
+                        <Flame className="w-3 h-3 fill-[#0D0F12]" />
+                        GÜNÜN DOSYASI
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="relative z-10 p-4 pt-12 bg-[#0D0F12]/90 border-t border-[#232730]">
-                    <h2 className="text-sm sm:text-base font-bold text-[#E6EDF3] group-hover:text-[#10B981] transition-colors leading-snug line-clamp-2">
-                      {leadNews.title}
+                  <div className="p-3.5 sm:p-4 bg-[#15181E] flex-1 flex flex-col justify-between">
+                    <h2 className="text-xs sm:text-sm font-bold text-[#E6EDF3] group-hover:text-[#10B981] transition-colors leading-snug line-clamp-2">
+                      {leadNews.title.replace(' (BÖTE)', '')}
                     </h2>
-                    <div className="mt-2 flex items-center justify-between text-[11px] font-mono text-[#8B949E]">
-                      <span className="text-[#10B981]">
-                        {leadNews.source} • {leadNews.readTime}
+                    <div className="mt-2 pt-2 border-t border-[#232730]/80 flex items-center justify-between text-[11px] font-mono text-[#8B949E]">
+                      <span className="text-[#10B981] truncate">
+                        {leadNews.source.replace('BÖTE & ', '')} • {leadNews.readTime}
                       </span>
-                      <span className="inline-flex items-center gap-1 font-semibold text-[#E6EDF3] group-hover:text-[#10B981]">
-                        OKU <ArrowRight className="w-3 h-3 text-[#10B981]" />
+                      <span className="inline-flex items-center gap-1 font-semibold text-[#E6EDF3] group-hover:text-[#10B981] shrink-0">
+                        İncele <ArrowRight className="w-3 h-3 text-[#10B981]" />
                       </span>
                     </div>
                   </div>

@@ -607,11 +607,26 @@ export async function getAllTechNews(category?: string, search?: string): Promis
       countMap[row.newsId] = Number(row.count);
     });
 
-    allWithCounts = items.map((item) => ({
-      ...item,
-      imageUrl: resolveNewsImageUrl(item),
-      commentCount: countMap[item.id] || 0,
-    }));
+    allWithCounts = items.map((item) => {
+      const normalizedCategory =
+        item.category === 'Eğitim Teknolojileri (BÖTE)'
+          ? 'Eğitim Teknolojileri'
+          : item.category;
+      const normalizedTitle = item.title.replace(' (BÖTE)', '');
+      const normalizedSource =
+        item.source === 'BÖTE & EdTech Akademi' ? 'EdTech Akademi' : item.source;
+      return {
+        ...item,
+        category: normalizedCategory,
+        title: normalizedTitle,
+        source: normalizedSource,
+        imageUrl: resolveNewsImageUrl({
+          ...item,
+          category: normalizedCategory,
+        }),
+        commentCount: countMap[item.id] || 0,
+      };
+    });
 
     globalForTechNews.techNewsListCache = {
       data: allWithCounts,
@@ -674,9 +689,23 @@ export const getTechNewsBySlug = cache(async function getTechNewsBySlugImpl(
     UPDATE "TechNews" SET "views" = "views" + 1 WHERE "id" = ${items[0].id}
   `.catch(() => {});
 
+  const normalizedCategory =
+    items[0].category === 'Eğitim Teknolojileri (BÖTE)'
+      ? 'Eğitim Teknolojileri'
+      : items[0].category;
+
   return {
     ...items[0],
-    imageUrl: resolveNewsImageUrl(items[0]),
+    category: normalizedCategory,
+    title: items[0].title.replace(' (BÖTE)', ''),
+    source:
+      items[0].source === 'BÖTE & EdTech Akademi'
+        ? 'EdTech Akademi'
+        : items[0].source,
+    imageUrl: resolveNewsImageUrl({
+      ...items[0],
+      category: normalizedCategory,
+    }),
     views: Number(items[0].views) + 1,
   };
 });

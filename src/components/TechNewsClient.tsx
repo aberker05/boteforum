@@ -617,85 +617,97 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
-            {/* Sol Büyük Vitrin (Ana Manşet) */}
+            {/* Sol Büyük Vitrin (Ana Manşet: Üstte Net Yüksek Çözünürlüklü Kapak + Altta Editöryal Özet) */}
             <div
               className={`${
                 sideFeaturedItems.length > 0 ? 'lg:col-span-7' : 'lg:col-span-12'
-              } group relative rounded-md overflow-hidden border border-[#232730] bg-[#15181E] hover:border-[#10B981]/60 transition-colors flex flex-col justify-end min-h-[360px] sm:min-h-[420px]`}
+              } group rounded-md overflow-hidden border border-[#232730] bg-[#15181E] hover:border-[#10B981]/60 transition-colors flex flex-col justify-between`}
             >
-              <TechNewsCover
-                title={activeHeroItem.title}
-                category={activeHeroItem.category}
-                badgeColor={activeHeroItem.badgeColor}
-                imageUrl={activeHeroItem.imageUrl}
-                slug={activeHeroItem.slug}
-                className="absolute inset-0 w-full h-full"
-                overlayVariant="hero"
-              />
-
-              {/* Üst Rozetler ve Yönetici Butonları */}
-              <div className="absolute top-3.5 left-3.5 right-3.5 z-20 flex items-center justify-between gap-2 font-mono">
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <span
-                    className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-sm text-[11px] font-semibold bg-[#0D0F12]/90 border border-[#232730]"
-                    style={{ color: activeHeroItem.badgeColor }}
-                  >
-                    {getCategoryIcon(activeHeroItem.category, 'w-3 h-3')}
-                    {activeHeroItem.category}
-                  </span>
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] font-bold bg-[#F59E0B] text-[#0D0F12]">
-                    <Flame className="w-3 h-3 fill-[#0D0F12]" />
-                    BAŞ MANŞET
-                  </span>
-                </div>
-
-                {canModerate && (
-                  <div className="flex items-center gap-1 bg-[#0D0F12]/90 p-1 rounded-md border border-[#232730]">
-                    <button
-                      type="button"
-                      onClick={() => openEditModal(activeHeroItem)}
-                      className="inline-flex items-center gap-1 px-2 py-1 rounded-sm text-[11px] font-medium text-[#10B981] hover:bg-[#15181E] transition-colors cursor-pointer"
-                      title="Haberi Düzenle"
-                    >
-                      <Edit2 className="w-3 h-3" />
-                      <span>Düzenle</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleDelete(activeHeroItem.id, activeHeroItem.title)
-                      }
-                      className="inline-flex items-center gap-1 px-2 py-1 rounded-sm text-[11px] font-medium text-rose-400 hover:bg-[#15181E] transition-colors cursor-pointer"
-                      title="Haberi Sil"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                      <span>Sil</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Alt İçerik Katmanı */}
-              <div className="relative z-10 p-5 sm:p-6 bg-[#0D0F12]/92 border-t border-[#232730] flex flex-col justify-end">
-                <div className="flex items-center gap-2 text-xs font-mono text-[#8B949E] mb-1.5">
-                  <span className="font-semibold text-[#10B981]">
-                    {activeHeroItem.source}
-                  </span>
-                  <span>•</span>
-                  <span>{formatRelativeTime(activeHeroItem.createdAt)}</span>
-                </div>
-
-                <Link href={`/haberler/${activeHeroItem.slug}`}>
-                  <h3 className="text-lg sm:text-2xl font-bold text-[#E6EDF3] group-hover:text-[#10B981] transition-colors leading-snug">
-                    {activeHeroItem.title}
-                  </h3>
+              {/* Üst Net Görsel Vitrin Alanı */}
+              <div className="relative h-56 sm:h-68 w-full overflow-hidden border-b border-[#232730] shrink-0">
+                <Link
+                  href={`/haberler/${activeHeroItem.slug}`}
+                  className="block w-full h-full"
+                >
+                  <TechNewsCover
+                    title={activeHeroItem.title}
+                    category={activeHeroItem.category}
+                    badgeColor={activeHeroItem.badgeColor}
+                    imageUrl={activeHeroItem.imageUrl}
+                    slug={activeHeroItem.slug}
+                    className="w-full h-full"
+                    overlayVariant="card"
+                  />
                 </Link>
 
-                <p className="mt-2 text-xs sm:text-sm text-[#8B949E] leading-relaxed line-clamp-2">
-                  {activeHeroItem.summary}
-                </p>
+                {/* Üst Rozetler ve Yönetici Butonları */}
+                <div className="absolute top-3 left-3 right-3 z-20 flex items-center justify-between gap-2 font-mono pointer-events-none">
+                  <div className="flex items-center gap-1.5 flex-wrap pointer-events-auto">
+                    <span
+                      className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-sm text-[11px] font-semibold bg-[#0D0F12]/90 backdrop-blur-xs border border-[#232730]"
+                      style={{ color: activeHeroItem.badgeColor }}
+                    >
+                      {getCategoryIcon(activeHeroItem.category, 'w-3 h-3')}
+                      {activeHeroItem.category === 'Eğitim Teknolojileri (BÖTE)'
+                        ? 'Eğitim Teknolojileri'
+                        : activeHeroItem.category}
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] font-bold bg-[#F59E0B] text-[#0D0F12]">
+                      <Flame className="w-3 h-3 fill-[#0D0F12]" />
+                      BAŞ MANŞET
+                    </span>
+                  </div>
 
-                <div className="mt-4 pt-3 border-t border-[#232730] flex flex-wrap items-center justify-between gap-3 text-xs font-mono text-[#8B949E]">
+                  {canModerate && (
+                    <div className="flex items-center gap-1 bg-[#0D0F12]/90 backdrop-blur-xs p-1 rounded-md border border-[#232730] pointer-events-auto">
+                      <button
+                        type="button"
+                        onClick={() => openEditModal(activeHeroItem)}
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded-sm text-[11px] font-medium text-[#10B981] hover:bg-[#15181E] transition-colors cursor-pointer"
+                        title="Haberi Düzenle"
+                      >
+                        <Edit2 className="w-3 h-3" />
+                        <span>Düzenle</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleDelete(activeHeroItem.id, activeHeroItem.title)
+                        }
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded-sm text-[11px] font-medium text-rose-400 hover:bg-[#15181E] transition-colors cursor-pointer"
+                        title="Haberi Sil"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        <span>Sil</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Alt Editöryal İçerik Katmanı */}
+              <div className="p-5 sm:p-6 bg-[#15181E] flex-1 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center gap-2 text-xs font-mono text-[#8B949E] mb-1.5">
+                    <span className="font-semibold text-[#10B981]">
+                      {activeHeroItem.source}
+                    </span>
+                    <span>•</span>
+                    <span>{formatRelativeTime(activeHeroItem.createdAt)}</span>
+                  </div>
+
+                  <Link href={`/haberler/${activeHeroItem.slug}`}>
+                    <h3 className="text-lg sm:text-2xl font-bold text-[#E6EDF3] group-hover:text-[#10B981] transition-colors leading-snug">
+                      {activeHeroItem.title.replace(' (BÖTE)', '')}
+                    </h3>
+                  </Link>
+
+                  <p className="mt-2 text-xs sm:text-sm text-[#8B949E] leading-relaxed line-clamp-2">
+                    {activeHeroItem.summary}
+                  </p>
+                </div>
+
+                <div className="mt-4 pt-3.5 border-t border-[#232730] flex flex-wrap items-center justify-between gap-3 text-xs font-mono text-[#8B949E]">
                   <div className="flex items-center gap-3.5">
                     <span className="inline-flex items-center gap-1">
                       <Clock className="w-3.5 h-3.5 text-[#10B981]" />
@@ -721,73 +733,95 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
               </div>
             </div>
 
-            {/* Sağ Sütun: Diğer Manşet Kartları */}
+            {/* Sağ Sütun: Yatay Bölünmüş Premium Dergi Kartları (Solda %100 Net Kapak Görseli + Sağda Başlık & Meta) */}
             {sideFeaturedItems.length > 0 && (
               <div className="lg:col-span-5 flex flex-col justify-between gap-3">
-                {sideFeaturedItems.slice(0, 3).map((item) => (
-                  <div
-                    key={item.id}
-                    className="group relative flex-1 rounded-md overflow-hidden border border-[#232730] bg-[#15181E] hover:border-[#10B981]/60 transition-colors flex flex-col justify-end min-h-[132px]"
-                  >
-                    <TechNewsCover
-                      title={item.title}
-                      category={item.category}
-                      badgeColor={item.badgeColor}
-                      imageUrl={item.imageUrl}
-                      slug={item.slug}
-                      className="absolute inset-0 w-full h-full"
-                      overlayVariant="hero"
-                    />
+                {sideFeaturedItems.slice(0, 3).map((item) => {
+                  const cleanCategory =
+                    item.category === 'Eğitim Teknolojileri (BÖTE)'
+                      ? 'Eğitim Teknolojileri'
+                      : item.category;
+                  const cleanTitle = item.title.replace(' (BÖTE)', '');
 
-                    <div className="relative z-10 p-4 bg-[#0D0F12]/88 flex flex-col justify-between h-full">
-                      <div className="flex items-center justify-between gap-2 font-mono">
-                        <span
-                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] font-semibold bg-[#15181E] border border-[#232730]"
-                          style={{ color: item.badgeColor }}
-                        >
-                          {getCategoryIcon(item.category, 'w-3 h-3')}
-                          {item.category}
-                        </span>
+                  return (
+                    <div
+                      key={item.id}
+                      className="group relative flex-1 rounded-md overflow-hidden border border-[#232730] bg-[#15181E] hover:border-[#10B981]/60 hover:bg-[#181C23] transition-colors flex flex-row items-stretch min-h-[132px]"
+                    >
+                      {/* Sol Kenar Kategori Vurgu Çizgisi */}
+                      <div
+                        className="w-[3px] shrink-0"
+                        style={{ backgroundColor: item.badgeColor }}
+                      />
 
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-[10px] font-medium text-[#8B949E] bg-[#15181E] px-1.5 py-0.5 rounded-sm border border-[#232730]">
-                            {item.readTime}
-                          </span>
-                          {canModerate && (
-                            <>
-                              <button
-                                type="button"
-                                onClick={() => openEditModal(item)}
-                                className="p-1 rounded-sm bg-[#15181E] border border-[#232730] text-[#10B981] hover:bg-[#0D0F12] transition-colors cursor-pointer"
-                                title="Haberi Düzenle"
-                              >
-                                <Edit2 className="w-3 h-3" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleDelete(item.id, item.title)}
-                                className="p-1 rounded-sm bg-[#15181E] border border-[#232730] text-rose-400 hover:bg-[#0D0F12] transition-colors cursor-pointer"
-                                title="Haberi Sil"
-                              >
-                                <Trash2 className="w-3 h-3" />
-                              </button>
-                            </>
-                          )}
+                      {/* Sol: Karartmasız, %100 Net ve Canlı Kapak Fotoğrafı */}
+                      <Link
+                        href={`/haberler/${item.slug}`}
+                        className="relative w-28 sm:w-36 md:w-40 shrink-0 overflow-hidden border-r border-[#232730] bg-[#0D0F12]"
+                      >
+                        <TechNewsCover
+                          title={cleanTitle}
+                          category={cleanCategory}
+                          badgeColor={item.badgeColor}
+                          imageUrl={item.imageUrl}
+                          slug={item.slug}
+                          className="w-full h-full"
+                          overlayVariant="none"
+                        />
+                      </Link>
+
+                      {/* Sağ: Temiz Editöryal İçerik ve Metrikler */}
+                      <div className="flex-1 min-w-0 p-3.5 sm:p-4 flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center justify-between gap-2 font-mono mb-1.5">
+                            <span
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] font-semibold bg-[#0D0F12] border border-[#232730] truncate"
+                              style={{ color: item.badgeColor }}
+                            >
+                              {getCategoryIcon(cleanCategory, 'w-3 h-3')}
+                              <span className="truncate">{cleanCategory}</span>
+                            </span>
+
+                            <div className="flex items-center gap-1 shrink-0">
+                              <span className="text-[10px] font-medium text-[#8B949E] bg-[#0D0F12] px-1.5 py-0.5 rounded-sm border border-[#232730]">
+                                {item.readTime}
+                              </span>
+                              {canModerate && (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() => openEditModal(item)}
+                                    className="p-1 rounded-sm bg-[#0D0F12] border border-[#232730] text-[#10B981] hover:bg-[#15181E] transition-colors cursor-pointer"
+                                    title="Haberi Düzenle"
+                                  >
+                                    <Edit2 className="w-3 h-3" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDelete(item.id, item.title)}
+                                    className="p-1 rounded-sm bg-[#0D0F12] border border-[#232730] text-rose-400 hover:bg-[#15181E] transition-colors cursor-pointer"
+                                    title="Haberi Sil"
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </div>
+
+                          <Link href={`/haberler/${item.slug}`}>
+                            <h4 className="text-xs sm:text-sm font-bold text-[#E6EDF3] group-hover:text-[#10B981] transition-colors leading-snug line-clamp-2">
+                              {cleanTitle}
+                            </h4>
+                          </Link>
                         </div>
-                      </div>
 
-                      <div className="mt-2.5">
-                        <Link href={`/haberler/${item.slug}`}>
-                          <h4 className="text-sm font-bold text-[#E6EDF3] group-hover:text-[#10B981] transition-colors leading-snug line-clamp-2">
-                            {item.title}
-                          </h4>
-                        </Link>
-                        <div className="mt-1.5 flex items-center justify-between text-[11px] font-mono text-[#8B949E]">
+                        <div className="mt-2 pt-2 border-t border-[#232730]/80 flex items-center justify-between gap-2 text-[11px] font-mono text-[#8B949E]">
                           <span className="text-[#10B981] font-medium truncate">
-                            {item.source}
+                            {item.source.replace('BÖTE & ', '')}
                           </span>
                           <div className="flex items-center gap-2.5 shrink-0">
-                            <span className="inline-flex items-center gap-1">
+                            <span className="inline-flex items-center gap-1 tabular-nums">
                               <Eye className="w-3 h-3 text-[#8B949E]" />
                               {item.views}
                             </span>
@@ -801,8 +835,8 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

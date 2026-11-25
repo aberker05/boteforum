@@ -70,7 +70,7 @@ export default function TechNewsCover({
       <div
         className="absolute inset-0"
         style={{
-          background: `radial-gradient(circle at 20% 20%, ${badgeColor}40 0%, transparent 55%), radial-gradient(circle at 80% 80%, #6366f135 0%, transparent 60%), linear-gradient(135deg, #090d16 0%, #0f172a 100%)`,
+          background: `radial-gradient(circle at 20% 20%, ${badgeColor}35 0%, transparent 55%), linear-gradient(135deg, #0D0F12 0%, #15181E 100%)`,
         }}
       >
         {/* Siber Izgara Deseni */}
@@ -81,67 +81,60 @@ export default function TechNewsCover({
           <defs>
             <pattern
               id={`grid-${slug || category}`}
-              width="32"
-              height="32"
+              width="28"
+              height="28"
               patternUnits="userSpaceOnUse"
             >
               <path
-                d="M 32 0 L 0 0 0 32"
+                d="M 28 0 L 0 0 0 28"
                 fill="none"
                 stroke={badgeColor}
                 strokeWidth="0.6"
-                strokeOpacity="0.45"
+                strokeOpacity="0.4"
               />
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill={`url(#grid-${slug || category})`} />
         </svg>
 
-        {/* Merkez İkon İllüstrasyonu (Görsel yüklenemezse veya çevrimdışıysa öne çıkar) */}
+        {/* Merkez İkon İllüstrasyonu (Görsel yüklenemezse veya kaldırılmışsa öne çıkar) */}
         <div className="absolute inset-0 flex items-center justify-center">
           <div
-            className="w-20 h-20 rounded-3xl flex items-center justify-center border backdrop-blur-md transition-transform duration-700 group-hover:scale-110"
+            className="w-14 h-14 rounded-md flex items-center justify-center border transition-transform duration-500 group-hover:scale-105"
             style={{
-              backgroundColor: `${badgeColor}18`,
-              borderColor: `${badgeColor}40`,
+              backgroundColor: '#0D0F12',
+              borderColor: `${badgeColor}55`,
               color: badgeColor,
-              boxShadow: `0 0 50px -10px ${badgeColor}60`,
             }}
           >
-            {getCategoryIcon(category, 'w-10 h-10')}
+            {getCategoryIcon(category, 'w-7 h-7')}
           </div>
         </div>
       </div>
 
-      {/* Katman 2: Yüksek Çözünürlüklü Kapak Fotoğrafı */}
+      {/* Katman 2: Yüksek Çözünürlüklü, Net ve Canlı Kapak Fotoğrafı */}
       {!imgError && resolvedUrl && (
+        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={resolvedUrl}
           alt={title}
           loading="lazy"
           onError={() => setImgError(true)}
-          className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
+          className="absolute inset-0 w-full h-full object-cover object-center contrast-[1.04] saturate-[1.06] transition-transform duration-500 ease-out group-hover:scale-105"
         />
       )}
 
-      {/* Katman 3: Renk Tonlama & Sinematik Karartma Katmanı */}
-      <div
-        className="absolute inset-0 pointer-events-none mix-blend-soft-light opacity-35"
-        style={{
-          background: `linear-gradient(135deg, ${badgeColor} 0%, transparent 70%)`,
-        }}
-      />
-
+      {/* Katman 3: İnce Kenar Vinyeti (Görseli karartmadan yalnızca rozet okunabilirliğini destekler) */}
       {overlayVariant === 'hero' && (
-        <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-[#090d16] via-[#090d16]/65 to-slate-950/20" />
+        <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-[#0D0F12]/80 via-[#0D0F12]/20 to-transparent" />
       )}
 
       {overlayVariant === 'card' && (
-        <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-[#0b0f19] via-slate-950/25 to-transparent" />
+        <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-[#0D0F12]/45 via-transparent to-[#0D0F12]/20" />
       )}
 
       {overlayVariant === 'detail' && (
-        <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-[#111827] via-slate-950/35 to-slate-950/10" />
+        <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-[#0D0F12]/65 via-transparent to-[#0D0F12]/20" />
       )}
     </div>
   );
@@ -229,10 +222,10 @@ export function TechNewsCoverPicker({
   };
 
   return (
-    <div className="space-y-3 rounded-2xl border border-slate-800/90 bg-slate-950/60 p-3.5">
+    <div className="space-y-3 rounded-md border border-[#232730] bg-[#0D0F12] p-3.5">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-          <ImageIcon className="w-3.5 h-3.5 text-emerald-400" />
+        <label className="text-xs font-mono font-semibold text-[#E6EDF3] flex items-center gap-1.5">
+          <ImageIcon className="w-3.5 h-3.5 text-[#10B981]" />
           Haber Kapak Görseli
         </label>
         <div className="flex items-center gap-2">
@@ -247,7 +240,7 @@ export function TechNewsCoverPicker({
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-[11px] font-semibold transition-all cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#10B981]/15 hover:bg-[#10B981]/25 text-[#10B981] border border-[#10B981]/40 text-[11px] font-semibold transition-colors cursor-pointer"
           >
             <Upload className="w-3 h-3" />
             {uploading ? 'İşleniyor...' : 'Bilgisayardan Yükle'}
@@ -256,7 +249,7 @@ export function TechNewsCoverPicker({
             <button
               type="button"
               onClick={() => onChange('none')}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-500/15 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 text-[11px] font-semibold transition-all cursor-pointer"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-rose-500/15 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 text-[11px] font-semibold transition-colors cursor-pointer"
               title="Fotoğrafı tamamen kaldır ve sadece ikonlu siber kapağı kullan"
             >
               <Trash2 className="w-3 h-3" />
@@ -267,7 +260,7 @@ export function TechNewsCoverPicker({
             <button
               type="button"
               onClick={() => onChange('')}
-              className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] transition-all cursor-pointer"
+              className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-[#15181E] hover:bg-[#1C212B] border border-[#232730] text-[#E6EDF3] text-[11px] transition-colors cursor-pointer"
               title="Varsayılan kategori görseline döndür"
             >
               <RotateCcw className="w-3 h-3" />
@@ -279,7 +272,7 @@ export function TechNewsCoverPicker({
 
       {/* Canlı Önizleme ve URL Girişi */}
       <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
-        <div className="sm:col-span-4 rounded-xl overflow-hidden border border-slate-800 h-24 relative group">
+        <div className="sm:col-span-4 rounded-md overflow-hidden border border-[#232730] h-24 relative group">
           <TechNewsCover
             title="Kapak Önizleme"
             category={category}
@@ -288,7 +281,7 @@ export function TechNewsCoverPicker({
             className="w-full h-full"
             overlayVariant="card"
           />
-          <span className="absolute bottom-1.5 left-2 text-[10px] font-medium text-white/90 bg-slate-950/75 px-1.5 py-0.5 rounded backdrop-blur-sm">
+          <span className="absolute bottom-1.5 left-2 text-[10px] font-mono font-medium text-[#E6EDF3] bg-[#0D0F12]/90 px-1.5 py-0.5 rounded-sm border border-[#232730]">
             Canlı Önizleme
           </span>
         </div>
@@ -309,12 +302,12 @@ export function TechNewsCoverPicker({
                 ? 'Bilgisayardan özel görsel yüklendi (Kaldırmak için üstteki "Resmi Kaldır" butonuna basın)'
                 : 'https://... görsel bağlantısı yapıştırın veya aşağıdan hazır kapak seçin'
             }
-            className="w-full bg-slate-900/90 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500/60"
+            className="w-full bg-[#15181E] border border-[#232730] rounded-md px-3 py-2 text-xs font-mono text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:border-[#10B981]"
           />
 
           {/* Hazır Teknoloji Kapakları */}
           <div>
-            <span className="block text-[10px] text-slate-400 mb-1">
+            <span className="block text-[10px] font-mono text-[#8B949E] mb-1">
               Veya tek tıkla hazır teknoloji kapaklarından seçin:
             </span>
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
@@ -325,13 +318,14 @@ export function TechNewsCoverPicker({
                     key={preset.url}
                     type="button"
                     onClick={() => onChange(preset.url)}
-                    className={`relative shrink-0 w-14 h-9 rounded-lg overflow-hidden border transition-all cursor-pointer ${
+                    className={`relative shrink-0 w-14 h-9 rounded-sm overflow-hidden border transition-all cursor-pointer ${
                       isSelected
-                        ? 'border-emerald-400 ring-2 ring-emerald-500/30 scale-105'
-                        : 'border-slate-800 opacity-75 hover:opacity-100'
+                        ? 'border-[#10B981] ring-1 ring-[#10B981]'
+                        : 'border-[#232730] opacity-75 hover:opacity-100'
                     }`}
                     title={preset.label}
                   >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={preset.url}
                       alt={preset.label}
@@ -346,10 +340,10 @@ export function TechNewsCoverPicker({
       </div>
 
       {onBadgeColorChange && (
-        <div className="pt-2 border-t border-slate-800/80 space-y-1.5">
-          <span className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-300">
-            <Palette className="w-3.5 h-3.5 text-indigo-400" />
-            İçerik Rozet & Atmosfer Rengi Seçin:
+        <div className="pt-2 border-t border-[#232730] space-y-1.5">
+          <span className="flex items-center gap-1.5 text-[11px] font-mono font-semibold text-[#E6EDF3]">
+            <Palette className="w-3.5 h-3.5 text-[#10B981]" />
+            İçerik Rozet &amp; Atmosfer Rengi Seçin:
           </span>
           <div className="flex flex-wrap items-center gap-1.5">
             {RICH_COLOR_PALETTE.map((c) => (
@@ -358,7 +352,7 @@ export function TechNewsCoverPicker({
                 type="button"
                 onClick={() => onBadgeColorChange(c.hex)}
                 title={c.label}
-                className="w-6 h-6 rounded-lg flex items-center justify-center text-white transition-transform hover:scale-110 cursor-pointer border border-white/10"
+                className="w-6 h-6 rounded-sm flex items-center justify-center text-white transition-transform hover:scale-105 cursor-pointer border border-[#232730]"
                 style={{ backgroundColor: c.hex }}
               >
                 {activeColor.toLowerCase() === c.hex.toLowerCase() && (
@@ -371,7 +365,7 @@ export function TechNewsCoverPicker({
               value={activeColor}
               onChange={(e) => onBadgeColorChange(e.target.value)}
               title="Özel Renk Seç"
-              className="w-7 h-7 rounded-lg cursor-pointer border border-slate-700 bg-transparent"
+              className="w-7 h-7 rounded-sm cursor-pointer border border-[#232730] bg-transparent"
             />
           </div>
         </div>
