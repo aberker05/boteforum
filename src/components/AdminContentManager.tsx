@@ -618,35 +618,35 @@ export function AdminContentManager({
   };
 
   return (
-    <div className="rounded-3xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900/90 p-5 sm:p-6 space-y-5">
+    <div className="rounded-md border border-[#232730] bg-[#15181E] p-5 sm:p-6 space-y-5">
       {/* Üst Başlık ve Alt Sekmeler */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#232730] pb-4">
         <div>
-          <h2 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-            <FileText className="w-5 h-5 text-indigo-500" />
+          <h2 className="text-base sm:text-lg font-bold text-[#E6EDF3] flex items-center gap-2">
+            <FileText className="w-4 h-4 text-[#10B981]" />
             Tüm Forum İçerikleri ve Yorum Yönetimi
           </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          <p className="text-xs text-[#8B949E] mt-0.5">
             Forumda paylaşılan tüm konuları, konu yorumlarını, teknoloji haberlerini ve haber yorumlarını tek merkezden düzenleyebilir veya silebilirsiniz.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative w-full sm:w-64">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-3.5 h-3.5 text-[#8B949E] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="İçerik, başlık veya yazar ara..."
-              className="w-full pl-9 pr-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+              className="w-full pl-8 pr-3 py-2 rounded-md text-xs font-mono bg-[#0D0F12] border border-[#232730] text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:border-[#10B981]"
             />
           </div>
           {subTab === 'threads' && (
             <button
               type="button"
               onClick={openCreateThread}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-semibold bg-[#10B981] hover:bg-[#059669] text-[#0D0F12] transition-colors cursor-pointer"
             >
               <PlusCircle className="w-4 h-4" />
               Yeni Konu Ekle
@@ -656,7 +656,7 @@ export function AdminContentManager({
             <button
               type="button"
               onClick={openCreateNews}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-semibold bg-[#10B981] hover:bg-[#059669] text-[#0D0F12] transition-colors cursor-pointer"
             >
               <PlusCircle className="w-4 h-4" />
               Yeni Haber Ekle
@@ -667,10 +667,10 @@ export function AdminContentManager({
 
       {feedback && (
         <div
-          className={`p-3.5 rounded-2xl text-xs font-semibold flex items-center justify-between ${
+          className={`p-3.5 rounded-md text-xs font-semibold flex items-center justify-between ${
             feedback.type === 'success'
-              ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
-              : 'bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400'
+              ? 'bg-[#10B981]/10 border border-[#10B981]/30 text-[#10B981]'
+              : 'bg-rose-500/10 border border-rose-500/30 text-rose-400'
           }`}
         >
           <span>{feedback.text}</span>
@@ -680,58 +680,78 @@ export function AdminContentManager({
         </div>
       )}
 
-      {/* Alt Kategori Seçici */}
-      <div className="flex flex-wrap items-center gap-2">
+      {/* Alt Kategori Seçici (4 Sütun Eşit Izgara) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
         <button
           type="button"
           onClick={() => setSubTab('threads')}
-          className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-colors ${
+          className={`flex items-center justify-between gap-1.5 px-3 py-2 rounded-md text-xs font-semibold border transition-colors cursor-pointer ${
             subTab === 'threads'
-              ? 'bg-indigo-600 text-white'
-              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+              ? 'bg-[#10B981]/15 border-[#10B981] text-[#10B981]'
+              : 'bg-[#0D0F12] border-[#232730] text-[#8B949E] hover:text-[#E6EDF3]'
           }`}
         >
-          <FileText className="w-3.5 h-3.5" />
-          Forum Konuları ({threads.length})
+          <span className="inline-flex items-center gap-1.5 truncate">
+            <FileText className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">Forum Konuları</span>
+          </span>
+          <span className="font-mono text-[10px] px-1.5 py-0.5 rounded-sm bg-[#15181E] text-[#E6EDF3] shrink-0">
+            {threads.length}
+          </span>
         </button>
 
         <button
           type="button"
           onClick={() => setSubTab('comments')}
-          className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-colors ${
+          className={`flex items-center justify-between gap-1.5 px-3 py-2 rounded-md text-xs font-semibold border transition-colors cursor-pointer ${
             subTab === 'comments'
-              ? 'bg-indigo-600 text-white'
-              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+              ? 'bg-[#10B981]/15 border-[#10B981] text-[#10B981]'
+              : 'bg-[#0D0F12] border-[#232730] text-[#8B949E] hover:text-[#E6EDF3]'
           }`}
         >
-          <MessageSquare className="w-3.5 h-3.5" />
-          Forum Yorumları ({comments.length})
+          <span className="inline-flex items-center gap-1.5 truncate">
+            <MessageSquare className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">Forum Yorumları</span>
+          </span>
+          <span className="font-mono text-[10px] px-1.5 py-0.5 rounded-sm bg-[#15181E] text-[#E6EDF3] shrink-0">
+            {comments.length}
+          </span>
         </button>
 
         <button
           type="button"
           onClick={() => setSubTab('news')}
-          className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-colors ${
+          className={`flex items-center justify-between gap-1.5 px-3 py-2 rounded-md text-xs font-semibold border transition-colors cursor-pointer ${
             subTab === 'news'
-              ? 'bg-indigo-600 text-white'
-              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+              ? 'bg-[#10B981]/15 border-[#10B981] text-[#10B981]'
+              : 'bg-[#0D0F12] border-[#232730] text-[#8B949E] hover:text-[#E6EDF3]'
           }`}
         >
-          <Newspaper className="w-3.5 h-3.5" />
-          Teknoloji Haberleri ({techNews.length})
+          <span className="inline-flex items-center gap-1.5 truncate">
+            <Newspaper className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">Teknoloji Haberleri</span>
+          </span>
+          <span className="font-mono text-[10px] px-1.5 py-0.5 rounded-sm bg-[#15181E] text-[#E6EDF3] shrink-0">
+            {techNews.length}
+          </span>
         </button>
 
         <button
           type="button"
           onClick={() => setSubTab('newsComments')}
-          className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-colors ${
+          className={`flex items-center justify-between gap-1.5 px-3 py-2 rounded-md text-xs font-semibold border transition-colors cursor-pointer ${
             subTab === 'newsComments'
-              ? 'bg-indigo-600 text-white'
-              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+              ? 'bg-[#10B981]/15 border-[#10B981] text-[#10B981]'
+              : 'bg-[#0D0F12] border-[#232730] text-[#8B949E] hover:text-[#E6EDF3]'
           }`}
         >
-          <MessageSquare className="w-3.5 h-3.5" />
-          Haber Yorumları ({techNewsComments.length})
+          <span className="inline-flex items-center gap-1.5 truncate">
+            <MessageSquare className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">Haber Yorumları</span>
+          </span>
+          <span className="font-mono text-[10px] px-1.5 py-0.5 rounded-sm bg-[#15181E] text-[#E6EDF3] shrink-0">
+            {techNewsComments.length}
+          </span>
         </button>
       </div>
 
