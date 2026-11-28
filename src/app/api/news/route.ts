@@ -6,6 +6,7 @@ import {
   verifyRequestOrigin,
 } from '@/lib/security';
 import { isSafeLogoUrl } from '@/lib/siteSettings';
+import { isSafeVideoUrl } from '@/lib/videoUtils';
 import {
   getAllTechNews,
   createTechNews,
@@ -41,7 +42,18 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { title, summary, content, category, badgeColor, source, readTime, isFeatured, imageUrl } = body;
+    const {
+      title,
+      summary,
+      content,
+      category,
+      badgeColor,
+      source,
+      readTime,
+      isFeatured,
+      imageUrl,
+      videoUrl,
+    } = body;
 
     if (!title || !summary || !content || !category) {
       return NextResponse.json(
@@ -53,6 +65,16 @@ export async function POST(request: Request) {
     if (imageUrl && imageUrl !== 'none' && !isSafeLogoUrl(String(imageUrl))) {
       return NextResponse.json(
         { error: 'Geçersiz kapak görseli formatı veya adresi.' },
+        { status: 400 }
+      );
+    }
+
+    if (videoUrl && videoUrl !== 'none' && !isSafeVideoUrl(String(videoUrl))) {
+      return NextResponse.json(
+        {
+          error:
+            'Geçersiz video bağlantısı. Lütfen YouTube, Vimeo, Loom veya MP4/WebM adresi girin.',
+        },
         { status: 400 }
       );
     }
@@ -82,6 +104,7 @@ export async function POST(request: Request) {
       readTime: readTime || '3 dk okuma',
       isFeatured: Boolean(isFeatured),
       imageUrl: typeof imageUrl === 'string' ? imageUrl : undefined,
+      videoUrl: typeof videoUrl === 'string' ? videoUrl : undefined,
     });
 
     return NextResponse.json({ news: item });
@@ -109,7 +132,19 @@ export async function PATCH(request: Request) {
     }
 
     const body = await request.json();
-    const { id, title, summary, content, category, badgeColor, source, readTime, isFeatured, imageUrl } = body;
+    const {
+      id,
+      title,
+      summary,
+      content,
+      category,
+      badgeColor,
+      source,
+      readTime,
+      isFeatured,
+      imageUrl,
+      videoUrl,
+    } = body;
 
     if (!id) {
       return NextResponse.json({ error: 'Haber ID gerekli.' }, { status: 400 });
@@ -123,6 +158,21 @@ export async function PATCH(request: Request) {
     ) {
       return NextResponse.json(
         { error: 'Geçersiz kapak görseli formatı veya adresi.' },
+        { status: 400 }
+      );
+    }
+
+    if (
+      videoUrl !== undefined &&
+      videoUrl !== '' &&
+      videoUrl !== 'none' &&
+      !isSafeVideoUrl(String(videoUrl))
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            'Geçersiz video bağlantısı. Lütfen YouTube, Vimeo, Loom veya MP4/WebM adresi girin.',
+        },
         { status: 400 }
       );
     }
@@ -165,6 +215,7 @@ export async function PATCH(request: Request) {
       isFeatured:
         typeof isFeatured === 'boolean' ? isFeatured : undefined,
       imageUrl: typeof imageUrl === 'string' ? imageUrl : undefined,
+      videoUrl: typeof videoUrl === 'string' ? videoUrl : undefined,
     });
 
     if (!updated) {

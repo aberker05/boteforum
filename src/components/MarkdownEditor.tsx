@@ -16,8 +16,15 @@ import {
   Edit3,
   Loader2,
   Trash2,
+  Film,
+  Plus,
 } from 'lucide-react';
 import { MarkdownRenderer } from './MarkdownRenderer';
+import {
+  parseVideoSource,
+  formatVideoMarkdown,
+  extractVideosFromMarkdown,
+} from '@/lib/videoUtils';
 
 const ALLOWED_IMAGE_MIME_TYPES = [
   'image/png',
@@ -92,15 +99,56 @@ export function MarkdownEditor({
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const [dragActive, setDragActive] = useState(false);
+  const [videoBarOpen, setVideoBarOpen] = useState(false);
+  const [quickVideoUrl, setQuickVideoUrl] = useState('');
+  const [quickVideoTitle, setQuickVideoTitle] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const embeddedImageMatches =
     value.match(/data:image\/(?:png|jpeg|jpg|webp|gif);base64,[a-zA-Z0-9+/=]+/gi) || [];
-  const plainTextLength = value.replace(
-    /data:image\/(?:png|jpeg|jpg|webp|gif);base64,[a-zA-Z0-9+/=]+/gi,
-    ''
-  ).length;
+  const plainTextLength = value
+    .replace(/data:image\/(?:png|jpeg|jpg|webp|gif);base64,[a-zA-Z0-9+/=]+/gi, '')
+    .replace(/data:video\/(?:mp4|webm);base64,[a-zA-Z0-9+/=]+/gi, '').length;
+
+  const attachedVideos = React.useMemo(
+    () => extractVideosFromMarkdown(value),
+    [value]
+  );
+
+  const handleInsertQuickVideo = () => {
+    setUploadError('');
+    const parsed = parseVideoSource(quickVideoUrl);
+    if (!parsed) {
+      setUploadError(
+        'Lütfen geçerli bir YouTube, YouTube Shorts, Vimeo, Loom veya .mp4 / .webm video bağlantısı girin.'
+      );
+      return;
+    }
+    const md = `\n${formatVideoMarkdown(
+      quickVideoUrl.trim(),
+      quickVideoTitle.trim() || 'Video İncelemesi'
+    )}\n`;
+    const el = textareaRef.current;
+    const start = el ? el.selectionStart : value.length;
+    const end = el ? el.selectionEnd : value.length;
+    const nextValue = value.substring(0, start) + md + value.substring(end);
+    onChange(nextValue);
+    setQuickVideoUrl('');
+    setQuickVideoTitle('');
+    setVideoBarOpen(false);
+  };
+
+  const handleRemoveAttachedVideo = (targetMatch: string, targetIndex: number) => {
+    const before = value.slice(0, targetIndex);
+    const after = value.slice(targetIndex + targetMatch.length);
+    const nextValue = (
+      before.replace(/\n$/, '') +
+      '\n' +
+      after.replace(/^\n/, '')
+    ).trim();
+    onChange(nextValue);
+  };
 
   const attachedImages = React.useMemo(() => {
     const list: Array<{
@@ -426,9 +474,50 @@ export function MarkdownEditor({
               )}
               <span>{uploadingImage ? 'Yükleniyor...' : 'Görsel Yükle'}</span>
             </button>
+
+            <button
+              type="button"
+              title="YouTube, Vimeo, Loom veya MP4 Video Ekle"
+              onClick={() => setVideoBarOpen((v) => !v)}
+              className={`ml-1 inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-mono font-semibold border transition-colors cursor-pointer ${
+                videoBarOpen
+                  ? 'bg-[#F59E0B] text-[#0D0F12] border-[#F59E0B]'
+                  : 'bg-[#F59E0B]/15 hover:bg-[#F59E0B]/25 text-[#F59E0B] border-[#F59E0B]/35'
+              }`}
+            >
+              <Film className="w-3.5 h-3.5" />
+              <span>Video Ekle</span>
+            </button>
           </div>
         )}
       </div>
+
+      {videoBarOpen && tab === 'write' && (
+        <div className="px-3.5 py-2.5 bg-[#15181E] border-b border-[#232730] flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+          <input
+            type="text"
+            value={quickVideoUrl}
+            onChange={(e) => setQuickVideoUrl(e.target.value)}
+            placeholder="YouTube, Shorts, Vimeo, Loom veya .mp4 video adresi..."
+            className="flex-1 px-2.5 py-1.5 rounded-md text-xs font-mono bg-[#0D0F12] border border-[#232730] text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:border-[#10B981]"
+          />
+          <input
+            type="text"
+            value={quickVideoTitle}
+            onChange={(e) => setQuickVideoTitle(e.target.value)}
+            placeholder="Video başlığı (isteğe bağlı)"
+            className="sm:w-48 px-2.5 py-1.5 rounded-md text-xs bg-[#0D0F12] border border-[#232730] text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:border-[#10B981]"
+          />
+          <button
+            type="button"
+            onClick={handleInsertQuickVideo}
+            className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-md text-xs font-mono font-semibold bg-[#10B981] hover:bg-[#059669] text-[#0D0F12] cursor-pointer shrink-0"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            Ekle
+          </button>
+        </div>
+      )}
 
       {uploadError && (
         <div className="px-4 py-2 bg-rose-500/10 border-b border-rose-500/25 text-xs text-rose-400 flex items-center justify-between">
@@ -468,6 +557,44 @@ export function MarkdownEditor({
           ) : (
             <p className="text-sm text-[#8B949E] italic">Önizlenecek içerik henüz yazılmadı...</p>
           )}
+        </div>
+      )}
+
+      {/* Eklenen Videoları Tek Tıkla Kaldırma Paneli */}
+      {attachedVideos.length > 0 && (
+        <div className="px-3.5 py-2.5 border-t border-[#232730] bg-[#15181E] space-y-2">
+          <span className="text-xs font-bold text-[#E6EDF3] flex items-center gap-1.5">
+            <Film className="w-3.5 h-3.5 text-[#F59E0B]" />
+            İçeriğe Eklenen Videolar ({attachedVideos.length})
+          </span>
+          <div className="flex flex-wrap gap-2">
+            {attachedVideos.map((vid, idx) => (
+              <div
+                key={`${vid.index}-${idx}`}
+                className="flex items-center gap-2.5 p-1.5 pr-2.5 rounded-md border border-[#232730] bg-[#0D0F12]"
+              >
+                <div className="w-11 h-8 rounded-sm bg-[#15181E] border border-[#232730] flex items-center justify-center text-[#F59E0B] text-[10px] font-mono font-bold shrink-0">
+                  {vid.info.provider === 'youtube' ? 'YT' : 'VİD'}
+                </div>
+                <div className="min-w-0 max-w-[170px]">
+                  <p className="text-xs font-semibold text-[#E6EDF3] truncate">
+                    {vid.title}
+                  </p>
+                  <p className="text-[10px] font-mono text-[#8B949E]">
+                    {vid.info.providerLabel}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveAttachedVideo(vid.fullMatch, vid.index)}
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold bg-rose-500/15 text-rose-400 hover:bg-rose-500 hover:text-white transition-colors cursor-pointer shrink-0"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Kaldır</span>
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { MarkdownEditor } from './MarkdownEditor';
 import { TechNewsCoverPicker } from './TechNewsCover';
+import { TopicVideoPicker } from './VideoEmbed';
 import {
   TechNewsItem,
   AdminTechNewsCommentItem,
@@ -145,6 +146,7 @@ export function AdminContentManager({
   const [nSource, setNSource] = useState('');
   const [nReadTime, setNReadTime] = useState('3 dk okuma');
   const [nImageUrl, setNImageUrl] = useState('');
+  const [nVideoUrl, setNVideoUrl] = useState('');
   const [nFeatured, setNFeatured] = useState(false);
 
   const showNotice = (type: 'success' | 'error', text: string) => {
@@ -517,6 +519,7 @@ export function AdminContentManager({
     setNSource('');
     setNReadTime('3 dk okuma');
     setNImageUrl('');
+    setNVideoUrl('');
     setNFeatured(false);
     setNewsModalOpen(true);
   };
@@ -535,6 +538,7 @@ export function AdminContentManager({
     setNSource(n.source);
     setNReadTime(n.readTime);
     setNImageUrl(n.imageUrl || '');
+    setNVideoUrl(n.videoUrl || '');
     setNFeatured(Number(n.isFeatured) === 1);
     setNewsModalOpen(true);
   };
@@ -557,6 +561,7 @@ export function AdminContentManager({
           source: nSource,
           readTime: nReadTime,
           imageUrl: nImageUrl,
+          videoUrl: nVideoUrl,
           isFeatured: nFeatured,
         }),
       });
@@ -1446,6 +1451,14 @@ export function AdminContentManager({
                 onChange={setNImageUrl}
                 badgeColor={nBadgeColor}
                 onBadgeColorChange={setNBadgeColor}
+              />
+
+              <TopicVideoPicker
+                videoUrl={nVideoUrl}
+                onChange={(nextUrl) => setNVideoUrl(nextUrl)}
+                categoryName={nCategory}
+                contextTitle={nTitle}
+                mode="news"
               />
 
               <div>

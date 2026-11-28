@@ -16,6 +16,7 @@ export interface TechNewsItem {
   views: number;
   createdAt: string;
   imageUrl?: string;
+  videoUrl?: string;
   commentCount?: number;
 }
 
@@ -162,6 +163,41 @@ export const TECH_NEWS_PRESET_COVERS = [
     url: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1200&q=80',
   },
 ];
+
+export const DEFAULT_NEWS_VIDEOS_BY_SLUG: Record<string, string> = {
+  'acik-agirlikli-akil-yuruten-modeller-ve-yerel-cikarim-sunucularinda-yeni-standart':
+    'https://www.youtube.com/watch?v=zjkBMFhNj_g',
+  'bote-ve-akademik-arastirmalarda-yapay-zeka-okuryazarligi-ve-acik-bilim-standartlari':
+    'https://www.youtube.com/watch?v=8mAITcNt710',
+  'react-19-ve-nextjs-use-cache-mimarisiyle-hibrit-web-uygulamalarinda-sifir-gecikme':
+    'https://www.youtube.com/watch?v=Sklc_fQBmcs',
+  'passkey-zorunlulugu-ve-cihaza-bagli-oturum-kimlikleriyle-sifresiz-guvenlik-donemi':
+    'https://www.youtube.com/watch?v=2xdV6xut7bc',
+  'kuantum-direncli-sifreleme-post-quantum-cryptography-tarayicilarda-varsayilan-oldu':
+    'https://www.youtube.com/watch?v=-UrdExQW0cs',
+  '2nm-gaa-islemciler-ve-fotonik-ara-baglanti-teknolojisi-seri-uretimde':
+    'https://www.youtube.com/watch?v=dX9CGRZwD-w',
+  'egitim-teknolojilerinde-bote-kisisellestirilmis-yapay-zeka-ogretmenler-ve-xr-laboratuvarlar':
+    'https://www.youtube.com/watch?v=hJP5GqnTrNo',
+  'genel-amacli-insansi-robotlarda-gorsel-dil-eylem-vla-modelleri-ve-sifir-atis-ogrenme':
+    'https://www.youtube.com/watch?v=29ECwExc-_M',
+};
+
+export function resolveNewsVideoUrl(item: {
+  videoUrl?: string;
+  slug?: string;
+}): string {
+  if (item.videoUrl && item.videoUrl.trim() === 'none') {
+    return '';
+  }
+  if (item.videoUrl && item.videoUrl.trim()) {
+    return item.videoUrl.trim();
+  }
+  if (item.slug && DEFAULT_NEWS_VIDEOS_BY_SLUG[item.slug]) {
+    return DEFAULT_NEWS_VIDEOS_BY_SLUG[item.slug];
+  }
+  return '';
+}
 
 export function resolveNewsImageUrl(item: {
   imageUrl?: string;
@@ -650,6 +686,7 @@ Küresel veri merkezlerinin elektrik talebi katlanarak büyürken, kesintisiz ve
 const globalForTechNews = globalThis as unknown as {
   techNewsInitialized?: boolean;
   techNewsImageColumnReady?: boolean;
+  techNewsVideoColumnReady?: boolean;
   techNewsListCache?: { data: TechNewsItem[]; expiresAt: number };
 };
 
@@ -659,8 +696,19 @@ export function invalidateTechNewsCache() {
   globalForTechNews.techNewsListCache = undefined;
 }
 
+async function ensureTechNewsVideoColumn() {
+  if (globalForTechNews.techNewsVideoColumnReady) return;
+  await prisma.$executeRaw`
+    ALTER TABLE "TechNews" ADD COLUMN "videoUrl" TEXT NOT NULL DEFAULT ''
+  `.catch(() => {});
+  globalForTechNews.techNewsVideoColumnReady = true;
+}
+
 export async function ensureTechNewsTable() {
-  if (globalForTechNews.techNewsInitialized) return;
+  if (globalForTechNews.techNewsInitialized) {
+    await ensureTechNewsVideoColumn();
+    return;
+  }
 
   await prisma.$executeRaw`
     CREATE TABLE IF NOT EXISTS "TechNews" (
@@ -676,9 +724,12 @@ export async function ensureTechNewsTable() {
       "isFeatured" INTEGER NOT NULL DEFAULT 0,
       "views" INTEGER NOT NULL DEFAULT 0,
       "createdAt" TEXT NOT NULL,
-      "imageUrl" TEXT NOT NULL DEFAULT ''
+      "imageUrl" TEXT NOT NULL DEFAULT '',
+      "videoUrl" TEXT NOT NULL DEFAULT ''
     )
   `;
+
+  await ensureTechNewsVideoColumn();
 
   const existingRows = await prisma.$queryRaw<{ slug: string }[]>`
     SELECT "slug" FROM "TechNews"
@@ -841,6 +892,7 @@ export async function getAllTechNews(category?: string, search?: string): Promis
           ...item,
           category: normalizedCategory,
         }),
+        videoUrl: resolveNewsVideoUrl(item),
         commentCount: countMap[item.id] || 0,
       };
     });
@@ -923,6 +975,7 @@ export const getTechNewsBySlug = cache(async function getTechNewsBySlugImpl(
       ...items[0],
       category: normalizedCategory,
     }),
+    videoUrl: resolveNewsVideoUrl(items[0]),
     views: Number(items[0].views) + 1,
   };
 });
@@ -937,8 +990,10 @@ export async function createTechNews(input: {
   readTime?: string;
   isFeatured?: boolean;
   imageUrl?: string;
+  videoUrl?: string;
 }): Promise<TechNewsItem> {
   await ensureTechNewsTable();
+  await ensureTechNewsVideoColumn();
 
   const id = `news_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
   const baseSlug = slugify(input.title) || 'teknoloji-haberi';
@@ -963,10 +1018,12 @@ export async function createTechNews(input: {
           imageUrl: input.imageUrl,
           category: input.category,
         });
+  const cleanVideoUrl =
+    input.videoUrl?.trim() === 'none' ? 'none' : (input.videoUrl || '').trim();
 
   await prisma.$executeRaw`
-    INSERT INTO "TechNews" ("id", "title", "slug", "summary", "content", "category", "badgeColor", "source", "readTime", "isFeatured", "views", "createdAt", "imageUrl")
-    VALUES (${id}, ${cleanTitle}, ${slug}, ${cleanSummary}, ${cleanContent}, ${input.category}, ${badgeColor}, ${source}, ${readTime}, ${isFeatured}, 1, ${createdAt}, ${cleanImageUrl})
+    INSERT INTO "TechNews" ("id", "title", "slug", "summary", "content", "category", "badgeColor", "source", "readTime", "isFeatured", "views", "createdAt", "imageUrl", "videoUrl")
+    VALUES (${id}, ${cleanTitle}, ${slug}, ${cleanSummary}, ${cleanContent}, ${input.category}, ${badgeColor}, ${source}, ${readTime}, ${isFeatured}, 1, ${createdAt}, ${cleanImageUrl}, ${cleanVideoUrl})
   `;
   invalidateTechNewsCache();
 
@@ -984,6 +1041,7 @@ export async function createTechNews(input: {
     views: 1,
     createdAt,
     imageUrl: cleanImageUrl,
+    videoUrl: cleanVideoUrl === 'none' ? '' : cleanVideoUrl,
   };
 }
 
@@ -998,8 +1056,10 @@ export async function updateTechNews(input: {
   readTime?: string;
   isFeatured?: boolean;
   imageUrl?: string;
+  videoUrl?: string;
 }): Promise<TechNewsItem | null> {
   await ensureTechNewsTable();
+  await ensureTechNewsVideoColumn();
 
   const existing = await prisma.$queryRaw<TechNewsItem[]>`
     SELECT * FROM "TechNews" WHERE "id" = ${input.id} LIMIT 1
@@ -1059,6 +1119,12 @@ export async function updateTechNews(input: {
           imageUrl: curr.imageUrl,
           category: nextCategory,
         });
+  const nextVideoUrl =
+    input.videoUrl !== undefined
+      ? input.videoUrl.trim() === 'none' || input.videoUrl.trim() === ''
+        ? 'none'
+        : input.videoUrl.trim()
+      : curr.videoUrl || '';
 
   await prisma.$executeRaw`
     UPDATE "TechNews"
@@ -1071,7 +1137,8 @@ export async function updateTechNews(input: {
       "source" = ${nextSource},
       "readTime" = ${nextReadTime},
       "isFeatured" = ${nextFeatured},
-      "imageUrl" = ${nextImageUrl}
+      "imageUrl" = ${nextImageUrl},
+      "videoUrl" = ${nextVideoUrl}
     WHERE "id" = ${curr.id}
   `;
 
@@ -1088,6 +1155,7 @@ export async function updateTechNews(input: {
     readTime: nextReadTime,
     isFeatured: nextFeatured,
     imageUrl: nextImageUrl,
+    videoUrl: resolveNewsVideoUrl({ videoUrl: nextVideoUrl, slug: curr.slug }),
   };
 }
 

@@ -14,9 +14,12 @@ import {
   Trash2,
   CheckCircle2,
   RotateCcw,
+  Film,
 } from 'lucide-react';
 import { MarkdownEditor } from './MarkdownEditor';
 import { CategoryIcon } from './CategoryIcon';
+import { TopicVideoPicker } from './VideoEmbed';
+import { isSafeVideoUrl } from '@/lib/videoUtils';
 
 const NEW_THREAD_DRAFT_KEY = 'novaforum_draft_new_thread';
 
@@ -53,6 +56,9 @@ export function NewThreadForm({ categories }: { categories: CategoryOption[] }) 
   const [hasPoll, setHasPoll] = useState(false);
   const [pollQuestion, setPollQuestion] = useState('');
   const [pollOptions, setPollOptions] = useState<string[]>(['', '']);
+  const [hasVideo, setHasVideo] = useState(false);
+  const [videoUrl, setVideoUrl] = useState('');
+  const [videoTitle, setVideoTitle] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [draftHydrated, setDraftHydrated] = useState(false);
@@ -141,6 +147,9 @@ export function NewThreadForm({ categories }: { categories: CategoryOption[] }) 
     setHasPoll(false);
     setPollQuestion('');
     setPollOptions(['', '']);
+    setHasVideo(false);
+    setVideoUrl('');
+    setVideoTitle('');
     setDraftSavedTime(null);
     try {
       window.localStorage.removeItem(NEW_THREAD_DRAFT_KEY);
@@ -150,6 +159,9 @@ export function NewThreadForm({ categories }: { categories: CategoryOption[] }) 
   };
 
   const isOtherSelected = categoryId === 'OTHER';
+  const selectedCategoryObj = standardCategories.find(
+    (c) => c.id === categoryId
+  );
 
   const handleAddOption = () => {
     if (pollOptions.length < 6) {
@@ -193,6 +205,13 @@ export function NewThreadForm({ categories }: { categories: CategoryOption[] }) 
       }
     }
 
+    if (hasVideo && videoUrl.trim() && !isSafeVideoUrl(videoUrl.trim())) {
+      setError(
+        'Eklediğiniz video bağlantısı geçersiz. Lütfen geçerli bir YouTube, Vimeo, Loom veya MP4/WebM adresi girin.'
+      );
+      return;
+    }
+
     setLoading(true);
     setError('');
 
@@ -206,6 +225,9 @@ export function NewThreadForm({ categories }: { categories: CategoryOption[] }) 
           customTopic: isOtherSelected ? customTopic : undefined,
           tags,
           content,
+          videoUrl: hasVideo && videoUrl.trim() ? videoUrl.trim() : undefined,
+          videoTitle:
+            hasVideo && videoTitle.trim() ? videoTitle.trim() : undefined,
           poll: hasPoll
             ? {
                 question: pollQuestion.trim(),
@@ -437,6 +459,65 @@ export function NewThreadForm({ categories }: { categories: CategoryOption[] }) 
               rows={10}
               placeholder="Konunuzu detaylıca açıklayın. Kod örnekleri, başlıklar ve listeler için üstteki araç çubuğunu kullanabilirsiniz..."
             />
+          </div>
+
+          {/* Konu Başlığına Uygun Video Ekleme Alanı */}
+          <div className="rounded-md border border-[#232730] bg-[#0D0F12] p-4 space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-md bg-[#F59E0B]/15 text-[#F59E0B] border border-[#F59E0B]/30 flex items-center justify-center shrink-0">
+                  <Film className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-[#E6EDF3]">
+                    Konuya Video Ekle (İsteğe Bağlı)
+                  </h3>
+                  <p className="text-[11px] text-[#8B949E]">
+                    Seçtiğiniz kategoriye ve konu başlığına uygun bir eğitim/inceleme videosu seçin veya YouTube, Vimeo, Loom, MP4 bağlantısı ekleyin.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (hasVideo) {
+                    setHasVideo(false);
+                    setVideoUrl('');
+                    setVideoTitle('');
+                  } else {
+                    setHasVideo(true);
+                  }
+                }}
+                className={`shrink-0 px-3.5 py-1.5 rounded-md text-xs font-mono font-semibold border transition-colors cursor-pointer ${
+                  hasVideo
+                    ? 'bg-rose-500/15 text-rose-400 border-rose-500/30 hover:bg-rose-500/25'
+                    : 'bg-[#10B981]/15 text-[#10B981] border-[#10B981]/40 hover:bg-[#10B981]/25'
+                }`}
+              >
+                {hasVideo ? 'Videoyu Kapat' : '+ Video Ekle'}
+              </button>
+            </div>
+
+            {hasVideo && (
+              <div className="pt-2">
+                <TopicVideoPicker
+                  videoUrl={videoUrl}
+                  onChange={(nextUrl, suggestedTitle) => {
+                    setVideoUrl(nextUrl);
+                    if (suggestedTitle) {
+                      setVideoTitle(suggestedTitle);
+                    } else if (!nextUrl) {
+                      setVideoTitle('');
+                    }
+                  }}
+                  categoryName={selectedCategoryObj?.name || ''}
+                  customTopic={isOtherSelected ? customTopic : ''}
+                  contextTitle={title}
+                  mode="thread"
+                />
+              </div>
+            )}
           </div>
 
           {/* İsteğe Bağlı Anket Oluşturma Alanı */}

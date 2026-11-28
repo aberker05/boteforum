@@ -39,7 +39,8 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "frame-ancestors 'none'; base-uri 'self'; object-src 'none';",
+            value:
+              "frame-ancestors 'none'; frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com https://www.loom.com https://www.dailymotion.com; base-uri 'self'; object-src 'none';",
           },
         ],
       },

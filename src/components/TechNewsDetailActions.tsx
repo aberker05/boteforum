@@ -6,6 +6,7 @@ import { Edit2, Trash2, Sparkles, X } from 'lucide-react';
 import { TechNewsItem, TECH_NEWS_CATEGORIES } from '@/lib/techNews';
 import { MarkdownEditor } from './MarkdownEditor';
 import { TechNewsCoverPicker } from './TechNewsCover';
+import { TopicVideoPicker } from './VideoEmbed';
 
 export function TechNewsDetailActions({ item }: { item: TechNewsItem }) {
   const router = useRouter();
@@ -22,6 +23,7 @@ export function TechNewsDetailActions({ item }: { item: TechNewsItem }) {
   const [source, setSource] = useState(item.source);
   const [readTime, setReadTime] = useState(item.readTime);
   const [imageUrl, setImageUrl] = useState(item.imageUrl || '');
+  const [videoUrl, setVideoUrl] = useState(item.videoUrl || '');
   const [isFeatured, setIsFeatured] = useState(Number(item.isFeatured) === 1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -49,6 +51,7 @@ export function TechNewsDetailActions({ item }: { item: TechNewsItem }) {
           source,
           readTime,
           imageUrl,
+          videoUrl,
           isFeatured,
         }),
       });
@@ -107,6 +110,7 @@ export function TechNewsDetailActions({ item }: { item: TechNewsItem }) {
             setSource(item.source);
             setReadTime(item.readTime);
             setImageUrl(item.imageUrl || '');
+            setVideoUrl(item.videoUrl || '');
             setIsFeatured(Number(item.isFeatured) === 1);
             setError('');
             setEditOpen(true);
@@ -221,6 +225,14 @@ export function TechNewsDetailActions({ item }: { item: TechNewsItem }) {
                 onChange={setImageUrl}
                 badgeColor={badgeColor}
                 onBadgeColorChange={setBadgeColor}
+              />
+
+              <TopicVideoPicker
+                videoUrl={videoUrl}
+                onChange={(nextUrl) => setVideoUrl(nextUrl)}
+                categoryName={category}
+                contextTitle={title}
+                mode="news"
               />
 
               <div>

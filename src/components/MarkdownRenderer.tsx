@@ -11,6 +11,8 @@ import {
   X,
   WrapText,
 } from 'lucide-react';
+import { parseVideoSource } from '@/lib/videoUtils';
+import { VideoPlayerCard } from './VideoEmbed';
 
 interface MarkdownRendererProps {
   content: string;
@@ -19,11 +21,16 @@ interface MarkdownRendererProps {
 
 const SAFE_RASTER_DATA_IMAGE_REGEX =
   /^data:image\/(?:png|jpeg|jpg|webp|gif);base64,[a-zA-Z0-9+/=\s]+$/i;
+const SAFE_DATA_VIDEO_REGEX =
+  /^data:video\/(?:mp4|webm);base64,[a-zA-Z0-9+/=\s]+$/i;
 
 function isSafeLinkHref(href?: string): boolean {
   if (!href) return false;
   const trimmed = href.trim();
   const lower = trimmed.toLowerCase();
+  if (lower.startsWith('data:video/')) {
+    return trimmed.length <= 3_600_000 && SAFE_DATA_VIDEO_REGEX.test(trimmed);
+  }
   if (
     lower.startsWith('javascript:') ||
     lower.startsWith('vbscript:') ||
@@ -259,6 +266,9 @@ export const MarkdownRenderer = React.memo(function MarkdownRenderer({
           remarkPlugins={[remarkGfm]}
           urlTransform={safeMarkdownUrlTransform}
           components={{
+            p: ({ children }) => {
+              return <div className="my-3 leading-relaxed">{children}</div>;
+            },
             pre: ({ children }) => <CodeBlockContainer>{children}</CodeBlockContainer>,
             code: ({ className: codeClass, children }) => {
               const isBlock = Boolean(codeClass && codeClass.includes('language-'));
@@ -271,6 +281,33 @@ export const MarkdownRenderer = React.memo(function MarkdownRenderer({
               if (!isSafeLinkHref(href)) {
                 return <span className="text-slate-400 line-through">{children}</span>;
               }
+              const labelText = extractTextFromChildren(children).trim();
+              const videoInfo = href ? parseVideoSource(href) : null;
+              const isExplicitVideoEmbed =
+                Boolean(videoInfo) &&
+                (labelText.startsWith('🎬') ||
+                  /^video\b/i.test(labelText) ||
+                  labelText === href ||
+                  href?.startsWith('data:video/'));
+
+              if (videoInfo && isExplicitVideoEmbed && href) {
+                const cleanTitle = labelText
+                  .replace(/^🎬\s*Video:\s*/i, '')
+                  .trim();
+                return (
+                  <div className="my-3.5">
+                    <VideoPlayerCard
+                      url={href}
+                      title={
+                        cleanTitle && cleanTitle !== href
+                          ? cleanTitle
+                          : 'Konu Video İncelemesi'
+                      }
+                    />
+                  </div>
+                );
+              }
+
               const isExternal = href?.startsWith('http://') || href?.startsWith('https://');
               return (
                 <a

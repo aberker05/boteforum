@@ -14,11 +14,13 @@ import {
   Award,
   Edit2,
   Trash2,
+  Play,
 } from 'lucide-react';
 import { VoteButtons } from './VoteButtons';
 import { CategoryIcon } from './CategoryIcon';
 import { UserAvatar } from './UserAvatar';
 import { formatRelativeTime } from '@/lib/utils';
+import { hasEmbeddedVideoInMarkdown } from '@/lib/videoUtils';
 
 export interface ThreadCardData {
   id: string;
@@ -107,9 +109,11 @@ export function ThreadCard({
     thread.content.includes('```') || thread.content.includes('[Kod Bloğu]');
   const hasImage =
     thread.content.includes('![') || thread.content.includes('Görsel]');
+  const hasVideo = hasEmbeddedVideoInMarkdown(thread.content);
 
   const plainExcerpt = thread.content
     .replace(/!\[[^\]]*\]\([^)]+\)/g, '[Görsel]')
+    .replace(/\[🎬\s*Video:[^\]]*\]\([^)]+\)/g, '[Video]')
     .replace(/```[\s\S]*?```/g, '[Kod Bloğu]')
     .replace(/[#>*_`~-]/g, '')
     .replace(/\s+/g, ' ')
@@ -162,6 +166,11 @@ export function ThreadCard({
               {thread.isLocked && (
                 <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm font-mono text-[10px] font-semibold bg-rose-500/15 text-rose-400 border border-rose-500/30">
                   <Lock className="w-2.5 h-2.5" /> LOCKED
+                </span>
+              )}
+              {hasVideo && (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm font-mono text-[10px] font-semibold bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/35">
+                  <Play className="w-2.5 h-2.5 fill-[#10B981]" /> VİDEO
                 </span>
               )}
               <Link
@@ -388,6 +397,12 @@ export function ThreadCard({
             {hasImage && (
               <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[10px] font-semibold bg-[#0D0F12] text-[#F59E0B] border border-[#232730]">
                 IMG
+              </span>
+            )}
+
+            {hasVideo && (
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[10px] font-semibold bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/35">
+                <Play className="w-2.5 h-2.5 fill-[#10B981]" /> VİDEO
               </span>
             )}
           </div>

@@ -10,6 +10,7 @@ import {
   MessageSquare,
   Sparkles,
   Flame,
+  Play,
 } from 'lucide-react';
 import {
   getTechNewsBySlug,
@@ -22,6 +23,7 @@ import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { TechNewsComments } from '@/components/TechNewsComments';
 import { TechNewsDetailActions } from '@/components/TechNewsDetailActions';
 import TechNewsCover from '@/components/TechNewsCover';
+import { VideoPlayerCard } from '@/components/VideoEmbed';
 import { formatRelativeTime } from '@/lib/utils';
 
 interface NewsDetailProps {
@@ -131,6 +133,12 @@ export default async function TechNewsDetailPage({ params }: NewsDetailProps) {
                   MANŞET
                 </span>
               )}
+              {item.videoUrl && item.videoUrl !== 'none' && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] font-bold bg-[#0D0F12]/90 border border-[#10B981]/50 text-[#10B981]">
+                  <Play className="w-2.5 h-2.5 fill-[#10B981]" />
+                  VİDEO İNCELEME
+                </span>
+              )}
             </div>
 
             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-sm text-xs font-medium bg-[#0D0F12]/90 text-[#E6EDF3] border border-[#232730]">
@@ -172,6 +180,16 @@ export default async function TechNewsDetailPage({ params }: NewsDetailProps) {
               {item.summary}
             </p>
           </div>
+
+          {item.videoUrl && item.videoUrl !== 'none' && (
+            <div className="pt-1">
+              <VideoPlayerCard
+                url={item.videoUrl}
+                title={item.title}
+                badgeText="GÜNDEM VİDEOSU"
+              />
+            </div>
+          )}
 
           <div className="py-1 text-sm sm:text-base">
             <MarkdownRenderer content={item.content} />

@@ -195,8 +195,10 @@ export function validatePasswordStrength(password: string): {
 
 const SAFE_DATA_IMAGE_GLOBAL_REGEX =
   /data:image\/(?:png|jpeg|jpg|webp|gif);base64,[a-zA-Z0-9+/=]+/gi;
+const SAFE_DATA_VIDEO_GLOBAL_REGEX =
+  /data:video\/(?:mp4|webm);base64,[a-zA-Z0-9+/=]+/gi;
 
-// Markdown içeriklerinde hem metin uzunluğunu hem de gömülü görsellerin güvenliğini/sayısını denetler
+// Markdown içeriklerinde hem metin uzunluğunu hem de gömülü görsel/kısa video kliplerinin güvenliğini denetler
 export function validateMarkdownContent(
   content: string,
   maxTextLength: number,
@@ -206,15 +208,20 @@ export function validateMarkdownContent(
   // 1. İzin verilmeyen data: URI protokollerini engelle (örn. data:image/svg+xml, data:text/html)
   const allDataUris = content.match(/data:[^\s)"']+/gi) || [];
   for (const uri of allDataUris) {
-    if (!/^data:image\/(?:png|jpeg|jpg|webp|gif);base64,[a-zA-Z0-9+/=]+$/i.test(uri)) {
+    const isSafeImg =
+      /^data:image\/(?:png|jpeg|jpg|webp|gif);base64,[a-zA-Z0-9+/=]+$/i.test(uri);
+    const isSafeVid =
+      /^data:video\/(?:mp4|webm);base64,[a-zA-Z0-9+/=]+$/i.test(uri) &&
+      uri.length <= 3_600_000;
+    if (!isSafeImg && !isSafeVid) {
       return {
         valid: false,
-        error: `${fieldName} içinde güvenlik nedeniyle yalnızca PNG, JPG, WEBP ve GIF formatında görseller desteklenir (SVG veya diğer veri tipleri kullanılamaz).`,
+        error: `${fieldName} içinde güvenlik nedeniyle yalnızca PNG, JPG, WEBP, GIF görseller ve kısa MP4/WebM video klipleri (maks. 2.5 MB) desteklenir.`,
       };
     }
   }
 
-  // 2. Gömülü görsel sayısı ve toplam boyut sınırı
+  // 2. Gömülü görsel ve kısa klip sayısı sınırı
   const safeImages = content.match(SAFE_DATA_IMAGE_REGEX_FOR_COUNT()) || [];
   if (safeImages.length > maxImages) {
     return {
@@ -223,16 +230,27 @@ export function validateMarkdownContent(
     };
   }
 
-  const maxTotalPayload = maxTextLength + maxImages * 180000;
-  if (content.length > maxTotalPayload) {
+  const safeVideos = content.match(SAFE_DATA_VIDEO_GLOBAL_REGEX) || [];
+  if (safeVideos.length > 2) {
     return {
       valid: false,
-      error: `${fieldName} içindeki görsel boyutu çok yüksek. Lütfen daha küçük boyutlu görsel kullanın.`,
+      error: `${fieldName} içerisine doğrudan yüklenen en fazla 2 kısa video klibi eklenebilir (daha fazlası için YouTube/Vimeo bağlantısı kullanın).`,
     };
   }
 
-  // 3. Görseller çıkarıldıktan sonraki saf metin uzunluğu kontrolü
-  const plainText = content.replace(SAFE_DATA_IMAGE_GLOBAL_REGEX, '');
+  const maxTotalPayload =
+    maxTextLength + maxImages * 180000 + safeVideos.length * 3_600_000;
+  if (content.length > maxTotalPayload) {
+    return {
+      valid: false,
+      error: `${fieldName} içindeki medya boyutu çok yüksek. Lütfen daha küçük boyutlu dosya veya video bağlantısı kullanın.`,
+    };
+  }
+
+  // 3. Görsel ve video verileri çıkarıldıktan sonraki saf metin uzunluğu kontrolü
+  const plainText = content
+    .replace(SAFE_DATA_IMAGE_GLOBAL_REGEX, '')
+    .replace(SAFE_DATA_VIDEO_GLOBAL_REGEX, '');
   if (plainText.length > maxTextLength) {
     return {
       valid: false,

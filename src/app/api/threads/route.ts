@@ -6,6 +6,7 @@ import { slugify } from '@/lib/utils';
 import { checkContentModeration } from '@/lib/moderation';
 import { createPollForThread } from '@/lib/polls';
 import { createNotification, extractMentions } from '@/lib/notifications';
+import { isSafeVideoUrl, formatVideoMarkdown } from '@/lib/videoUtils';
 import {
   checkActionCooldown,
   validateContentLength,
@@ -28,11 +29,30 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { title, content, categoryId, tags, customTopic, poll } = body;
+    const {
+      title,
+      content,
+      categoryId,
+      tags,
+      customTopic,
+      poll,
+      videoUrl,
+      videoTitle,
+    } = body;
 
     if (!title || !content || !categoryId) {
       return NextResponse.json(
         { error: 'Başlık, kategori ve içerik alanları zorunludur.' },
+        { status: 400 }
+      );
+    }
+
+    if (videoUrl && !isSafeVideoUrl(String(videoUrl))) {
+      return NextResponse.json(
+        {
+          error:
+            'Geçersiz video bağlantısı. Lütfen geçerli bir YouTube, Vimeo, Loom veya MP4/WebM adresi girin.',
+        },
         { status: 400 }
       );
     }
@@ -136,11 +156,28 @@ export async function POST(request: Request) {
       .slice(0, 5)
       .join(',');
 
+    let finalContent = content.trim();
+    if (
+      typeof videoUrl === 'string' &&
+      videoUrl.trim() &&
+      videoUrl.trim() !== 'none' &&
+      !finalContent.includes(videoUrl.trim())
+    ) {
+      const cleanVidTitle =
+        typeof videoTitle === 'string' && videoTitle.trim()
+          ? videoTitle.trim()
+          : finalTitle;
+      finalContent = `${finalContent}\n\n${formatVideoMarkdown(
+        videoUrl.trim(),
+        cleanVidTitle
+      )}`;
+    }
+
     const thread = await prisma.thread.create({
       data: {
         title: finalTitle,
         slug,
-        content: content.trim(),
+        content: finalContent,
         categoryId: targetCategoryId,
         authorId: user.id,
         tags: cleanTags,

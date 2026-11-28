@@ -21,10 +21,13 @@ import {
   ChevronLeft,
   ChevronRight,
   SlidersHorizontal,
+  Play,
 } from 'lucide-react';
 import { TechNewsItem, TECH_NEWS_CATEGORIES } from '@/lib/techNews';
 import { formatRelativeTime } from '@/lib/utils';
+import { hasEmbeddedVideoInMarkdown } from '@/lib/videoUtils';
 import { MarkdownEditor } from './MarkdownEditor';
+import { TopicVideoPicker } from './VideoEmbed';
 import TechNewsCover, {
   TechNewsCoverPicker,
   getCategoryIcon,
@@ -77,6 +80,7 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
   const [source, setSource] = useState('');
   const [readTime, setReadTime] = useState('3 dk okuma');
   const [imageUrl, setImageUrl] = useState('');
+  const [videoUrl, setVideoUrl] = useState('');
   const [isFeatured, setIsFeatured] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -139,6 +143,7 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
     setSource('');
     setReadTime('3 dk okuma');
     setImageUrl('');
+    setVideoUrl('');
     setIsFeatured(false);
     setError('');
     setModalOpen(true);
@@ -158,6 +163,7 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
     setSource(item.source);
     setReadTime(item.readTime);
     setImageUrl(item.imageUrl || '');
+    setVideoUrl(item.videoUrl || '');
     setIsFeatured(Number(item.isFeatured) === 1);
     setError('');
     setModalOpen(true);
@@ -237,6 +243,7 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
           source,
           readTime,
           imageUrl,
+          videoUrl,
           isFeatured,
         }),
       });
@@ -661,6 +668,16 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
                       <Flame className="w-3 h-3 fill-[#0D0F12]" />
                       BAŞ MANŞET
                     </span>
+                    {(Boolean(
+                      activeHeroItem.videoUrl &&
+                        activeHeroItem.videoUrl !== 'none'
+                    ) ||
+                      hasEmbeddedVideoInMarkdown(activeHeroItem.content)) && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] font-bold bg-[#0D0F12]/90 border border-[#10B981]/50 text-[#10B981]">
+                        <Play className="w-2.5 h-2.5 fill-[#10B981]" />
+                        VİDEO
+                      </span>
+                    )}
                   </div>
 
                   {canModerate && (
@@ -773,6 +790,13 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
                           className="w-full h-full"
                           overlayVariant="none"
                         />
+                        {(Boolean(item.videoUrl && item.videoUrl !== 'none') ||
+                          hasEmbeddedVideoInMarkdown(item.content)) && (
+                          <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm font-mono text-[9px] font-bold bg-[#0D0F12]/90 border border-[#10B981]/50 text-[#10B981]">
+                            <Play className="w-2.5 h-2.5 fill-[#10B981]" />
+                            VİDEO
+                          </span>
+                        )}
                       </Link>
 
                       {/* Sağ: Temiz Editöryal İçerik ve Metrikler */}
@@ -937,7 +961,7 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
                       />
                     </Link>
 
-                    <div className="absolute top-2.5 left-2.5 z-10">
+                    <div className="absolute top-2.5 left-2.5 z-10 flex items-center gap-1.5">
                       <span
                         className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm font-mono text-[10px] font-semibold bg-[#0D0F12]/90 border border-[#232730]"
                         style={{ color: item.badgeColor }}
@@ -945,6 +969,13 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
                         {getCategoryIcon(item.category, 'w-3 h-3')}
                         {item.category}
                       </span>
+                      {(Boolean(item.videoUrl && item.videoUrl !== 'none') ||
+                        hasEmbeddedVideoInMarkdown(item.content)) && (
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm font-mono text-[10px] font-bold bg-[#0D0F12]/90 border border-[#10B981]/50 text-[#10B981]">
+                          <Play className="w-2.5 h-2.5 fill-[#10B981]" />
+                          VİDEO
+                        </span>
+                      )}
                     </div>
 
                     {canModerate && (
@@ -1121,6 +1152,14 @@ export function TechNewsClient({ initialNews, currentUser }: TechNewsClientProps
                 onChange={setImageUrl}
                 badgeColor={badgeColor}
                 onBadgeColorChange={setBadgeColor}
+              />
+
+              <TopicVideoPicker
+                videoUrl={videoUrl}
+                onChange={(nextUrl) => setVideoUrl(nextUrl)}
+                categoryName={category}
+                contextTitle={title}
+                mode="news"
               />
 
               <div>
