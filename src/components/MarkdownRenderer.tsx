@@ -291,8 +291,11 @@ export const MarkdownRenderer = React.memo(function MarkdownRenderer({
                   href?.startsWith('data:video/'));
 
               if (videoInfo && isExplicitVideoEmbed && href) {
-                const cleanTitle = labelText
-                  .replace(/^🎬\s*Video:\s*/i, '')
+                const rawLabel = labelText.replace(/^🎬\s*Video:\s*/i, '').trim();
+                const sourceMatch = /\|\s*Kaynak:\s*(.+)$/i.exec(rawLabel);
+                const explicitSource = sourceMatch ? sourceMatch[1].trim() : undefined;
+                const cleanTitle = rawLabel
+                  .replace(/\|\s*Kaynak:.*$/i, '')
                   .trim();
                 return (
                   <div className="my-3.5">
@@ -303,6 +306,7 @@ export const MarkdownRenderer = React.memo(function MarkdownRenderer({
                           ? cleanTitle
                           : 'Konu Video İncelemesi'
                       }
+                      sourceCredit={explicitSource}
                     />
                   </div>
                 );

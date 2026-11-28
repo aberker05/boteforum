@@ -102,6 +102,7 @@ export function MarkdownEditor({
   const [videoBarOpen, setVideoBarOpen] = useState(false);
   const [quickVideoUrl, setQuickVideoUrl] = useState('');
   const [quickVideoTitle, setQuickVideoTitle] = useState('');
+  const [quickVideoSource, setQuickVideoSource] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -127,7 +128,8 @@ export function MarkdownEditor({
     }
     const md = `\n${formatVideoMarkdown(
       quickVideoUrl.trim(),
-      quickVideoTitle.trim() || 'Video İncelemesi'
+      quickVideoTitle.trim() || 'Video İncelemesi',
+      quickVideoSource.trim() || parsed.sourceName
     )}\n`;
     const el = textareaRef.current;
     const start = el ? el.selectionStart : value.length;
@@ -136,6 +138,7 @@ export function MarkdownEditor({
     onChange(nextValue);
     setQuickVideoUrl('');
     setQuickVideoTitle('');
+    setQuickVideoSource('');
     setVideoBarOpen(false);
   };
 
@@ -493,29 +496,41 @@ export function MarkdownEditor({
       </div>
 
       {videoBarOpen && tab === 'write' && (
-        <div className="px-3.5 py-2.5 bg-[#15181E] border-b border-[#232730] flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-          <input
-            type="text"
-            value={quickVideoUrl}
-            onChange={(e) => setQuickVideoUrl(e.target.value)}
-            placeholder="YouTube, Shorts, Vimeo, Loom veya .mp4 video adresi..."
-            className="flex-1 px-2.5 py-1.5 rounded-md text-xs font-mono bg-[#0D0F12] border border-[#232730] text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:border-[#10B981]"
-          />
-          <input
-            type="text"
-            value={quickVideoTitle}
-            onChange={(e) => setQuickVideoTitle(e.target.value)}
-            placeholder="Video başlığı (isteğe bağlı)"
-            className="sm:w-48 px-2.5 py-1.5 rounded-md text-xs bg-[#0D0F12] border border-[#232730] text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:border-[#10B981]"
-          />
-          <button
-            type="button"
-            onClick={handleInsertQuickVideo}
-            className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-md text-xs font-mono font-semibold bg-[#10B981] hover:bg-[#059669] text-[#0D0F12] cursor-pointer shrink-0"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            Ekle
-          </button>
+        <div className="px-3.5 py-2.5 bg-[#15181E] border-b border-[#232730] space-y-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            <input
+              type="text"
+              value={quickVideoUrl}
+              onChange={(e) => setQuickVideoUrl(e.target.value)}
+              placeholder="YouTube, Shorts, Vimeo, Loom veya .mp4 adresi..."
+              className="flex-1 px-2.5 py-1.5 rounded-md text-xs font-mono bg-[#0D0F12] border border-[#232730] text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:border-[#10B981]"
+            />
+            <input
+              type="text"
+              value={quickVideoSource}
+              onChange={(e) => setQuickVideoSource(e.target.value)}
+              placeholder="Kaynak / Kanal Adı (Örn: Vercel)"
+              className="sm:w-44 px-2.5 py-1.5 rounded-md text-xs font-mono bg-[#0D0F12] border border-[#232730] text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:border-[#10B981]"
+            />
+            <input
+              type="text"
+              value={quickVideoTitle}
+              onChange={(e) => setQuickVideoTitle(e.target.value)}
+              placeholder="Video başlığı (isteğe bağlı)"
+              className="sm:w-44 px-2.5 py-1.5 rounded-md text-xs bg-[#0D0F12] border border-[#232730] text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:border-[#10B981]"
+            />
+            <button
+              type="button"
+              onClick={handleInsertQuickVideo}
+              className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-md text-xs font-mono font-semibold bg-[#10B981] hover:bg-[#059669] text-[#0D0F12] cursor-pointer shrink-0"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Ekle
+            </button>
+          </div>
+          <p className="text-[10px] font-mono text-[#8B949E]">
+            Telif koruması: Eklenen videonun altında kaynak kanal adı ve orijinal yayıncı bağlantısı otomatik gösterilir.
+          </p>
         </div>
       )}
 

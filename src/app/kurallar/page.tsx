@@ -89,7 +89,16 @@ export default async function RulesPage() {
               Şikayet, Raporlama ve Çözüm İşaretleme
             </h3>
             <p>
-              Kurallara aykırı gördüğünüz içerikleri konu içindeki <strong>Rapor Et</strong> butonuyla veya <Link href="/destek" className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline">Destek & Şikayet Merkezi</Link> üzerinden yönetime bildirebilir, çözülen konularınızda doğru yanıtı <strong>Çözüm Seç</strong> ile işaretleyebilirsiniz.
+              Kurallara aykırı gördüğünüz içerikleri konu içindeki <strong>Rapor Et</strong> butonuyla veya <Link href="/destek" className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline">Destek &amp; Şikayet Merkezi</Link> üzerinden yönetime bildirebilir, çözülen konularınızda doğru yanıtı <strong>Çözüm Seç</strong> ile işaretleyebilirsiniz.
+            </p>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 space-y-1.5 sm:col-span-2">
+            <h3 className="font-bold text-slate-900 dark:text-white">
+              Video, Medya ve Telif Hakkı (Kaynak Gösterimi) Kuralları
+            </h3>
+            <p>
+              Konu ve teknoloji gündemi paylaşımlarında eklenen dış videolar platformumuzda kopyalanıp barındırılmaz; yalnızca yayıncıların gömülü oynatmaya (embed) izin verdiği resmi oynatıcılar (YouTube, Vimeo, Loom vb.) kullanılır ve oynatıcı altında <strong>içerik üreticisi / kaynak kanal adı ile orijinal bağlantı zorunlu olarak gösterilir</strong>. İzinsiz kopyalanmış telifli video yüklemek yasaktır; olası hak sahipliği veya telif bildirimlerinizi <Link href="/destek" className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline">Destek &amp; Şikayet Merkezi</Link> üzerinden ilettiğinizde ilgili içerik ivedilikle kaldırılır.
             </p>
           </div>
         </div>

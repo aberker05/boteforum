@@ -59,6 +59,7 @@ export function NewThreadForm({ categories }: { categories: CategoryOption[] }) 
   const [hasVideo, setHasVideo] = useState(false);
   const [videoUrl, setVideoUrl] = useState('');
   const [videoTitle, setVideoTitle] = useState('');
+  const [videoSource, setVideoSource] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [draftHydrated, setDraftHydrated] = useState(false);
@@ -150,6 +151,7 @@ export function NewThreadForm({ categories }: { categories: CategoryOption[] }) 
     setHasVideo(false);
     setVideoUrl('');
     setVideoTitle('');
+    setVideoSource('');
     setDraftSavedTime(null);
     try {
       window.localStorage.removeItem(NEW_THREAD_DRAFT_KEY);
@@ -228,6 +230,8 @@ export function NewThreadForm({ categories }: { categories: CategoryOption[] }) 
           videoUrl: hasVideo && videoUrl.trim() ? videoUrl.trim() : undefined,
           videoTitle:
             hasVideo && videoTitle.trim() ? videoTitle.trim() : undefined,
+          videoSource:
+            hasVideo && videoSource.trim() ? videoSource.trim() : undefined,
           poll: hasPoll
             ? {
                 question: pollQuestion.trim(),
@@ -503,12 +507,15 @@ export function NewThreadForm({ categories }: { categories: CategoryOption[] }) 
               <div className="pt-2">
                 <TopicVideoPicker
                   videoUrl={videoUrl}
-                  onChange={(nextUrl, suggestedTitle) => {
+                  onChange={(nextUrl, suggestedTitle, suggestedSource) => {
                     setVideoUrl(nextUrl);
                     if (suggestedTitle) {
                       setVideoTitle(suggestedTitle);
                     } else if (!nextUrl) {
                       setVideoTitle('');
+                    }
+                    if (suggestedSource !== undefined) {
+                      setVideoSource(suggestedSource);
                     }
                   }}
                   categoryName={selectedCategoryObj?.name || ''}

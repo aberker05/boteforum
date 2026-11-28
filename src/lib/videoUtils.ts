@@ -12,6 +12,9 @@ export interface ParsedVideoInfo {
   embedUrl: string;
   thumbnailUrl?: string;
   isDirectVideo: boolean;
+  sourceName: string;
+  sourceDomain: string;
+  licenseNote: string;
 }
 
 export interface SuggestedTopicVideo {
@@ -42,6 +45,35 @@ function parseStartSeconds(raw: string | null): number {
   return total;
 }
 
+export function attachSourceToVideoUrl(
+  rawUrl: string,
+  sourceName?: string
+): string {
+  const trimmed = (rawUrl || '').trim();
+  if (!trimmed || trimmed === 'none' || trimmed.startsWith('data:video/')) {
+    return trimmed;
+  }
+  const cleanSource = (sourceName || '').trim().slice(0, 80);
+  try {
+    const u = new URL(trimmed);
+    if (cleanSource) {
+      u.hash = `kaynak=${encodeURIComponent(cleanSource)}`;
+    } else if (u.hash.startsWith('#kaynak=')) {
+      u.hash = '';
+    }
+    return u.toString();
+  } catch {
+    return trimmed;
+  }
+}
+
+function findSuggestedVideoMatch(videoIdOrUrl: string): SuggestedTopicVideo | undefined {
+  const needle = videoIdOrUrl.toLowerCase();
+  return TOPIC_SUGGESTED_VIDEOS.find(
+    (v) => v.url.toLowerCase().includes(needle) || needle.includes(v.url.toLowerCase())
+  );
+}
+
 export function parseVideoSource(rawUrl?: string | null): ParsedVideoInfo | null {
   if (!rawUrl || typeof rawUrl !== 'string') return null;
   const trimmed = rawUrl.trim();
@@ -59,6 +91,10 @@ export function parseVideoSource(rawUrl?: string | null): ParsedVideoInfo | null
         originalUrl: trimmed,
         embedUrl: trimmed,
         isDirectVideo: true,
+        sourceName: 'Üye Tarafından Yüklenen Klip',
+        sourceDomain: 'Yerel Medya',
+        licenseNote:
+          'Bu kısa klip paylaşan kullanıcı tarafından yüklenmiştir; telif uygunluğu paylaşan üyeye aittir.',
       };
     }
     return null;
@@ -75,8 +111,25 @@ export function parseVideoSource(rawUrl?: string | null): ParsedVideoInfo | null
     return null;
   }
 
+  let hashSource = '';
+  if (parsed.hash && parsed.hash.toLowerCase().startsWith('#kaynak=')) {
+    try {
+      hashSource = decodeURIComponent(parsed.hash.slice('#kaynak='.length)).trim();
+    } catch {
+      hashSource = '';
+    }
+  }
+
+  const cleanExternalUrlObj = new URL(parsed.toString());
+  if (cleanExternalUrlObj.hash.toLowerCase().startsWith('#kaynak=')) {
+    cleanExternalUrlObj.hash = '';
+  }
+  const cleanExternalUrl = cleanExternalUrlObj.toString();
+
   const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
   const pathname = parsed.pathname;
+  const standardEmbedNotice =
+    'Resmi gömülü oynatıcı (Embed) üzerinden sunulmaktadır; içerik sitemizde barındırılmaz ve tüm telif hakları orijinal içerik üreticisine aittir.';
 
   // 2. YouTube (watch, youtu.be, shorts, embed, live)
   if (
@@ -108,6 +161,7 @@ export function parseVideoSource(rawUrl?: string | null): ParsedVideoInfo | null
       const embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}${
         startSec > 0 ? `?start=${startSec}` : ''
       }`;
+      const matchedCatalog = findSuggestedVideoMatch(videoId);
       return {
         provider: 'youtube',
         providerLabel: 'YOUTUBE',
@@ -115,6 +169,12 @@ export function parseVideoSource(rawUrl?: string | null): ParsedVideoInfo | null
         embedUrl,
         thumbnailUrl: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
         isDirectVideo: false,
+        sourceName:
+          hashSource ||
+          matchedCatalog?.channel ||
+          'YouTube Resmi Yayıncısı',
+        sourceDomain: 'youtube.com',
+        licenseNote: standardEmbedNotice,
       };
     }
     return null;
@@ -128,9 +188,12 @@ export function parseVideoSource(rawUrl?: string | null): ParsedVideoInfo | null
       return {
         provider: 'vimeo',
         providerLabel: 'VIMEO',
-        originalUrl: trimmed,
+        originalUrl: cleanExternalUrl,
         embedUrl: `https://player.vimeo.com/video/${numericId}`,
         isDirectVideo: false,
+        sourceName: hashSource || 'Vimeo İçerik Üreticisi',
+        sourceDomain: 'vimeo.com',
+        licenseNote: standardEmbedNotice,
       };
     }
     return null;
@@ -147,9 +210,12 @@ export function parseVideoSource(rawUrl?: string | null): ParsedVideoInfo | null
       return {
         provider: 'loom',
         providerLabel: 'LOOM EKRAN KAYDI',
-        originalUrl: trimmed,
+        originalUrl: cleanExternalUrl,
         embedUrl: `https://www.loom.com/embed/${parts[1]}`,
         isDirectVideo: false,
+        sourceName: hashSource || 'Loom Sunum Kaydı',
+        sourceDomain: 'loom.com',
+        licenseNote: standardEmbedNotice,
       };
     }
     return null;
@@ -171,9 +237,12 @@ export function parseVideoSource(rawUrl?: string | null): ParsedVideoInfo | null
       return {
         provider: 'dailymotion',
         providerLabel: 'DAILYMOTION',
-        originalUrl: trimmed,
+        originalUrl: cleanExternalUrl,
         embedUrl: `https://www.dailymotion.com/embed/video/${dmId}`,
         isDirectVideo: false,
+        sourceName: hashSource || 'Dailymotion Yayıncısı',
+        sourceDomain: 'dailymotion.com',
+        licenseNote: standardEmbedNotice,
       };
     }
     return null;
@@ -183,10 +252,14 @@ export function parseVideoSource(rawUrl?: string | null): ParsedVideoInfo | null
   if (/\.(?:mp4|webm|ogg|mov)$/i.test(pathname)) {
     return {
       provider: 'mp4',
-      providerLabel: 'HTML5 VİDEO',
-      originalUrl: trimmed,
-      embedUrl: trimmed,
+      providerLabel: 'HARİCİ VİDEO',
+      originalUrl: cleanExternalUrl,
+      embedUrl: cleanExternalUrl,
       isDirectVideo: true,
+      sourceName: hashSource || host,
+      sourceDomain: host,
+      licenseNote:
+        'Harici sunucu bağlantısı üzerinden oynatılmaktadır; tüm telif hakları kaynak yayıncıya aittir.',
     };
   }
 
@@ -198,12 +271,24 @@ export function isSafeVideoUrl(rawUrl?: string | null): boolean {
   return parseVideoSource(rawUrl) !== null;
 }
 
-export function formatVideoMarkdown(url: string, title?: string): string {
+export function formatVideoMarkdown(
+  url: string,
+  title?: string,
+  sourceName?: string
+): string {
   const cleanTitle = (title || 'Konu Videosu')
-    .replace(/[\[\]()]/g, '')
+    .replace(/[\[\]()|]/g, '')
     .trim()
     .slice(0, 90);
-  return `[🎬 Video: ${cleanTitle || 'Konu Videosu'}](${url.trim()})`;
+  const cleanSource = (sourceName || '')
+    .replace(/[\[\]()|]/g, '')
+    .trim()
+    .slice(0, 60);
+  const finalUrl = cleanSource ? attachSourceToVideoUrl(url, cleanSource) : url.trim();
+  const label = cleanSource
+    ? `🎬 Video: ${cleanTitle || 'Konu Videosu'} | Kaynak: ${cleanSource}`
+    : `🎬 Video: ${cleanTitle || 'Konu Videosu'}`;
+  return `[${label}](${finalUrl})`;
 }
 
 export function extractVideosFromMarkdown(content: string): Array<{

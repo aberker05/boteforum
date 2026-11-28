@@ -38,6 +38,7 @@ export async function POST(request: Request) {
       poll,
       videoUrl,
       videoTitle,
+      videoSource,
     } = body;
 
     if (!title || !content || !categoryId) {
@@ -167,9 +168,14 @@ export async function POST(request: Request) {
         typeof videoTitle === 'string' && videoTitle.trim()
           ? videoTitle.trim()
           : finalTitle;
+      const cleanVidSource =
+        typeof videoSource === 'string' && videoSource.trim()
+          ? videoSource.trim()
+          : undefined;
       finalContent = `${finalContent}\n\n${formatVideoMarkdown(
         videoUrl.trim(),
-        cleanVidTitle
+        cleanVidTitle,
+        cleanVidSource
       )}`;
     }
 
